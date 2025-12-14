@@ -1,4 +1,6 @@
 ﻿using Application.Common.Interfaces;
+using Application.Repositories;
+using Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Infrastructure
@@ -8,9 +10,12 @@ namespace Infrastructure
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
 
+        public IAuthRepository Auth { get; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
+            Auth = new AuthRepository(_context);
         }
         public async Task BeginTransactionAsync()
         {

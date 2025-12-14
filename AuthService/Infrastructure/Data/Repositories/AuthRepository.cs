@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Utils;
 using Application.DTOs.User;
+using Application.Features.User.Commands;
 using Application.Repositories;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -11,50 +12,10 @@ namespace Infrastructure.Data.Repositories
     public class AuthRepository : IAuthRepository
     {
         private readonly IApplicationDbContext _dbContext;
-        private readonly UserManager<ExtendedIdentityUser> _userManager;
 
-        public AuthRepository(IApplicationDbContext dbContext, UserManager<ExtendedIdentityUser> userManager)
+        public AuthRepository(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
-        }
-        public async Task AddLoginAsync(string userId, string loginProvider, string providerKey)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
-            {
-                await _userManager.AddLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, loginProvider));
-            }
-        }
-
-        public async Task AssignRoleAsync(string userId, string role)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
-            {
-                await _userManager.AddToRoleAsync(user, role);
-            }
-        }
-
-        public async Task<(bool IsSuccess, List<string> Errors, UserIdentityDto? NewUser)> CreateExternalUserAsync(ExternalAuthCommand command)
-        {
-            var userName = StringUtils.Slugify($"{command.FirstName} {command.LastName}");
-            var newUser = new ExtendedIdentityUser
-            {
-                UserName = userName,
-                Email = command.Email,
-                EmailConfirmed = true
-            };
-
-            var result = await _userManager.CreateAsync(newUser);
-
-            if (!result.Succeeded)
-            {
-                return (false, result.Errors.Select(e => e.Description).ToList(), null);
-            }
-
-            var createdUserDto = new UserIdentityDto { Id = newUser.Id, Email = newUser.Email };
-            return (true, new List<string>(), createdUserDto);
         }
 
         public async Task<UserIdentityDto?> FindByEmailAsync(string email)
@@ -66,34 +27,32 @@ namespace Infrastructure.Data.Repositories
                 Email = user.Email,
             } : null;
         }
+        // new
 
-        public async Task<List<string>> GetRolesAsync(string userId)
+        public async Task<ExtendedIdentityUser?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return new List<string>();
-
-            var roles = await _userManager.GetRolesAsync(user);
-            return roles.ToList();
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         }
 
-        public async Task<bool> HasLoginAsync(string userId, string loginProvider)
+        public async Task<ExtendedIdentityUser?> GetUserByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
-
-            var logins = await _userManager.GetLoginsAsync(user);
-            return logins.Any(l => l.LoginProvider == loginProvider);
+            return await _dbContext.Users.FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public async Task UpdateRefreshTokenAsync(string userId, string refreshToken)
+        public Task<List<ExtendedIdentityUser>> GetUsersAsync(CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
-            {
-                user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(12);
-                await _userManager.UpdateAsync(user);
-            }
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateUserAsync(ExtendedIdentityUser user, CancellationToken cancellationToken = default)
+        {
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<bool> UserExistsAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Users.AnyAsync(u => u.Email == email, cancellationToken);
         }
     }
 }

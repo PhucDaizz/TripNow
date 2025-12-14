@@ -4,6 +4,7 @@ using CarbonTC.API.Common.ExceptionHandling;
 using CarbonTC.API.ExceptionHandling;
 using CarbonTC.API.Extensions;
 using Infrastructure;
+using Infrastructure.BackgroundJobs.Consumer.User;
 using Infrastructure.Persistence.SeedData;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
@@ -33,6 +34,9 @@ namespace API
             builder.Services.Configure<GoogleSettings>(
                 builder.Configuration.GetSection(GoogleSettings.SectionName)
             );
+            builder.Services.Configure<FrontendSettings>(
+                builder.Configuration.GetSection(FrontendSettings.SectionName)
+            );
 
             builder.AddDependencies();
 
@@ -56,6 +60,8 @@ namespace API
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddSharedRabbitMQ(builder.Configuration);
+
+            builder.Services.AddHostedService<UserEventsConsumer>();
 
 
             var app = builder.Build();

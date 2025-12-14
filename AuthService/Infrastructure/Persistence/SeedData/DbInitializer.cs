@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Infrastructure.Common;
+﻿using Domain.Common;
+using Domain.Entities;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;

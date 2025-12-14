@@ -32,7 +32,7 @@ namespace Infrastructure
 
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<IExternalAuthService, ExternalAuthService>();
-
+            services.AddScoped<IIdentityService, IdentityService>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

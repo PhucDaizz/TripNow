@@ -2,6 +2,7 @@
 using Application.Contracts;
 using Application.DTOs.User;
 using Application.Repositories;
+using Domain.Common;
 
 namespace Infrastructure.Services
 {
@@ -10,12 +11,14 @@ namespace Infrastructure.Services
         private readonly IAuthRepository _authRepository;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityService _identityService;
 
-        public ExternalAuthService(IAuthRepository authRepository, ITokenGenerator tokenGenerator, IUnitOfWork unitOfWork)
+        public ExternalAuthService(IAuthRepository authRepository, ITokenGenerator tokenGenerator, IUnitOfWork unitOfWork, IIdentityService identityService)
         {
             _authRepository = authRepository;
             _tokenGenerator = tokenGenerator;
             _unitOfWork = unitOfWork;
+            _identityService = identityService;
         }
 
         public async Task<AuthResultDto> AuthenticateAsync(ExternalAuthCommand command)
@@ -26,26 +29,26 @@ namespace Infrastructure.Services
             // 2. Nếu chưa có, tạo mới
             if (userIdentity == null)
             {
-                var (isSuccess, errors, newUser) = await _authRepository.CreateExternalUserAsync(command); // Không có password
-                if (!isSuccess)
+                var newUser = await _identityService.CreateExternalUserAsync(command); // Không có password
+                if (!newUser.IsSuccess)
                 {
-                    return new AuthResultDto { IsSuccess = false, ErrorMessage = string.Join(", ", errors) };
+                    return new AuthResultDto { IsSuccess = false, ErrorMessage = string.Join(", ", newUser.Error.Message) };
                 }
-                userIdentity = newUser;
+                userIdentity = newUser.Value;
                 isNewUser = true;
             }
 
             // 3. Gán role nếu là user mới
             if (isNewUser)
             {
-                await _authRepository.AssignRoleAsync(userIdentity.Id, "User");
+                await _identityService.AssignRoleAsync(userIdentity.Id, AppRoles.Customer);
             }
 
             // 4. Thêm thông tin đăng nhập ngoài (Google)
-            var hasLogin = await _authRepository.HasLoginAsync(userIdentity.Id, command.Provider);
+            var hasLogin = await _identityService.HasLoginAsync(userIdentity.Id, command.Provider);
             if (!hasLogin)
             {
-                await _authRepository.AddLoginAsync(userIdentity.Id, command.Provider, command.ProviderKey);
+                await _identityService.AddLoginAsync(userIdentity.Id, command.Provider, command.ProviderKey);
             }
 
             // 5. Tạo JWT và Refresh Token
@@ -54,13 +57,13 @@ namespace Infrastructure.Services
                 Email = userIdentity.Email,
                 UserId = userIdentity.Id,
             };
-            var roles = await _authRepository.GetRolesAsync(userIdentity.Id);
+            var roles = await _identityService.GetRolesAsync(userIdentity.Id);
 
             var accessToken = _tokenGenerator.CreateToken(crateUserToken, roles);
             var refreshToken = _tokenGenerator.GenerateRefreshToken();
 
 
-            await _authRepository.UpdateRefreshTokenAsync(userIdentity.Id, refreshToken);
+            await _identityService.UpdateRefreshTokenAsync(userIdentity.Id, refreshToken);
 
             await _unitOfWork.SaveChangesAsync();
 
