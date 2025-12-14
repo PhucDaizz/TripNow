@@ -2,9 +2,12 @@
 using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
+using Application.Features.User.Queries.GetInfoDetail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -65,6 +68,33 @@ namespace API.Controllers
             }
 
             return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value));
+        }
+
+        [Route("GetnInfo")]
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetInfo()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<GetInfoDetailQuery>.ErrorResponse("User not authenticated"));
+            }
+
+            var result = await _mediator.Send(new GetInfoDetailQuery
+            {
+                UserId = userId
+            });
+
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<InforDto>.SuccessResponse(result.Value));
+            }
+            return BadRequest(ApiResponse<InforDto>.ErrorResponse(
+                result.Error.Code,
+                new List<string> { result.Error.Message }
+            ));
         }
 
     }

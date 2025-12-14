@@ -19,9 +19,4 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\User\Queries\" />
-    <Folder Include="Mappings\" />
-  </ItemGroup>
-
 </Project>

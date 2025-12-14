@@ -1,10 +1,7 @@
 ﻿using Application.Common.Interfaces;
-using Application.Common.Utils;
 using Application.DTOs.User;
-using Application.Features.User.Commands;
 using Application.Repositories;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories
@@ -36,7 +33,7 @@ namespace Infrastructure.Data.Repositories
 
         public async Task<ExtendedIdentityUser?> GetUserByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Users.FindAsync(new object[] { id }, cancellationToken);
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
         public Task<List<ExtendedIdentityUser>> GetUsersAsync(CancellationToken cancellationToken = default)
