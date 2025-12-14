@@ -7,7 +7,7 @@ using MediatR;
 using Nexus.BuildingBlocks.Interfaces;
 using RabbitMQ.Client;
 
-namespace Application.Features.User.Commands
+namespace Application.Features.User.Commands.Register
 {
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<string>>
     {

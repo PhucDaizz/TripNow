@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.User;
-using Application.Features.User.Commands;
+using Application.Features.User.Commands.Register;
 using Domain.Common.Response;
 
 namespace Application.Contracts
@@ -19,5 +19,6 @@ namespace Application.Contracts
         Task AddLoginAsync(string userId, string loginProvider, string providerKey);
         Task<List<string>> GetRolesAsync(string userId);
         Task UpdateRefreshTokenAsync(string userId, string refreshToken);
+        Task<(bool IsAuthenticated, UserIdentityDto? User)> AuthenticateUserAsync(string email, string password);
     }
 }

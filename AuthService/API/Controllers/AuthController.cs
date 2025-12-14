@@ -1,4 +1,6 @@
-﻿using Application.Features.User.Commands;
+﻿using Application.DTOs.User;
+using Application.Features.User.Commands.Login;
+using Application.Features.User.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
@@ -17,7 +19,8 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken cancellationToken)
+        [Route("RegisterUser")]
+        public async Task<IActionResult> Register([FromBody]RegisterCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -37,6 +40,16 @@ namespace API.Controllers
             ));
         }
 
-
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value, "Login Success"));
+            }
+            return Unauthorized(ApiResponse<LoginResponseDto>.ErrorResponse(result.Error.Message));
+        }
     }
 }

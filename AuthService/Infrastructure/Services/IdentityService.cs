@@ -1,6 +1,6 @@
 ﻿using Application.Contracts;
 using Application.DTOs.User;
-using Application.Features.User.Commands;
+using Application.Features.User.Commands.Register;
 using Domain.Common.Response;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -240,6 +240,29 @@ namespace Infrastructure.Services
 
             var createdUserDto = new UserIdentityDto { Id = newUser.Id, Email = newUser.Email };
             return Result.Success(createdUserDto);
+        }
+
+        public async Task<(bool IsAuthenticated, UserIdentityDto? User)> AuthenticateUserAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return (false, null);
+            }
+
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, password);
+            if (!isPasswordCorrect)
+            {
+                return (false, null);
+            }
+
+            var userDto = new UserIdentityDto
+            {
+                Id = user.Id,
+                Email = user.Email
+            };
+
+            return (true, userDto);
         }
     }
 }

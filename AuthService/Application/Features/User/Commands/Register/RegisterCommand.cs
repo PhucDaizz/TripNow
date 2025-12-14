@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace Application.Features.User.Commands
+namespace Application.Features.User.Commands.Register
 {
     public class RegisterCommand: IRequest<Result<string>>
     {
