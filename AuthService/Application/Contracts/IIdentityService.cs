@@ -20,5 +20,6 @@ namespace Application.Contracts
         Task<List<string>> GetRolesAsync(string userId);
         Task UpdateRefreshTokenAsync(string userId, string refreshToken);
         Task<(bool IsAuthenticated, UserIdentityDto? User)> AuthenticateUserAsync(string email, string password);
+        Task<UserIdentityDto?> GetUserByEmailAndValidateRefreshTokenAsync(string email, string refreshToken);
     }
 }

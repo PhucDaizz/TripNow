@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.User;
 using Application.Features.User.Commands.Login;
+using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -51,5 +52,20 @@ namespace API.Controllers
             }
             return Unauthorized(ApiResponse<LoginResponseDto>.ErrorResponse(result.Error.Message));
         }
+
+        [Route("Refreshtoken")]
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken(RefreshTokenCommand refreshTokenModel)
+        {
+
+            var result = await _mediator.Send(refreshTokenModel);
+            if (result.IsFailure)
+            {
+                return Unauthorized(ApiResponse<LoginResponseDto>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value));
+        }
+
     }
 }

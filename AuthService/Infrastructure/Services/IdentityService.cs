@@ -264,5 +264,17 @@ namespace Infrastructure.Services
 
             return (true, userDto);
         }
+
+        public async Task<UserIdentityDto?> GetUserByEmailAndValidateRefreshTokenAsync(string email, string refreshToken)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+            {
+                return null; 
+            }
+
+            return new UserIdentityDto { Id = user.Id, Email = user.Email };
+        }
     }
 }
