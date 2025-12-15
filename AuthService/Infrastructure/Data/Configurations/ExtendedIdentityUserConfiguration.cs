@@ -15,6 +15,9 @@ namespace Infrastructure.Data.Configurations
             builder.Property(x => x.AvatarUrl)
                 .IsRequired(false)
                 .HasMaxLength(500);
+
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Infrastructure.Services
             _identityService = identityService;
         }
 
-        public async Task<AuthResultDto> AuthenticateAsync(ExternalAuthCommand command)
+        public async Task<AuthOAuthResultDto> AuthenticateAsync(ExternalAuthCommand command)
         {
             var userIdentity = await _authRepository.FindByEmailAsync(command.Email);
             bool isNewUser = false;
@@ -32,7 +32,7 @@ namespace Infrastructure.Services
                 var newUser = await _identityService.CreateExternalUserAsync(command); // Không có password
                 if (!newUser.IsSuccess)
                 {
-                    return new AuthResultDto { IsSuccess = false, ErrorMessage = string.Join(", ", newUser.Error.Message) };
+                    return new AuthOAuthResultDto { IsSuccess = false, ErrorMessage = string.Join(", ", newUser.Error.Message) };
                 }
                 userIdentity = newUser.Value;
                 isNewUser = true;
@@ -67,12 +67,14 @@ namespace Infrastructure.Services
 
             await _unitOfWork.SaveChangesAsync();
 
-            return new AuthResultDto
+            return new AuthOAuthResultDto
             {
                 IsSuccess = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Roles = roles
+                Roles = roles,
+                UserId = userIdentity.Id,
+                FullName = command.FirstName + " " + command.LastName
             };
         }
     }

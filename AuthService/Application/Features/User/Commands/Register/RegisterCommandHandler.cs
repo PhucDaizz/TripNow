@@ -12,14 +12,12 @@ namespace Application.Features.User.Commands.Register
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<string>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMediator _mediator;
         private readonly IIdentityService _identityService;
         private readonly IMessagePublisher _messagePublisher;
 
-        public RegisterCommandHandler(IUnitOfWork unitOfWork, IEmailServices emailServices, IMediator mediator, IIdentityService identityService, IMessagePublisher messagePublisher)
+        public RegisterCommandHandler(IUnitOfWork unitOfWork, IEmailServices emailServices, IIdentityService identityService, IMessagePublisher messagePublisher)
         {
             _unitOfWork = unitOfWork;
-            _mediator = mediator;
             _identityService = identityService;
             _messagePublisher = messagePublisher;
         }

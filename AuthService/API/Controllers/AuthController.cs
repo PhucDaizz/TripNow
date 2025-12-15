@@ -1,9 +1,11 @@
 ﻿using Application.DTOs.User;
+using Application.Features.User.Commands.ConfirmEmail;
 using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
 using Application.Features.User.Queries.GetInfoDetail;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
@@ -95,6 +97,67 @@ namespace API.Controllers
                 result.Error.Code,
                 new List<string> { result.Error.Message }
             ));
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        [Route("send-confirmemail")]
+        public async Task<IActionResult> SendConfirmEmail()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _mediator.Send(
+                new GetInfoDetailQuery
+                {
+                    UserId = userId
+                });
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse(result.Error.Code, new List<string> { result.Error.Message }));
+            }
+
+            return Ok(ApiResponse<string>.SuccessResponse("Email has been sent"));
+        }
+
+        
+        [HttpGet]
+        [Route("email-confirmation")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("EMPTY.TOKEN", new List<string> { "User Id and Token are required" }));
+            }
+
+            var result = await _mediator.Send(new ConfirmEmailCommand
+            {
+                UserId = userId,
+                Token = token
+            });
+
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<string>.SuccessResponse(result.Value, "Email confirmed successfully."));
+            }
+
+            return BadRequest(ApiResponse<string>.ErrorResponse(
+                result.Error.Code,
+                new List<string> { result.Error.Message }
+            ));
+        }
+
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = "/"
+            };
+
+            return Challenge(properties, "Google");
         }
 
     }

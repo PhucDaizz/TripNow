@@ -6,7 +6,7 @@ namespace Domain.Entities
     {
         public string FullName { get; set; }
         public string AvatarUrl { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;  
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiry { get; set; }
         public bool? Gender { get; set; }

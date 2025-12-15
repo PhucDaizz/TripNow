@@ -4,7 +4,9 @@ using Application.Features.User.Commands.Register;
 using Domain.Common.Response;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Infrastructure.Services
 {
@@ -93,28 +95,39 @@ namespace Infrastructure.Services
                 return string.Empty;
             }
 
-            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
         }
 
-        public async Task<Result> ConfirmEmailAsync(
+        public async Task<Result<string>> ConfirmEmailAsync(
             string userId,
             string token,
             CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
-                return Result.Failure(new Error("User.NotFound", "User not found"));
+                return Result.Failure<string>(new Error("User.NotFound", "User not found"));
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if(user.EmailConfirmed)
+            {
+                return Result.Success("Email already confirmed");
+            }
+
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             if (!result.Succeeded)
             {
-                return Result.Failure(new Error("Email.ConfirmFailed",
-                    string.Join("; ", result.Errors.Select(e => e.Description))));
+                return Result.Failure<string>(new Error("Email.ConfirmFailed",
+                string.Join("; ", result.Errors.Select(e => e.Description))));
             }
 
-            return Result.Success();
+            return Result.Success("Email has been confirm");
         }
 
         public Task<Result> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)

@@ -38,7 +38,7 @@ namespace Infrastructure.Contracts
                 issuer: _jwtOptions.Value.Issuer,
                 audience: _jwtOptions.Value.Audience,
                 claims: claim,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddMinutes(_jwtOptions.Value.TokenExpiryMinutes),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
