@@ -5,7 +5,9 @@ using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
 using Application.Features.User.Commands.ResetPasswordCommand;
+using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Queries.GetInfoDetail;
+using Infrastructure.Data.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -200,5 +202,31 @@ namespace API.Controllers
 
             return Ok(ApiResponse<string>.SuccessResponse(result.Value));
         }
+
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateInfor([FromBody]UpdateInforCommand command)
+        {
+            
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<string>.ErrorResponse("User not found!"));
+            }
+
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<string>.SuccessResponse(result.Value, "User information updated successfully."));
+            }
+            return BadRequest(ApiResponse<string>.ErrorResponse(
+                result.Error.Code,
+                new List<string> { result.Error.Message }
+            ));
+
+        }
+
+
+
     }
 }
