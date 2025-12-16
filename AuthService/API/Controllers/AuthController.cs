@@ -1,8 +1,10 @@
 ﻿using Application.DTOs.User;
 using Application.Features.User.Commands.ConfirmEmail;
+using Application.Features.User.Commands.ForgotPassword;
 using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
+using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Queries.GetInfoDetail;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -160,5 +162,43 @@ namespace API.Controllers
             return Challenge(properties, "Google");
         }
 
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordCommand request)
+        {
+            
+            var result = await _mediator.Send(new ForgotPasswordCommand
+            {
+                Email = request.Email,
+                ClientUrl = request.ClientUrl
+            });
+
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<string>.SuccessResponse(null,"A password reset link has been sent"));
+            }
+
+            return BadRequest(
+                ApiResponse<string>.ErrorResponse(result.Error.Code, new List<string> { result.Error.Message }));
+        }
+
+        [HttpPost("resetpassword")]
+        public async Task<IActionResult> ResetPassword([FromBody]ResetPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(
+                    ApiResponse<string>.ErrorResponse(
+                        result.Error.Code,
+                        new List<string> { result.Error.Message }
+                    )
+                );
+            }
+
+            return Ok(ApiResponse<string>.SuccessResponse(result.Value));
+        }
     }
 }

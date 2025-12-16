@@ -130,14 +130,42 @@ namespace Infrastructure.Services
             return Result.Success("Email has been confirm");
         }
 
-        public Task<Result> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return Result.Failure<bool>(new Error("USER.NOTFOUND","User is not existing"));
+            }
+
+            try
+            {
+                var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+                var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+
+                if (result.Succeeded)
+                {
+                    return Result.Success(true);
+                }
+                return Result.Failure<bool>(new Error("USER.NOTFOUND", result.Errors.Select(e => e.Description).First())); 
+            }
+            catch (FormatException)
+            {
+                return Result.Failure<bool>(new Error("TOKEN.INVALIDFORMAT","Invalid token format."));
+            }
         }
 
-        public Task<Result<string>> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return Result.Failure<string>(new Error("USER.NOTFOUND","User is not existing"));
+            }
+            var tokenReset =  await _userManager.GeneratePasswordResetTokenAsync(user);
+            return Result.Success(tokenReset);
         }
 
         public async Task<bool> HasLoginAsync(string userId, string loginProvider)
