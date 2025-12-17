@@ -18,7 +18,7 @@ namespace API
     {
         public static async Task Main(string[] args)
         {
-            Env.Load();
+            Env.Load($"../Config/.env");
 
             var builder = WebApplication.CreateBuilder(args);
 

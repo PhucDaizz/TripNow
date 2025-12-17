@@ -8,6 +8,9 @@ using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
+using Application.Repositories;
+using Domain.Common;
+using Infrastructure.Data.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -77,8 +80,7 @@ namespace API.Controllers
             return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value));
         }
 
-        [Route("GetnInfo")]
-        [HttpGet]
+        [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> GetInfo()
         {
@@ -254,5 +256,22 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.ErrorResponse("UPLOAD_FAILED", new List<string> { ex.Message }));
             }
         }
+
+        [HttpGet("{userId}")]
+        [Authorize(Roles = AppRoles.SysAdmin)]
+        public async Task<IActionResult> GetUserInfo(string userId)
+        {
+            var result = await _mediator.Send(new GetInfoDetailQuery
+            {
+                UserId = userId
+            });
+
+            return result.IsSuccess
+                ? Ok(ApiResponse<InforDto>.SuccessResponse(result.Value))
+                : NotFound(ApiResponse<InforDto>.ErrorResponse(result.Error.Code));
+        }
+
+
+
     }
 }

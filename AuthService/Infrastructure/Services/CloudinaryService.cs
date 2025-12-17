@@ -80,7 +80,11 @@ namespace Infrastructure.Services
                     }
                 }
 
-                var transformation = new Transformation(_settings.Transformation);
+                var transformation = new Transformation()
+                    .Crop("fill")                    
+                    .Gravity("face")                 
+                    .Quality("auto:good"); 
+
                 transformation.Quality("auto:good");
 
                 // Prepare upload parameters
