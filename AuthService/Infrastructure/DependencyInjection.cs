@@ -33,6 +33,8 @@ namespace Infrastructure
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<IExternalAuthService, ExternalAuthService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddSingleton<ICloudinaryService, CloudinaryService>();
+            services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

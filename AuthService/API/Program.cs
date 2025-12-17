@@ -3,6 +3,7 @@ using Application;
 using CarbonTC.API.Common.ExceptionHandling;
 using CarbonTC.API.ExceptionHandling;
 using CarbonTC.API.Extensions;
+using DotNetEnv;
 using Infrastructure;
 using Infrastructure.BackgroundJobs.Consumer.User;
 using Infrastructure.Persistence.SeedData;
@@ -17,6 +18,8 @@ namespace API
     {
         public static async Task Main(string[] args)
         {
+            Env.Load();
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.Configure<CloudinarySettings>(

@@ -6,11 +6,12 @@ using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
 using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Commands.UpdateInfor;
+using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
-using Infrastructure.Data.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using System.Security.Claims;
@@ -226,7 +227,32 @@ namespace API.Controllers
 
         }
 
+        [HttpPost("upload-avatar")]
+        [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 5 * 1024 * 1024)]
+        public async Task<IActionResult> UploadAvatar(IFormFile file, [FromQuery] bool deleteOld = true)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded");
 
+                var result = await _mediator.Send(new UploadAvatarCommand
+                {
+                    File = file,
+                    UserId = userId,
+                    DeleteOldAvatar = deleteOld,
+                    OptimizeImage = true
+                });
+
+                return Ok(ApiResponse<UploadAvatarResult>.SuccessResponse(result.Value, "Avatar uploaded successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("UPLOAD_FAILED", new List<string> { ex.Message }));
+            }
+        }
     }
 }
