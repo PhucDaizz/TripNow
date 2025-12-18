@@ -59,7 +59,7 @@ namespace Infrastructure.Services
             };
             var roles = await _identityService.GetRolesAsync(userIdentity.Id);
 
-            var accessToken = _tokenGenerator.CreateToken(crateUserToken, roles);
+            var accessToken = await _tokenGenerator.CreateToken(crateUserToken, roles);
             var refreshToken = _tokenGenerator.GenerateRefreshToken();
 
 

@@ -35,6 +35,7 @@ namespace Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddSingleton<ICloudinaryService, CloudinaryService>();
             services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

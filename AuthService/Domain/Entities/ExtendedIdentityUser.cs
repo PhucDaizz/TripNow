@@ -11,6 +11,7 @@ namespace Domain.Entities
         public DateTime? RefreshTokenExpiry { get; set; }
         public bool? Gender { get; set; }
         public string? Address { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation property
         public virtual StaffProfile StaffProfile { get; set; }

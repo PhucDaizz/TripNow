@@ -1,6 +1,8 @@
-﻿using Application.Contracts;
+﻿using Application.Common.Interfaces;
+using Application.Contracts;
 using Application.DTOs.User;
 using Infrastructure.Settings;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,13 +15,17 @@ namespace Infrastructure.Contracts
     public class JwtTokenGenerator : ITokenGenerator
     {
         private readonly IOptions<JwtSettings> _jwtOptions;
+        private readonly IApplicationDbContext _dbContext;
 
-        public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions)
+        public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, IApplicationDbContext dbContext)
         {
             _jwtOptions = jwtOptions;
+            _dbContext = dbContext;
         }
-        public string CreateToken(CreateTokenDTO user, List<string> roles)
+        public async Task<string> CreateToken(CreateTokenDTO user, List<string> roles)
         {
+            var userHotel = await _dbContext.StaffProfile.FirstOrDefaultAsync(x => x.UserId == user.UserId);
+
             var claim = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
@@ -29,6 +35,10 @@ namespace Infrastructure.Contracts
             {
                 claim.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            if (userHotel != null)
+                claim.Add(new Claim("HotelId", userHotel.HotelId.ToString()));
+
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Value.Key));
 

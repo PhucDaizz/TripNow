@@ -30,7 +30,7 @@ namespace Application.Features.User.Commands.Login
                 Email = user.Email,
                 UserId = user.Id,
             };
-            var token = _tokenGenerator.CreateToken(createTokenDto, roles);
+            var token = await _tokenGenerator.CreateToken(createTokenDto, roles);
             var refreshToken = _tokenGenerator.GenerateRefreshToken();
             await _identityService.UpdateRefreshTokenAsync(user.Id, refreshToken);
 

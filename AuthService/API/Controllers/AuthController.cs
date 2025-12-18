@@ -1,4 +1,5 @@
-﻿using Application.DTOs.User;
+﻿using Application.Common.Interfaces;
+using Application.DTOs.User;
 using Application.Features.User.Commands.ConfirmEmail;
 using Application.Features.User.Commands.ForgotPassword;
 using Application.Features.User.Commands.Login;
@@ -8,13 +9,11 @@ using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
-using Application.Repositories;
+using Application.Features.User.Queries.GetUsersWithPagination;
 using Domain.Common;
-using Infrastructure.Data.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using System.Security.Claims;
@@ -26,10 +25,12 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ICurrentUserService _currentUserService;
 
-        public AuthController(IMediator mediator)
+        public AuthController(IMediator mediator, ICurrentUserService currentUserService)
         {
             _mediator = mediator;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost]
@@ -271,7 +272,47 @@ namespace API.Controllers
                 : NotFound(ApiResponse<InforDto>.ErrorResponse(result.Error.Code));
         }
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetUsers([FromQuery] GetUsersWithPaginationQuery query)
+        {
+            var currentRole = User.FindFirstValue(ClaimTypes.Role);
+            var currentHotelId = _currentUserService.HotelId;
 
+            if (currentRole == AppRoles.SysAdmin)
+            {
+            }
+            else if (currentRole == AppRoles.HotelOwner)
+            {
+                if (currentHotelId == null)
+                {
+                    return Ok(ApiResponse<PagedResult<UserDto>>.SuccessResponse(PagedResult<UserDto>.Empty()));
+                }
+
+                query.HotelId = currentHotelId;
+            }
+            else if (currentRole == AppRoles.Receptionist)
+            {
+                if (currentHotelId == null)
+                {
+                    return BadRequest(ApiResponse<object>.ErrorResponse("Staff account implies a hotel association but none found."));
+                }
+                query.HotelId = currentHotelId;
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<Domain.Common.Models.PagedResult<UserDto>>.SuccessResponse(result.Value));
+        }
 
     }
 }

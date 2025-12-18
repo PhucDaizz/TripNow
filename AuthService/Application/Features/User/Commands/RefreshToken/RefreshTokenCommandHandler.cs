@@ -42,7 +42,7 @@ namespace Application.Features.User.Commands.RefreshToken
                 Email = user.Email,
                 UserId = user.Id,
             };
-            var newAccessToken = _tokenGenerator.CreateToken(createTokenDto, roles);
+            var newAccessToken = await _tokenGenerator.CreateToken(createTokenDto, roles);
             var newRefreshToken = _tokenGenerator.GenerateRefreshToken();
 
             await _identityService.UpdateRefreshTokenAsync(user.Id, newRefreshToken);
