@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using Application.DTOs.User;
 using Application.Features.User.Commands.Register;
+using Domain.Common;
 using Domain.Common.Response;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -23,46 +24,6 @@ namespace Infrastructure.Services
             _logger = logger;
         }
 
-        /*public async Task<Result<ExtendedIdentityUser>> CreateUserAsync(
-            string email,
-            string password,
-            string fullName,
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var user = new ExtendedIdentityUser
-                {
-                    UserName =  email,
-                    Email = email,
-                    FullName = fullName,
-                    EmailConfirmed = false
-                };
-
-                var result = await _userManager.CreateAsync(user, password);
-
-                if (!result.Succeeded)
-                {
-                    var errors = result.Errors.Select(e => $"{e.Code}: {e.Description}");
-                    _logger.LogWarning("Failed to create user {Email}: {Errors}",
-                        email, string.Join(", ", errors));
-
-                    return Result.Failure<ExtendedIdentityUser>(
-                        new Error("Identity.CreateFailed",
-                        string.Join("; ", errors)));
-                }
-
-                _logger.LogInformation("User created successfully: {Email}", email);
-                return Result.Success(user);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating user {Email}", email);
-                return Result.Failure<ExtendedIdentityUser>(
-                    new Error("System.Error", "Failed to create user"));
-            }
-        }
-*/
         
         public async Task<Result> AssignRoleAsync(
             string userId,
@@ -316,6 +277,90 @@ namespace Infrastructure.Services
             }
 
             return new UserIdentityDto { Id = user.Id, Email = user.Email };
+        }
+
+        public async Task<Result> RemoveRoleAsync(string userId, string role, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Result.Failure(new Error("USER.NOT_FOUND", "User not found"));
+
+                var result = await _userManager.RemoveFromRoleAsync(user, role);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Removed role {Role} from user {UserId}", role, userId);
+                    return Result.Success($"Removed role: {role}");
+                }
+
+                return Result.Failure(new Error("ROLE.REMOVE_FAILED",
+                    string.Join(", ", result.Errors.Select(e => e.Description))));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing role {Role} from user {UserId}", role, userId);
+                return Result.Failure(new Error("ROLE.REMOVE_ERROR", ex.Message));
+            }
+        }
+
+        /*public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }*/
+
+        public async Task<Result> AssignStaffRoleAsync(string userId, string position, CancellationToken cancellationToken = default)
+        {
+            var (role, isValid) = MapPositionToRole(position);
+            if (!isValid)
+                return Result.Failure(new Error("INVALID.POSITION", $"Invalid position: {position}"));
+
+            return await AssignRoleAsync(userId, role, cancellationToken);
+        }
+
+        public async Task<Result> DemoteToCustomerAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Result.Failure(new Error("USER.NOT_FOUND", "User not found"));
+
+            // Get current roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Remove all staff roles
+            var staffRoles = currentRoles.Where(r => r != AppRoles.Customer).ToList();
+
+            foreach (var role in staffRoles)
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+
+            // Add customer role if not already
+            if (!currentRoles.Contains(AppRoles.Customer))
+            {
+                await _userManager.AddToRoleAsync(user, AppRoles.Customer);
+            }
+
+            _logger.LogInformation("User {UserId} demoted to Customer role", userId);
+            return Result.Success("User demoted to Customer");
+        }
+
+        /*public Task<bool> CanUserBeStaffAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }*/
+
+        private (string role, bool isValid) MapPositionToRole(string position)
+        {
+            return position.ToLower() switch
+            {
+                "receptionist" => (AppRoles.Receptionist, true),
+                "housekeeping" or "cleaner" => (AppRoles.Housekeeping, true),
+                "hotelowner" or "owner" => (AppRoles.HotelOwner, true),
+                "sysadmin" or "admin" => (AppRoles.SysAdmin, true),
+                _ => (string.Empty, false)
+            };
         }
     }
 }

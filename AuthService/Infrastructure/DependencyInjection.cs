@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Contracts;
 using Application.Repositories;
+using Domain.Repositories;
 using Infrastructure.Contracts;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Persistence.SeedData;
@@ -29,6 +30,7 @@ namespace Infrastructure
 
             services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IStaffProfileRepository, StaffProfileRepository>();
 
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<IExternalAuthService, ExternalAuthService>();

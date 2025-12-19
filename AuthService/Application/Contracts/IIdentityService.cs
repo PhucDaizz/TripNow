@@ -21,5 +21,12 @@ namespace Application.Contracts
         Task UpdateRefreshTokenAsync(string userId, string refreshToken);
         Task<(bool IsAuthenticated, UserIdentityDto? User)> AuthenticateUserAsync(string email, string password);
         Task<UserIdentityDto?> GetUserByEmailAndValidateRefreshTokenAsync(string email, string refreshToken);
+
+        Task<Result> RemoveRoleAsync(string userId, string role, CancellationToken cancellationToken = default);
+        //Task<bool> IsInRoleAsync(string userId, string role, CancellationToken cancellationToken = default);
+
+        Task<Result> AssignStaffRoleAsync(string userId, string position, CancellationToken cancellationToken = default);
+        Task<Result> DemoteToCustomerAsync(string userId, CancellationToken cancellationToken = default);
+        //Task<bool> CanUserBeStaffAsync(string userId, CancellationToken cancellationToken = default);
     }
 }

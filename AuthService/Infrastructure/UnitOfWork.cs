@@ -1,7 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Application.Repositories;
+using Domain.Repositories;
 using Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure
 {
@@ -11,11 +13,13 @@ namespace Infrastructure
         private IDbContextTransaction? _transaction;
 
         public IAuthRepository Auth { get; }
+        public IStaffProfileRepository StaffProfile { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             Auth = new AuthRepository(_context);
+            StaffProfile = new StaffProfileRepository(_context);
         }
         public async Task BeginTransactionAsync()
         {

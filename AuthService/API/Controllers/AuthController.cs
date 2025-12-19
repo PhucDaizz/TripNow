@@ -1,22 +1,29 @@
 ﻿using Application.Common.Interfaces;
+using Application.DTOs.StaffProfile;
 using Application.DTOs.User;
+using Application.Features.StaffProfile.Commands.CreateStaffProfile;
+using Application.Features.StaffProfile.Commands.DeleteStaffProfile;
+using Application.Features.StaffProfile.Commands.UpdateStaffProfile;
 using Application.Features.User.Commands.ConfirmEmail;
 using Application.Features.User.Commands.ForgotPassword;
 using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
+using Application.Features.User.Commands.RegisterHotelOwner;
 using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
 using Application.Features.User.Queries.GetUsersWithPagination;
 using Domain.Common;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using System.Security.Claims;
+using System.Threading;
 
 namespace API.Controllers
 {
@@ -34,7 +41,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Route("RegisterUser")]
+        [Route("register-customer")]
         public async Task<IActionResult> Register([FromBody]RegisterCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
@@ -54,6 +61,31 @@ namespace API.Controllers
                 new List<string> { result.Error.Message }
             ));
         }
+
+
+        [Authorize(Roles = AppRoles.SysAdmin)]
+        [HttpPost("register-hotel-owner")]
+        public async Task<IActionResult> RegisterHotelOwner(
+            RegisterHotelOwnerCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                var response = ApiResponse<string>.SuccessResponse(
+                    result.Value,
+                    "User created successfully."
+                );
+
+                return Ok(response);
+            }
+
+            return BadRequest(ApiResponse<string>.ErrorResponse(
+                result.Error.Code,
+                new List<string> { result.Error.Message }
+            ));
+        }
+
 
         [HttpPost]
         [Route("Login")]
@@ -312,6 +344,81 @@ namespace API.Controllers
             }
 
             return Ok(ApiResponse<Domain.Common.Models.PagedResult<UserDto>>.SuccessResponse(result.Value));
+        }
+
+
+
+        [HttpPost("staff-profile")]
+        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> CreateStaffProfile(
+            [FromBody]CreateStaffProfileDto command)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var newStaffProfile = new CreateStaffProfileCommand
+            {
+                Email = command.Email,
+                HotelId = command.HotelId,
+                Position = command.Position,
+                CreatedByUserId = currentUserId
+            };
+
+            var result = await _mediator.Send(newStaffProfile);
+
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(
+                    result.Value,
+                    "Staff profile created successfully"
+                ));
+            }
+
+            return BadRequest(ApiResponse<string>.ErrorResponse(
+                result.Error.Message,
+                new List<string> { result.Error.Code }
+            ));
+        }
+
+
+        [HttpDelete("staff/{userid}")]
+        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> DeleteStaffProfile(Guid userid)
+        {
+            var command = new DeleteStaffProfileCommand
+            {
+                UserId = userid,
+                DeletedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+                return NoContent();
+
+            return BadRequest(result.Error.Message);
+        }
+
+        [HttpPut("staff/{userId}")]
+        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> UpdateStaffProfile(
+            Guid userId,
+            [FromBody] UpdateStaffProfileDto command)
+        {
+
+            var staffProfileUpdate = new UpdateStaffProfileCommand
+            {
+                StaffProfileId = userId,
+                NewPosition = command.NewPosition,
+                HotelId = command.HotelId,
+                UpdatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            };
+
+            var result = await _mediator.Send(staffProfileUpdate);
+
+            if (result.IsSuccess)
+                return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
+
+            return BadRequest(ApiResponse<StaffProfileDto>.ErrorResponse(result.Error.Message));
         }
 
     }
