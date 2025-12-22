@@ -1,5 +1,6 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Domain.Common;
+using HotelCatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelCatalogService.Infrastructure
@@ -11,12 +12,16 @@ namespace HotelCatalogService.Infrastructure
         {
             _domainEventService = domainEventService;
         }
-        /*
-                public DbSet<Listing> Listings { get; set; } = null!;
-                public DbSet<AuctionBid> AuctionBids { get; set; } = null!;
-                public DbSet<PriceSuggestion> PriceSuggestions { get; set; } = null!;
-                public DbSet<Transactions> Transactions { get; set; } = null!;
-                public DbSet<CreditInventory> CreditInventories { get; set; } = null!;*/
+        
+        public DbSet<Hotel> Hotel { get; set; }
+        public DbSet<Amenity> Amenity { get; set; }
+        public DbSet<Block> Block { get; set; }
+        public DbSet<Floor> Floor { get; set; }
+        public DbSet<HotelAmenity> HotelAmenity { get; set; }
+        public DbSet<Promotion> Promotion { get; set; }
+        public DbSet<Room> Room { get; set; }
+        public DbSet<RoomPrice> RoomPrice { get; set; }
+        public DbSet<RoomType> RoomType { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
