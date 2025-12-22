@@ -21,6 +21,11 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .WithOne()
                    .HasForeignKey("RoomTypeId") 
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(rt => rt.Images)
+                   .WithOne()
+                   .HasForeignKey("RoomTypeId")
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

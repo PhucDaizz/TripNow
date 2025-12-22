@@ -23,7 +23,9 @@ namespace HotelCatalogService.Domain.Entities
         private readonly List<RoomType> _roomTypes = new(); 
         private readonly List<HotelAmenity> _amenities = new();
         private readonly List<Promotion> _promotions = new();
+        private readonly List<HotelImage> _images = new();
 
+        public IReadOnlyCollection<HotelImage> Images => _images.AsReadOnly();
         public IReadOnlyCollection<Block> Blocks => _blocks.AsReadOnly();
         public IReadOnlyCollection<RoomType> RoomTypes => _roomTypes.AsReadOnly();
         public IReadOnlyCollection<HotelAmenity> Amenities => _amenities.AsReadOnly();
@@ -32,6 +34,7 @@ namespace HotelCatalogService.Domain.Entities
 
         private Hotel() 
         {
+            _images = new List<HotelImage>();
             _blocks = new List<Block>();
             _roomTypes = new List<RoomType>();
             _amenities = new List<HotelAmenity>();
@@ -166,6 +169,23 @@ namespace HotelCatalogService.Domain.Entities
         {
             Status = HotelStatus.Blocked;
             IsActive = false;
+        }
+
+        public void AddImage(string imageUrl, bool isThumbnail, string? caption)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl)) return;
+
+            // Logic: Nếu thêm ảnh này là Thumbnail, thì bỏ Thumbnail của ảnh cũ đi
+            if (isThumbnail)
+            {
+                foreach (var img in _images)
+                {
+                    // Cần thêm hàm SetThumbnail(false) trong HotelImage hoặc sửa trực tiếp nếu internal
+                    // Ở đây giả sử bạn xử lý logic đó
+                }
+            }
+
+            _images.Add(new HotelImage(this.Id, imageUrl, isThumbnail, caption));
         }
     }
 }

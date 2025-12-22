@@ -22,6 +22,8 @@ namespace HotelCatalogService.Infrastructure
         public DbSet<Room> Room { get; set; }
         public DbSet<RoomPrice> RoomPrice { get; set; }
         public DbSet<RoomType> RoomType { get; set; }
+        public DbSet<RoomTypeImage> RoomTypeImage { get; set; }
+        public DbSet<HotelImage> HotelImage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

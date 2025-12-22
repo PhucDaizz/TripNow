@@ -10,10 +10,13 @@ namespace HotelCatalogService.Domain.Entities
         public decimal SizeM2 { get; private set; }
 
         private readonly List<RoomPrice> _prices = new();
+        private readonly List<RoomTypeImage> _images = new();
+        public IReadOnlyCollection<RoomTypeImage> Images => _images.AsReadOnly();
         public IReadOnlyCollection<RoomPrice> Prices => _prices.AsReadOnly();
 
         private RoomType()
         {
+            _images = new List<RoomTypeImage>();
             _prices = new List<RoomPrice>();
         }
 
@@ -41,6 +44,11 @@ namespace HotelCatalogService.Domain.Entities
         {
             var specialPrice = _prices.FirstOrDefault(p => p.Date == date.Date);
             return specialPrice?.Price ?? BasePrice;
+        }
+
+        public void AddImage(string imageUrl, bool isMain)
+        {
+            _images.Add(new RoomTypeImage(this.Id, imageUrl, isMain));
         }
     }
 }
