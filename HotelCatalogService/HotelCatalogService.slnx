@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/API/HotelCatalogService.API.csproj" />
+  <Project Path="src/Application/HotelCatalogService.Application.csproj" />
+  <Project Path="src/Domain/HotelCatalogService.Domain.csproj" />
+  <Project Path="src/Infrastructure/HotelCatalogService.Infrastructure.csproj" />
+</Solution>
