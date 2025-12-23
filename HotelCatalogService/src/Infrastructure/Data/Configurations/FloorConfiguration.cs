@@ -18,6 +18,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .WithOne()
                    .HasForeignKey("FloorId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Rooms).HasField("_rooms");
         }
     }
 }

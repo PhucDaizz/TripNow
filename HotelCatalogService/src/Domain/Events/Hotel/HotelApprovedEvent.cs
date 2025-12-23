@@ -2,5 +2,5 @@
 
 namespace HotelCatalogService.Domain.Events.Hotel
 {
-    public record HotelApprovedEvent(Guid HotelId, Guid OwnerId): DomainEvent;
+    public record HotelApprovedEvent(Guid HotelId, string HotelName, Guid OwnerId): DomainEvent;
 }

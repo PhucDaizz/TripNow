@@ -49,26 +49,31 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .WithOne()
                    .HasForeignKey("HotelId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Blocks).HasField("_blocks");
 
             builder.HasMany(h => h.RoomTypes)
                    .WithOne()
                    .HasForeignKey("HotelId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.RoomTypes).HasField("_roomTypes");
 
             builder.HasMany(h => h.Amenities)
                    .WithOne()
                    .HasForeignKey("HotelId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Amenities).HasField("_amenities");
 
             builder.HasMany(h => h.Promotions)
                    .WithOne()
                    .HasForeignKey("HotelId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Promotions).HasField("_promotions");
 
             builder.HasMany(h => h.Images) 
                    .WithOne()
                    .HasForeignKey("HotelId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Images).HasField("_images");
         }
     }
 }

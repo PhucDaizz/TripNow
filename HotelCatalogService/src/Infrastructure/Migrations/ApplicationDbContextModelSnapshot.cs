@@ -216,6 +216,47 @@ namespace HotelCatalogService.Infrastructure.Migrations
                     b.ToTable("HotelAmenities", (string)null);
                 });
 
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.HotelImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Caption")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<bool>("IsThumbnail")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.ToTable("HotelImages", (string)null);
+                });
+
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Promotion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -386,6 +427,43 @@ namespace HotelCatalogService.Infrastructure.Migrations
                     b.ToTable("RoomTypes", (string)null);
                 });
 
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.RoomTypeImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<bool>("IsMainImage")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid>("RoomTypeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomTypeId");
+
+                    b.ToTable("RoomTypeImages", (string)null);
+                });
+
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Block", b =>
                 {
                     b.HasOne("HotelCatalogService.Domain.Entities.Hotel", null)
@@ -480,6 +558,15 @@ namespace HotelCatalogService.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.HotelImage", b =>
+                {
+                    b.HasOne("HotelCatalogService.Domain.Entities.Hotel", null)
+                        .WithMany("Images")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Promotion", b =>
                 {
                     b.HasOne("HotelCatalogService.Domain.Entities.Hotel", null)
@@ -519,6 +606,15 @@ namespace HotelCatalogService.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.RoomTypeImage", b =>
+                {
+                    b.HasOne("HotelCatalogService.Domain.Entities.RoomType", null)
+                        .WithMany("Images")
+                        .HasForeignKey("RoomTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Block", b =>
                 {
                     b.Navigation("Floors");
@@ -535,6 +631,8 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
                     b.Navigation("Blocks");
 
+                    b.Navigation("Images");
+
                     b.Navigation("Promotions");
 
                     b.Navigation("RoomTypes");
@@ -542,6 +640,8 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.RoomType", b =>
                 {
+                    b.Navigation("Images");
+
                     b.Navigation("Prices");
                 });
 #pragma warning restore 612, 618

@@ -195,5 +195,25 @@ namespace Infrastructure.Services
 
             return QueryHelpers.AddQueryString(clientUrl, queryParams);
         }
+
+        public string CreateHotelApprovedEmailBody(string ownerName, string hotelName)
+        {
+            return $@"
+                <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                    <h2>Xin chào {ownerName},</h2>
+                    <p>Chúng tôi rất vui mừng thông báo rằng khách sạn <strong>{hotelName}</strong> của bạn đã vượt qua quy trình kiểm duyệt.</p>
+                    <p>Hiện tại, khách sạn đã được kích hoạt và hiển thị trên hệ thống TripUp.</p>
+                    <p>Bạn có thể đăng nhập vào trang quản trị để bắt đầu quản lý phòng và đơn đặt chỗ ngay bây giờ.</p>
+                    <br>
+                    <a href='https://tripup.com/dashboard' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Vào trang quản trị</a>
+                    <br><br>
+                    <p>Trân trọng,<br>Đội ngũ TripUp</p>
+                </div>";
+        }
+
+        public string CreateHotelRejectedEmailBody(string ownerName, string hotelName, string reason = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

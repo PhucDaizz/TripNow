@@ -1,4 +1,6 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Domain.Repositories;
+using HotelCatalogService.Infrastructure.Data.Repositories;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -9,9 +11,13 @@ namespace HotelCatalogService.Infrastructure
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
 
+        public IHotelRepository Hotel { get; }
+
+
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
+            Hotel = new HotelRepository(context);
         }
         public async Task BeginTransactionAsync()
         {

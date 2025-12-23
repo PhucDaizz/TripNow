@@ -19,6 +19,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .WithOne()
                    .HasForeignKey("BlockId")
                    .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(h => h.Floors).HasField("_floors");
         }
     }
 }

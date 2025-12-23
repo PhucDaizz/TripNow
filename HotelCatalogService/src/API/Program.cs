@@ -1,9 +1,11 @@
+using DotNetEnv;
 using HotelCatalogService.API.Common.ExceptionHandling;
 using HotelCatalogService.API.ExceptionHandling;
 using HotelCatalogService.API.Extensions;
 using HotelCatalogService.API.StartUp;
 using HotelCatalogService.Application;
 using HotelCatalogService.Infrastructure;
+using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
@@ -14,7 +16,18 @@ namespace HotelCatalogService.API
     {
         public static void Main(string[] args)
         {
+            Env.Load($"../Config/.env");
+
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.Configure<CloudinarySettings>(
+               builder.Configuration.GetSection(CloudinarySettings.SectionName)
+            );
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection(EmailSettings.SectionName)
+            );
+
+
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

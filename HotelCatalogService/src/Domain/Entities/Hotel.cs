@@ -162,7 +162,7 @@ namespace HotelCatalogService.Domain.Entities
             IsActive = true;
 
             // Email thông báo cho chủ khách sạn
-            AddDomainEvent(new HotelApprovedEvent(Id, OwnerId));
+            AddDomainEvent(new HotelApprovedEvent(Id, Name, OwnerId));
         }
 
         public void Suspend(string reason)

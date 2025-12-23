@@ -1,4 +1,7 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Application.Contracts;
+using HotelCatalogService.Domain.Repositories;
+using HotelCatalogService.Infrastructure.Data.Repositories;
 using HotelCatalogService.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +21,13 @@ namespace HotelCatalogService.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
+            services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IEmailServices, EmailServices>();
+            services.AddSingleton<ICloudinaryService, CloudinaryService>();
+            services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
