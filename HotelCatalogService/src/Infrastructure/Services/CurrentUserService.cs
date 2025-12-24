@@ -13,13 +13,23 @@ namespace HotelCatalogService.Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string? UserId => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier).ToString();
+        public string? UserId =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        public string? UserName => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name).ToString();
 
-        public string? Email => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email).ToString();
+        public string? UserName =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Name)?.Value;
 
-        public string? Role => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role).ToString();
+        public string? Email =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Email)?.Value;
+
+        public string? Role =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Role)?.Value;
+
 
         public Guid? HotelId
         {

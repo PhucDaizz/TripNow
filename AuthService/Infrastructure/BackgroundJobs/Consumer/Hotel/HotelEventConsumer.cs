@@ -1,5 +1,4 @@
 ﻿using Application.DTOs.Hotel;
-using Application.DTOs.User;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,22 +25,27 @@ namespace Infrastructure.BackgroundJobs.Consumer.Hotel
                 exchange: "hotel.events",
                 exchangeType: "topic",
                 routingKey: "hotel.approved",
-                queueName: "hotel-service-approved",
-                handler: async (eventMessage) =>
-                {
-                    using var scope = _scopeFactory.CreateScope();
-                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                    try
-                    {
-                        await mediator.Publish(eventMessage, stoppingToken);
-                        _logger.LogInformation("Successfully processed SendEmailHotelApproved for user: {UserId}", eventMessage.OwnerId);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error handling message for user: {UserId}",
-                            eventMessage.OwnerId);
-                    }
-                });
+                queueName: "auth-service-hotel-approved", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken) 
+            );
+        }
+
+        private async Task ProcessMessage<TMessage>(TMessage message, CancellationToken token) where TMessage : class
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            try
+            {
+                await mediator.Publish(message, token);
+
+                _logger.LogInformation("Successfully processed message {MessageType} : {MessageData}",
+                    typeof(TMessage).Name, System.Text.Json.JsonSerializer.Serialize(message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling message {MessageType}", typeof(TMessage).Name);
+            }
         }
     }
 }

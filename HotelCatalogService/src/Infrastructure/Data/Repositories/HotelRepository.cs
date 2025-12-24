@@ -94,6 +94,11 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 query = query.Where(h => h.IsActive == isActive.Value);
             }
 
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(h => h.Address.City.Contains(city));
+            }
+
             query = query.OrderByDescending(h => h.CreatedAt);
 
             var totalCount = await query.CountAsync(cancellationToken);

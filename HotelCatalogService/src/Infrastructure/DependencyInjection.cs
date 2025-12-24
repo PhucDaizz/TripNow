@@ -25,8 +25,8 @@ namespace HotelCatalogService.Infrastructure
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IEmailServices, EmailServices>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<ICloudinaryService, CloudinaryService>();
-            services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();

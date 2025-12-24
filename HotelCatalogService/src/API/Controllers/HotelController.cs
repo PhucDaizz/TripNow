@@ -6,6 +6,7 @@ using HotelCatalogService.Application.Features.Hotel.Commands.DeleteHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
 using HotelCatalogService.Domain.Common;
+using HotelCatalogService.Domain.Enum;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -153,6 +154,18 @@ namespace HotelCatalogService.API.Controllers
                 query.IsActive = true;
                 query.Status = HotelStatus.Active;
             }*/
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+
+        [HttpGet("search")]
+        [AllowAnonymous] 
+        public async Task<IActionResult> SearchHotels([FromQuery] GetHotelsWithPaginationQuery query)
+        {
+            query.Status = HotelStatus.Active;
+            query.IsActive = true;
 
             var result = await _mediator.Send(query);
             return Ok(result);

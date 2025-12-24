@@ -27,8 +27,6 @@ namespace HotelCatalogService.API
                 builder.Configuration.GetSection(EmailSettings.SectionName)
             );
 
-
-
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddHealthChecks();
@@ -43,6 +41,9 @@ namespace HotelCatalogService.API
                     context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
                 };
             });
+
+
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
 
