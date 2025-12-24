@@ -65,9 +65,9 @@ namespace HotelCatalogService.Domain.Entities
             return new Hotel(ownerId, name, description, address, location);
         }
 
-        public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size)
+        public void DefineRoomType(Guid hotelId,string name, decimal basePrice, int capacity, decimal size)
         {
-            var roomType = new RoomType(name, basePrice, capacity, size);
+            var roomType = new RoomType(hotelId, name, basePrice, capacity, size);
             _roomTypes.Add(roomType);
         }
 

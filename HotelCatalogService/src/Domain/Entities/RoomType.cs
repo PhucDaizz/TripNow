@@ -4,6 +4,7 @@ namespace HotelCatalogService.Domain.Entities
 {
     public class RoomType : BaseEntity
     {
+        public Guid HotelId { get; private set; }
         public string Name { get; private set; }
         public decimal BasePrice { get; private set; }
         public int Capacity { get; private set; }
@@ -21,8 +22,9 @@ namespace HotelCatalogService.Domain.Entities
         }
 
 
-        internal RoomType(string name, decimal basePrice, int capacity, decimal sizeM2): this()
+        internal RoomType(Guid hotelId, string name, decimal basePrice, int capacity, decimal sizeM2): this()
         {
+            HotelId = hotelId;
             Name = name;
             BasePrice = basePrice;
             Capacity = capacity;
@@ -46,9 +48,17 @@ namespace HotelCatalogService.Domain.Entities
             return specialPrice?.Price ?? BasePrice;
         }
 
-        public void AddImage(string imageUrl, bool isMain)
+        public void AddImage(string imageUrl, string publicId, bool isMain)
         {
-            _images.Add(new RoomTypeImage(this.Id, imageUrl, isMain));
+            _images.Add(new RoomTypeImage(this.Id, imageUrl, publicId, isMain));
+        }
+
+        internal void UpdateDetails(string name, decimal basePrice, int capacity, decimal sizeM2)
+        {
+            Name = name;
+            BasePrice = basePrice;
+            Capacity = capacity;
+            SizeM2 = sizeM2;
         }
     }
 }

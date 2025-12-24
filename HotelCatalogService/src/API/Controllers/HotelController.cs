@@ -148,13 +148,6 @@ namespace HotelCatalogService.API.Controllers
             {
                 query.OwnerId = Guid.Parse(currentUserId); 
             }
-
-            /*if (currentRole == null)
-            {
-                query.IsActive = true;
-                query.Status = HotelStatus.Active;
-            }*/
-
             var result = await _mediator.Send(query);
             return Ok(result);
         }

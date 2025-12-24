@@ -1,5 +1,5 @@
 ﻿using HotelCatalogService.Domain.Entities;
-using Infrastructure.Data.Configurations; // Namespace chứa BaseEntityConfiguration của bạn
+using Infrastructure.Data.Configurations; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

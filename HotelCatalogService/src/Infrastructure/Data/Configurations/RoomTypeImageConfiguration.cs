@@ -11,7 +11,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
         {
             base.Configure(builder);
             builder.ToTable("RoomTypeImages");
-
+            builder.Property(x => x.PublicId).HasMaxLength(500).IsRequired();
             builder.Property(x => x.ImageUrl).HasMaxLength(500).IsRequired();
         }
     }
