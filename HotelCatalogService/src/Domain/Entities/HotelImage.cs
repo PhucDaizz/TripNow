@@ -6,17 +6,29 @@ namespace HotelCatalogService.Domain.Entities
     {
         public Guid HotelId { get; private set; }
         public string ImageUrl { get; private set; }
+        public string PublicId { get; private set; }
         public bool IsThumbnail { get; private set; } 
         public string? Caption { get; private set; } 
 
         private HotelImage() { }
 
-        internal HotelImage(Guid hotelId, string imageUrl, bool isThumbnail, string? caption)
+        internal HotelImage(Guid hotelId, string imageUrl, string publicId, bool isThumbnail, string? caption)
         {
             HotelId = hotelId;
             ImageUrl = imageUrl;
+            PublicId = publicId;
             IsThumbnail = isThumbnail;
             Caption = caption;
+        }
+
+        internal void UpdateDetails(string? caption)
+        {
+            Caption = caption;
+        }
+
+        internal void SetThumbnail(bool isThumbnail)
+        {
+            IsThumbnail = isThumbnail;
         }
     }
 }

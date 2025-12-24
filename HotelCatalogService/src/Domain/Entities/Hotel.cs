@@ -185,21 +185,54 @@ namespace HotelCatalogService.Domain.Entities
             IsActive = false;
         }
 
-        public void AddImage(string imageUrl, bool isThumbnail, string? caption)
+        public void AddImage(string imageUrl, string publicId, bool isThumbnail, string? caption)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl)) return;
+            if (_images.Count == 0) isThumbnail = true;
 
-            // Logic: Nếu thêm ảnh này là Thumbnail, thì bỏ Thumbnail của ảnh cũ đi
             if (isThumbnail)
             {
                 foreach (var img in _images)
                 {
-                    // Cần thêm hàm SetThumbnail(false) trong HotelImage hoặc sửa trực tiếp nếu internal
-                    // Ở đây giả sử bạn xử lý logic đó
+                    img.SetThumbnail(false);
                 }
             }
 
-            _images.Add(new HotelImage(this.Id, imageUrl, isThumbnail, caption));
+            var newImage = new HotelImage(this.Id, imageUrl, publicId, isThumbnail, caption);
+            _images.Add(newImage);
+        }
+
+        public void UpdateImageDetails(Guid imageId, bool isThumbnail, string? caption)
+        {
+            var img = _images.FirstOrDefault(x => x.Id == imageId);
+            if (img == null) return;
+
+            img.UpdateDetails(caption);
+
+            if (isThumbnail)
+            {
+                foreach (var existingImg in _images)
+                {
+                    existingImg.SetThumbnail(false);
+                }
+                img.SetThumbnail(true);
+            }
+            else if (img.IsThumbnail && !isThumbnail)
+            {
+                img.SetThumbnail(false);
+            }
+        }
+
+        public void RemoveImage(Guid imageId)
+        {
+            var img = _images.FirstOrDefault(x => x.Id == imageId);
+            if (img == null) return;
+
+            _images.Remove(img);
+
+            if (img.IsThumbnail && _images.Count > 0)
+            {
+                _images.First().SetThumbnail(true);
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.ToTable("HotelImages");
 
             builder.Property(x => x.ImageUrl).HasMaxLength(500).IsRequired(); 
+            builder.Property(x => x.PublicId).HasMaxLength(500).IsRequired(); 
             builder.Property(x => x.Caption).HasMaxLength(100);
             builder.Property(x => x.IsThumbnail).IsRequired();
         }
