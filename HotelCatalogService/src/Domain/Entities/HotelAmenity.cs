@@ -18,5 +18,11 @@ namespace HotelCatalogService.Domain.Entities
             Description = description;
             IsFree = isFree;
         }
+
+        internal void UpdateInfo(string? description, bool isFree)
+        {
+            Description = description;
+            IsFree = isFree;
+        }
     }
 }

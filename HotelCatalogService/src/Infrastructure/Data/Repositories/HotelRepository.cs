@@ -3,6 +3,7 @@ using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace HotelCatalogService.Infrastructure.Data.Repositories
 {
@@ -94,11 +95,6 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 query = query.Where(h => h.IsActive == isActive.Value);
             }
 
-            if (!string.IsNullOrEmpty(city))
-            {
-                query = query.Where(h => h.Address.City.Contains(city));
-            }
-
             query = query.OrderByDescending(h => h.CreatedAt);
 
             var totalCount = await query.CountAsync(cancellationToken);
@@ -109,6 +105,26 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
 
             return new PagedResult<Hotel>(items, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<Hotel?> GetByIdIncludeAsync(
+            Guid id,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<Hotel, object>>[] includes)
+        {
+            IQueryable<Hotel> query = _context.Hotel;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return await query
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
         }
     }
 }

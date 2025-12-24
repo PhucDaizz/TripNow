@@ -22,6 +22,12 @@ namespace HotelCatalogService.Domain.Entities
             return new Amenity(name, icon);
         }
 
+        public void Update(string name, string icon)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+            Name = name;
+            Icon = icon;
+        }
 
     }
 }

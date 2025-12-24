@@ -120,6 +120,20 @@ namespace HotelCatalogService.Domain.Entities
             _amenities.Add(new HotelAmenity(Id, amenityId, description, isFree));
         }
 
+        public void RemoveAmenity(Guid amenityId)
+        {
+            var item = _amenities.FirstOrDefault(x => x.AmenityId == amenityId);
+            if (item != null) _amenities.Remove(item);
+        }
+
+        public void UpdateAmenity(Guid amenityId, string? description, bool isFree)
+        {
+            var item = _amenities.FirstOrDefault(x => x.AmenityId == amenityId);
+            if (item == null) return; 
+
+            item.UpdateInfo(description, isFree);
+        }
+
         public void CreatePromotion(string code, byte type, decimal value, DateTime start, DateTime end, int qty)
         {
             if (_promotions.Any(p => p.Code == code && p.IsValid()))

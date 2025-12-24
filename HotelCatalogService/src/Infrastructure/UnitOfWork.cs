@@ -12,12 +12,13 @@ namespace HotelCatalogService.Infrastructure
         private IDbContextTransaction? _transaction;
 
         public IHotelRepository Hotel { get; }
-
+        public IAmenityRepository Amenity { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             Hotel = new HotelRepository(context);
+            Amenity = new AmenityRepository(context);
         }
         public async Task BeginTransactionAsync()
         {

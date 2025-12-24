@@ -1,6 +1,7 @@
 ﻿using HotelCatalogService.Domain.Common.Models;
 using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
+using System.Linq.Expressions;
 
 namespace HotelCatalogService.Domain.Repositories
 {
@@ -12,6 +13,11 @@ namespace HotelCatalogService.Domain.Repositories
         Task DeleteAsync(Hotel hotel, CancellationToken cancellationToken = default);
 
         Task<Hotel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Hotel?> GetByIdIncludeAsync(
+            Guid id,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<Hotel, object>>[] includes
+        );
 
         Task<Hotel?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 
