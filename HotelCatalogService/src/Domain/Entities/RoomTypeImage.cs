@@ -18,5 +18,10 @@ namespace HotelCatalogService.Domain.Entities
             PublicId = publicId;
             IsMainImage = isMainImage;
         }
+
+        internal void SetMain(bool isMain)
+        {
+            IsMainImage = isMain;
+        }
     }
 }

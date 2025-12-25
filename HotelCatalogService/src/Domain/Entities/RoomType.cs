@@ -48,12 +48,38 @@ namespace HotelCatalogService.Domain.Entities
             return specialPrice?.Price ?? BasePrice;
         }
 
-        public void AddImage(string imageUrl, string publicId, bool isMain)
+        public void AddImage(string imageUrl, string publicId)
         {
+            bool isMain = _images.Count == 0;
             _images.Add(new RoomTypeImage(this.Id, imageUrl, publicId, isMain));
         }
 
-        internal void UpdateDetails(string name, decimal basePrice, int capacity, decimal sizeM2)
+        public void RemoveImage(Guid imageId)
+        {
+            var img = _images.FirstOrDefault(x => x.Id == imageId);
+            if (img == null) return;
+
+            _images.Remove(img);
+
+            if (img.IsMainImage && _images.Count > 0)
+            {
+                _images.First().SetMain(true);
+            }
+        }
+
+        public void SetMainImage(Guid imageId)
+        {
+            var img = _images.FirstOrDefault(x => x.Id == imageId);
+            if (img == null) return;
+
+            foreach (var item in _images)
+            {
+                item.SetMain(false);
+            }
+            img.SetMain(true);
+        }
+
+        public void UpdateDetails(string name, decimal basePrice, int capacity, decimal sizeM2)
         {
             Name = name;
             BasePrice = basePrice;

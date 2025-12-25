@@ -65,10 +65,23 @@ namespace HotelCatalogService.Domain.Entities
             return new Hotel(ownerId, name, description, address, location);
         }
 
-        public void DefineRoomType(Guid hotelId,string name, decimal basePrice, int capacity, decimal size)
+        public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size)
         {
-            var roomType = new RoomType(hotelId, name, basePrice, capacity, size);
+            if (_roomTypes.Any(x => x.Name == name)) 
+                throw new ArgumentException("LThe room type already exists.");
+
+            var roomType = new RoomType(this.Id, name, basePrice, capacity, size);
             _roomTypes.Add(roomType);
+        }
+
+        public void RemoveRoomType(Guid roomTypeId)
+        {
+            var item = _roomTypes.FirstOrDefault(x => x.Id == roomTypeId);
+            if (item != null)
+            {
+                // Nếu loại phòng này đã có người đặt (Booking) thì không được xóa
+                _roomTypes.Remove(item);
+            }
         }
 
         public void AddPhysicalRoom(string blockName, int floorNumber, string roomName, Guid roomTypeId)

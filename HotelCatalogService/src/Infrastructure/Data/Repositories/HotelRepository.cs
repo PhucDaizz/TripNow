@@ -126,5 +126,13 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
         }
+
+        public async Task<Hotel> GetHotelWithRoomTypesAndImagesAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Hotel
+                .Include(x => x.RoomTypes)
+                    .ThenInclude(x => x.Images)
+                .FirstOrDefaultAsync(x => x.Id == hotelId, cancellationToken);
+        }
     }
 }
