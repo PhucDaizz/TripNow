@@ -5,6 +5,7 @@ using HotelCatalogService.Domain.Common.Cloudinary;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Processing;
 using System.Text.RegularExpressions;
 
 namespace HotelCatalogService.Infrastructure.Services
@@ -39,6 +40,8 @@ namespace HotelCatalogService.Infrastructure.Services
             Stream fileStream,
             string fileName,
             string folder = null,
+            int? width = null,   
+            int? height = null,
             Dictionary<string, string> tags = null,
             CancellationToken cancellationToken = default)
         {
@@ -56,6 +59,9 @@ namespace HotelCatalogService.Infrastructure.Services
                 if (!_settings.AllowedFormats.Contains(fileExtension))
                     throw new ArgumentException($"File format not allowed. Allowed: {string.Join(", ", _settings.AllowedFormats)}");
 
+                int targetWidth = width ?? 1920;
+                int targetHeight = height ?? 1080;
+
                 // Process image if processor is available (resize, compress, convert to webp)
                 Stream processedStream = fileStream;
                 if (_imageProcessor != null)
@@ -64,10 +70,11 @@ namespace HotelCatalogService.Infrastructure.Services
                     {
                         processedStream = await _imageProcessor.ResizeAsync(
                             fileStream,
-                            _settings.AvatarWidth,
-                            _settings.AvatarHeight,
+                            targetWidth,
+                            targetHeight,
                             "webp",
                             quality: 80,
+                            mode: ImageResizeMode.Max,
                             cancellationToken
                         );
                         fileName = Path.ChangeExtension(fileName, "webp");
@@ -80,9 +87,8 @@ namespace HotelCatalogService.Infrastructure.Services
                 }
 
                 var transformation = new Transformation()
-                    .Crop("fill")
-                    .Gravity("face")
-                    .Quality("auto:good");
+                    .Quality("auto:good") 
+                    .FetchFormat("auto");
 
                 transformation.Quality("auto:good");
 
@@ -97,8 +103,6 @@ namespace HotelCatalogService.Infrastructure.Services
                     UseFilename = true,
                     UniqueFilename = true,
                     Invalidate = true,
-                    Colors = true,
-                    Faces = true,
                     Format = "webp"
                 };
 
@@ -138,7 +142,7 @@ namespace HotelCatalogService.Infrastructure.Services
                 var bytes = Convert.FromBase64String(base64String);
                 using var stream = new MemoryStream(bytes);
 
-                return await UploadAsync(stream, fileName, folder, tags, cancellationToken);
+                return await UploadAsync(stream, fileName, folder, 1920, 1080, tags, cancellationToken);
             }
             catch (Exception ex)
             {

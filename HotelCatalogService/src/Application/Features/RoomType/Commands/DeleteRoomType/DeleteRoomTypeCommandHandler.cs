@@ -3,7 +3,7 @@ using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.Contracts;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.DeleteRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.DeleteRoomType
 {
     public class DeleteRoomTypeCommandHandler : IRequestHandler<DeleteRoomTypeCommand, Result>
     {

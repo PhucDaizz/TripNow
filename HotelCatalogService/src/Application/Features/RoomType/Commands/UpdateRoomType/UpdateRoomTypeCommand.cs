@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomType
 {
     public class UpdateRoomTypeCommand : IRequest<Result>
     {

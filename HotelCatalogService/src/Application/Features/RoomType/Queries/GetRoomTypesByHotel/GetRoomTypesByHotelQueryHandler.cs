@@ -3,7 +3,7 @@ using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.RoomType;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Queries.GetRoomTypesByHotel
+namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypesByHotel
 {
     public class GetRoomTypesByHotelQueryHandler : IRequestHandler<GetRoomTypesByHotelQuery, Result<List<RoomTypeDto>>>
     {

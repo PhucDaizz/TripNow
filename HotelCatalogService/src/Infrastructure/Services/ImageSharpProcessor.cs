@@ -21,6 +21,7 @@ namespace HotelCatalogService.Infrastructure.Services
             int height,
             string format = "webp",
             int quality = 80,
+            ImageResizeMode mode = ImageResizeMode.Max,
             CancellationToken cancellationToken = default)
         {
             try
@@ -29,11 +30,20 @@ namespace HotelCatalogService.Infrastructure.Services
 
                 using var image = await Image.LoadAsync(imageStream, cancellationToken);
 
+                var sharpResizeMode = mode switch
+                {
+                    ImageResizeMode.Crop => ResizeMode.Crop,
+                    ImageResizeMode.Pad => ResizeMode.Pad,
+                    ImageResizeMode.Max => ResizeMode.Max,
+                    ImageResizeMode.Stretch => ResizeMode.Stretch,
+                    _ => ResizeMode.Max // Mặc định
+                };
+
                 // Calculate aspect ratio preserving resize
                 var options = new ResizeOptions
                 {
                     Size = new Size(width, height),
-                    Mode = ResizeMode.Crop,
+                    Mode = sharpResizeMode,
                     Position = AnchorPositionMode.Center,
                     Compand = true
                 };

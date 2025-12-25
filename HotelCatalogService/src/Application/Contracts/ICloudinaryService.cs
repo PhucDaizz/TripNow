@@ -6,7 +6,7 @@ namespace HotelCatalogService.Application.Contracts
     {
         // Upload methods
         Task<CloudinaryUploadResult> UploadAsync(Stream fileStream, string fileName,
-            string folder = null, Dictionary<string, string> tags = null,
+            string folder = null, int? width = null, int? height = null, Dictionary<string, string> tags = null,
             CancellationToken cancellationToken = default);
 
         Task<CloudinaryUploadResult> UploadBase64Async(string base64String, string fileName,

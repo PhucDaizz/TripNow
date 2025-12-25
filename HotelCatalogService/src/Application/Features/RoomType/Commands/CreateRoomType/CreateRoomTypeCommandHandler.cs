@@ -5,7 +5,7 @@ using HotelCatalogService.Domain.Repositories;
 using MediatR;
 using System.Security;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.CreateRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomType
 {
     public class CreateRoomTypeCommandHandler : IRequestHandler<CreateRoomTypeCommand, Result<Guid>>
     {

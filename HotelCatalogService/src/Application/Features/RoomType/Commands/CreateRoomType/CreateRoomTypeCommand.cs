@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.CreateRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomType
 {
     public class CreateRoomTypeCommand : IRequest<Result<Guid>>
     {

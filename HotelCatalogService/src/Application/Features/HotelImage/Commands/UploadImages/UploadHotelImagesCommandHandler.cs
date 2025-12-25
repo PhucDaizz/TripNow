@@ -3,7 +3,7 @@ using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.Contracts;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UploadImages
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.UploadImages
 {
     public class UploadHotelImagesCommandHandler : IRequestHandler<UploadHotelImagesCommand, Result<List<string>>>
     {
@@ -41,10 +41,12 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.UploadImages
                 if (!await _imageProcessor.IsValidImageAsync(stream, token)) continue;
 
                 stream.Position = 0;
-                using var resizedStream = await _imageProcessor.ResizeAsync(stream, 1920, 1080, "webp", 80, token);
+                using var resizedStream = await _imageProcessor.ResizeAsync(stream, 1920, 1080, "webp", 80, ImageResizeMode.Max, token);
 
                 string folder = $"hotels/{request.HotelId}";
-                string fileName = Guid.NewGuid().ToString();
+
+                var originalExt = Path.GetExtension(file.FileName);
+                var fileName = $"{Guid.NewGuid()}{originalExt}";
 
                 var uploadResult = await _cloudinaryService.UploadAsync(resizedStream, fileName, folder, cancellationToken: token);
 

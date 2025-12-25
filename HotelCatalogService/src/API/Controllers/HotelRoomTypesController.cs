@@ -1,9 +1,9 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.RoomType;
-using HotelCatalogService.Application.Features.Hotel.Commands.CreateRoomType;
-using HotelCatalogService.Application.Features.Hotel.Commands.DeleteRoomType;
-using HotelCatalogService.Application.Features.Hotel.Commands.UpdateRoomType;
-using HotelCatalogService.Application.Features.Hotel.Queries.GetRoomTypesByHotel;
+using HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomType;
+using HotelCatalogService.Application.Features.RoomType.Commands.DeleteRoomType;
+using HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomType;
+using HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypesByHotel;
 using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

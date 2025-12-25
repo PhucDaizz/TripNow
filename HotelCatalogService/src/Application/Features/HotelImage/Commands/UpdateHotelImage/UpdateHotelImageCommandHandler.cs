@@ -3,7 +3,7 @@ using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotelImage
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.UpdateHotelImage
 {
     public class UpdateHotelImageCommandHandler : IRequestHandler<UpdateHotelImageCommand, Result>
     {

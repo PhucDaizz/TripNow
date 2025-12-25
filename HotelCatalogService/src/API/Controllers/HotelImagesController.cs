@@ -1,8 +1,8 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.HotelImage;
-using HotelCatalogService.Application.Features.Hotel.Commands.DeleteHotelImage;
-using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotelImage;
-using HotelCatalogService.Application.Features.Hotel.Commands.UploadImages;
+using HotelCatalogService.Application.Features.HotelImage.Commands.DeleteHotelImage;
+using HotelCatalogService.Application.Features.HotelImage.Commands.UpdateHotelImage;
+using HotelCatalogService.Application.Features.HotelImage.Commands.UploadImages;
 using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

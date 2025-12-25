@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.DeleteRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.DeleteRoomType
 {
     public class DeleteRoomTypeCommand : IRequest<Result>
     {

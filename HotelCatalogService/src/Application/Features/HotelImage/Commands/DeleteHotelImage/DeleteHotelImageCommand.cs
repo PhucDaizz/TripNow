@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.DeleteHotelImage
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.DeleteHotelImage
 {
     public class DeleteHotelImageCommand : IRequest<Result>
     {

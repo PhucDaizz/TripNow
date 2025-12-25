@@ -1,7 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotelImage
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.UpdateHotelImage
 {
     public class UpdateHotelImageCommand : IRequest<Result>
     {

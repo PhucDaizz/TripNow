@@ -2,7 +2,7 @@
 using HotelCatalogService.Application.Common.Interfaces;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateRoomType
+namespace HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomType
 {
     public class UpdateRoomTypeCommandHandler : IRequestHandler<UpdateRoomTypeCommand, Result>
     {

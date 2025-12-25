@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.UploadImages
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.UploadImages
 {
     public class UploadHotelImagesCommand : IRequest<Result<List<string>>> 
     {

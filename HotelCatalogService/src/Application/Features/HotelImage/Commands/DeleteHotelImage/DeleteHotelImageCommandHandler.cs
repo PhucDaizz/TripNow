@@ -3,7 +3,7 @@ using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.Contracts;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Hotel.Commands.DeleteHotelImage
+namespace HotelCatalogService.Application.Features.HotelImage.Commands.DeleteHotelImage
 {
     public class DeleteHotelImageCommandHandler : IRequestHandler<DeleteHotelImageCommand, Result>
     {
