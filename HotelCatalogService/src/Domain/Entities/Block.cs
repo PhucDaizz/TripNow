@@ -32,5 +32,12 @@ namespace HotelCatalogService.Domain.Entities
 
             return floor;
         }
+
+        internal void UpdateDetails(string name)
+        {
+            // Validation nếu cần
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên khu không được để trống");
+            Name = name;
+        }
     }
 }

@@ -34,5 +34,6 @@ namespace HotelCatalogService.Domain.Repositories
             CancellationToken cancellationToken = default);
 
         Task<Hotel> GetHotelWithRoomTypesAndImagesAsync(Guid hotelId, CancellationToken cancellationToken = default);
+        Task<Hotel> GetHotelWithBlocksAndFloorsAsync(Guid hotelId, CancellationToken cancellationToken = default);
     }
 }

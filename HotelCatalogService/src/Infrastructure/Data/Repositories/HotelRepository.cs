@@ -134,5 +134,13 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                     .ThenInclude(x => x.Images)
                 .FirstOrDefaultAsync(x => x.Id == hotelId, cancellationToken);
         }
+
+        public async Task<Hotel> GetHotelWithBlocksAndFloorsAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Hotel
+                .Include(h => h.Blocks)
+                    .ThenInclude(b => b.Floors)
+                .FirstOrDefaultAsync(h => h.Id == hotelId, cancellationToken);
+        }
     }
 }

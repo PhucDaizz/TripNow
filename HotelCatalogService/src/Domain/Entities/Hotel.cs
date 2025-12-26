@@ -84,6 +84,36 @@ namespace HotelCatalogService.Domain.Entities
             }
         }
 
+        public void AddBlock(string name)
+        {
+            if (_blocks.Any(x => x.Name.ToLower() == name.ToLower()))
+                throw new InvalidOperationException($"Khu vực '{name}' đã tồn tại");
+
+            _blocks.Add(new Block(this.Id, name));
+        }
+
+        public void UpdateBlock(Guid blockId, string newName)
+        {
+            var block = _blocks.FirstOrDefault(x => x.Id == blockId);
+            if (block == null) return;
+
+            if (_blocks.Any(x => x.Id != blockId && x.Name.ToLower() == newName.ToLower()))
+                throw new InvalidOperationException($"Khu vực '{newName}' đã tồn tại");
+
+            block.UpdateDetails(newName);
+        }
+
+        public void RemoveBlock(Guid blockId)
+        {
+            var block = _blocks.FirstOrDefault(x => x.Id == blockId);
+            if (block == null) return;
+
+            if (block.Floors.Any())
+                throw new InvalidOperationException("Không thể xóa khu vực đã có tầng");
+
+            _blocks.Remove(block);
+        }
+
         public void AddPhysicalRoom(string blockName, int floorNumber, string roomName, Guid roomTypeId)
         {
             if (!_roomTypes.Any(rt => rt.Id == roomTypeId))
