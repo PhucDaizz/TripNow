@@ -21,12 +21,26 @@ namespace HotelCatalogService.Domain.Entities
             FloorNumber = floorNumber;
         }
 
-        internal void AddRoom(Guid floorId, string roomName, Guid roomTypeId)
+        public void AddRoom(string roomName, Guid roomTypeId)
         {
             if (_rooms.Any(r => r.RoomName == roomName))
                 throw new InvalidOperationException($"Phòng {roomName} đã tồn tại ở tầng {FloorNumber}");
 
-            _rooms.Add(new Room(floorId, roomName, roomTypeId));
+            _rooms.Add(new Room(this.Id, roomName, roomTypeId));
+        }
+
+        public void UpdateDetails(int floorNumber)
+        {
+            FloorNumber = floorNumber;
+        }
+
+        public void RemoveRoom(Guid roomId)
+        {
+            var room = _rooms.FirstOrDefault(r => r.Id == roomId);
+            if (room == null)
+                throw new InvalidOperationException($"Phòng với Id {roomId} không tồn tại ở tầng {FloorNumber}");
+
+            _rooms.Remove(room);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Domain.Common.Response;
-using HotelCatalogService.Application.DTOs.Hotel;
 using HotelCatalogService.Domain.Common.Models;
+using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Repositories;
 using MediatR;
 
@@ -27,22 +27,8 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPa
                 cancellationToken
             );
 
-            var dtos = pagedData.Items.Select(h => new HotelDto
-            {
-                Id = h.Id,
-                Name = h.Name,
-                Slug = h.Slug,
-                Description = h.Description,
-                OwnerId = h.OwnerId,
-                Status = h.Status.ToString(), 
-                Rating = h.Rating,
-                AddressStreet = h.Address.Street,
-                AddressCity = h.Address.City,
-                Thumbnail = h.Images.FirstOrDefault(i => i.IsThumbnail)?.ImageUrl ?? "",
-                CreatedAt = h.CreatedAt
-            }).ToList();
-
-            return Result.Success(new PagedResult<HotelDto>(dtos, pagedData.TotalCount, request.PageNumber, request.PageSize));
+            
+            return Result.Success(pagedData);
         }
     }
 }

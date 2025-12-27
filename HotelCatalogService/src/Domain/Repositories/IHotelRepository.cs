@@ -1,4 +1,5 @@
 ﻿using HotelCatalogService.Domain.Common.Models;
+using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using System.Linq.Expressions;
@@ -24,7 +25,7 @@ namespace HotelCatalogService.Domain.Repositories
         Task<IEnumerable<Hotel>> GetByOwnerIdAsync(Guid ownerId, int page, int pageSize, CancellationToken cancellationToken = default);
 
         Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<PagedResult<Hotel>> GetByFilterAsync(
+        Task<PagedResult<HotelDto>> GetByFilterAsync(
             string? searchTerm,
             HotelStatus? status,
             Guid? ownerId,

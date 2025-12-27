@@ -1,7 +1,6 @@
-﻿using HotelCatalogService.Domain.Enum;
-using HotelCatalogService.Domain.ValueObject;
+﻿using HotelCatalogService.Domain.ValueObject;
 
-namespace HotelCatalogService.Application.DTOs.Hotel
+namespace HotelCatalogService.Domain.Dto.Hotel
 {
     public class HotelDto
     {

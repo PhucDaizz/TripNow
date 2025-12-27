@@ -1,6 +1,6 @@
 ﻿using Domain.Common.Response;
-using HotelCatalogService.Application.DTOs.Hotel;
 using HotelCatalogService.Domain.Common.Models;
+using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Enum;
 using MediatR;
 

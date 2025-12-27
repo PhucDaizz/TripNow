@@ -114,27 +114,27 @@ namespace HotelCatalogService.Domain.Entities
             _blocks.Remove(block);
         }
 
-        public void AddPhysicalRoom(string blockName, int floorNumber, string roomName, Guid roomTypeId)
-        {
-            if (!_roomTypes.Any(rt => rt.Id == roomTypeId))
-                throw new ArgumentException("Loại phòng không hợp lệ");
+        //public void AddPhysicalRoom(string blockName, int floorNumber, string roomName, Guid roomTypeId)
+        //{
+        //    if (!_roomTypes.Any(rt => rt.Id == roomTypeId))
+        //        throw new ArgumentException("Loại phòng không hợp lệ");
 
-            var block = _blocks.FirstOrDefault(b => b.Name == blockName);
-            if (block == null)
-            {
-                block = new Block(Id ,blockName);
-                _blocks.Add(block);
-            }
+        //    var block = _blocks.FirstOrDefault(b => b.Name == blockName);
+        //    if (block == null)
+        //    {
+        //        block = new Block(Id ,blockName);
+        //        _blocks.Add(block);
+        //    }
 
-            // Tìm hoặc tạo Floor trong Block
-            var floor = block.Floors.FirstOrDefault(f => f.FloorNumber == floorNumber);
-            if (floor == null)
-            {
-               floor = block.AddFloor(block.Id, floorNumber); 
-            }
+        //    // Tìm hoặc tạo Floor trong Block
+        //    var floor = block.Floors.FirstOrDefault(f => f.FloorNumber == floorNumber);
+        //    if (floor == null)
+        //    {
+        //       floor = block.AddFloor(floorNumber); 
+        //    }
 
-            floor.AddRoom(floor.Id, roomName, roomTypeId); 
-        }
+        //    floor.AddRoom(roomName, roomTypeId); 
+        //}
 
         public void UpdateRoomStatus(Guid roomId, RoomStatus newStatus)
         {
@@ -175,6 +175,30 @@ namespace HotelCatalogService.Domain.Entities
             if (item == null) return; 
 
             item.UpdateInfo(description, isFree);
+        }
+
+        public void AddRoom(Guid blockId, Guid floorId, string roomName, Guid roomTypeId)
+        {
+            var block = _blocks.FirstOrDefault(b => b.Id == blockId);
+            if (block == null)
+                throw new InvalidOperationException("Khu vực (Block) không tồn tại");
+
+            var floor = block.Floors.FirstOrDefault(f => f.Id == floorId);
+            if (floor == null)
+                throw new InvalidOperationException("Tầng không tồn tại trong khu vực này");
+
+            floor.AddRoom(roomName, roomTypeId);
+        }
+
+        public void RemoveRoom(Guid blockId, Guid floorId, Guid roomId)
+        {
+            var block = _blocks.FirstOrDefault(b => b.Id == blockId);
+            if (block == null) return;
+
+            var floor = block.Floors.FirstOrDefault(f => f.Id == floorId);
+            if (floor == null) return;
+
+            floor.RemoveRoom(roomId); 
         }
 
         public void CreatePromotion(string code, byte type, decimal value, DateTime start, DateTime end, int qty)

@@ -1,4 +1,6 @@
-﻿using HotelCatalogService.Domain.Common.Models;
+﻿using HotelCatalogService.Application.DTOs.Hotel;
+using HotelCatalogService.Domain.Common.Models;
+using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Repositories;
@@ -68,16 +70,17 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
             return await _context.Hotel.AnyAsync(h => h.Id == id, cancellationToken);
         }
 
-        public async Task<PagedResult<Hotel>> GetByFilterAsync(string? searchTerm, HotelStatus? status, Guid? ownerId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<HotelDto>> GetByFilterAsync(string? searchTerm, HotelStatus? status, Guid? ownerId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             var query = _context.Hotel.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                var term = searchTerm.Trim().ToLower();
-                query = query.Where(h => h.Name.ToLower().Contains(term) ||
-                                         h.Address.Street.ToLower().Contains(term) ||
-                                         h.Address.City.ToLower().Contains(term));
+                var term = $"%{searchTerm.Trim()}%";
+                query = query.Where(h =>
+                    EF.Functions.Like(h.Name, term) ||
+                    EF.Functions.Like(h.Address.Street, term) ||
+                    EF.Functions.Like(h.Address.City, term));
             }
 
             if (status.HasValue)
@@ -95,16 +98,32 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 query = query.Where(h => h.IsActive == isActive.Value);
             }
 
-            query = query.OrderByDescending(h => h.CreatedAt);
-
             var totalCount = await query.CountAsync(cancellationToken);
 
             var items = await query
+                .OrderByDescending(h => h.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .Select(h => new HotelDto
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    Slug = h.Slug,
+                    Description = h.Description,
+                    OwnerId = h.OwnerId,
+                    Status = h.Status.ToString(),
+                    Rating = h.Rating,
+                    AddressStreet = h.Address.Street,
+                    AddressCity = h.Address.City,
+                    Thumbnail = h.Images
+                        .Where(i => i.IsThumbnail)
+                        .Select(i => i.ImageUrl)
+                        .FirstOrDefault(),
+                    CreatedAt = h.CreatedAt
+                })
                 .ToListAsync(cancellationToken);
 
-            return new PagedResult<Hotel>(items, totalCount, pageNumber, pageSize);
+            return new PagedResult<HotelDto>(items, totalCount, pageNumber, pageSize);
         }
 
         public async Task<Hotel?> GetByIdIncludeAsync(

@@ -21,19 +21,38 @@ namespace HotelCatalogService.Domain.Entities
         }
 
 
-        internal Floor AddFloor(Guid blockId, int floorNumber)
+        public void AddFloor(int floorNumber)
         {
             if (_floors.Any(f => f.FloorNumber == floorNumber))
                 throw new InvalidOperationException($"Tầng {floorNumber} đã tồn tại trong khu {Name}");
 
-            var floor = new Floor(blockId, floorNumber);
-
-            _floors.Add(floor);
-
-            return floor;
+            _floors.Add(new Floor(this.Id, floorNumber));
         }
 
-        internal void UpdateDetails(string name)
+        public void UpdateFloor(Guid floorId, int newFloorNumber)
+        {
+            var floor = _floors.FirstOrDefault(f => f.Id == floorId);
+            if (floor == null) 
+                throw new InvalidOperationException($"Tầng với Id {floorId} không tồn tại trong khu {Name}");
+
+            if (_floors.Any(f => f.Id != floorId && f.FloorNumber == newFloorNumber))
+                throw new InvalidOperationException($"Tầng {newFloorNumber} đã tồn tại trong khu {Name}");
+
+            floor.UpdateDetails(newFloorNumber);
+        }
+
+        public void RemoveFloor(Guid floorId)
+        {
+            var floor = _floors.FirstOrDefault(f => f.Id == floorId);
+            if (floor == null) return;
+
+            if (floor.Rooms.Any())
+                throw new InvalidOperationException("Không thể xóa tầng đang chứa phòng. Hãy xóa phòng trước.");
+
+            _floors.Remove(floor);
+        }
+
+        public void UpdateDetails(string name)
         {
             // Validation nếu cần
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên khu không được để trống");
