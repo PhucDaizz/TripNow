@@ -4,7 +4,9 @@ using HotelCatalogService.API.ExceptionHandling;
 using HotelCatalogService.API.Extensions;
 using HotelCatalogService.API.StartUp;
 using HotelCatalogService.Application;
+using HotelCatalogService.Application.Contracts;
 using HotelCatalogService.Infrastructure;
+using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
@@ -52,6 +54,13 @@ namespace HotelCatalogService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHttpClient<IStaffService, StaffService>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:7001"); 
+            });
+
+
             var app = builder.Build();
 
             app.UseExceptionHandler();

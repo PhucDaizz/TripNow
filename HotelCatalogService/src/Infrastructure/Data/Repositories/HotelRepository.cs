@@ -1,6 +1,6 @@
-﻿using HotelCatalogService.Application.DTOs.Hotel;
-using HotelCatalogService.Domain.Common.Models;
+﻿using HotelCatalogService.Domain.Common.Models;
 using HotelCatalogService.Domain.Dto.Hotel;
+using HotelCatalogService.Domain.Dto.Room;
 using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Repositories;
@@ -146,7 +146,7 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
         }
 
-        public async Task<Hotel> GetHotelWithRoomTypesAndImagesAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        public async Task<Hotel?> GetHotelWithRoomTypesAndImagesAsync(Guid hotelId, CancellationToken cancellationToken = default)
         {
             return await _context.Hotel
                 .Include(x => x.RoomTypes)
@@ -154,12 +154,61 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(x => x.Id == hotelId, cancellationToken);
         }
 
-        public async Task<Hotel> GetHotelWithBlocksAndFloorsAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        public async Task<Hotel?> GetHotelWithBlocksAndFloorsAsync(Guid hotelId, CancellationToken cancellationToken = default)
         {
             return await _context.Hotel
                 .Include(h => h.Blocks)
                     .ThenInclude(b => b.Floors)
                 .FirstOrDefaultAsync(h => h.Id == hotelId, cancellationToken);
+        }
+
+        public async Task<Hotel?> GetHotelForRoomSetupAsync(Guid hotelId, Guid blockId, Guid floorId, CancellationToken token = default)
+        {
+            return await _context.Hotel
+                .Include(h => h.Blocks.Where(b => b.Id == blockId))
+                    .ThenInclude(b => b.Floors.Where(f => f.Id == floorId))
+                        .ThenInclude(f => f.Rooms)
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+        }
+
+        public async Task<List<DirtyRoomDto>> GetDirtyRoomsAsync(Guid hotelId, Guid? blockId, Guid? floorId, CancellationToken token)
+        {
+            var query = _context.Hotel
+                .Where(h => h.Id == hotelId)
+                .SelectMany(h => h.Blocks) 
+                .SelectMany(b => b.Floors, (block, floor) => new { block, floor })
+                .SelectMany(x => x.floor.Rooms, (x, room) => new { x.block, x.floor, room }) 
+                .Where(x => x.room.Status == RoomStatus.Dirty);
+
+            if (blockId.HasValue)
+            {
+                query = query.Where(x => x.block.Id == blockId.Value);
+            }
+
+            if (floorId.HasValue)
+            {
+                query = query.Where(x => x.floor.Id == floorId.Value);
+            }
+
+            return await query.Select(x => new DirtyRoomDto
+            {   
+                RoomId = x.room.Id,
+                RoomName = x.room.RoomName,
+                FloorId = x.floor.Id,
+                FloorName = $"Tầng {x.floor.FloorNumber}",
+                BlockId = x.block.Id,
+                BlockName = x.block.Name,
+                Status = x.room.Status.ToString()
+            }).ToListAsync(token);
+        }
+
+        public async Task<Hotel?> GetHotelWithSpecificRoomAsync(Guid hotelId, Guid roomId, CancellationToken token = default)
+        {
+            return await _context.Hotel
+                .Include(h => h.Blocks.Where(b => b.Floors.Any(f => f.Rooms.Any(r => r.Id == roomId))))
+                    .ThenInclude(b => b.Floors.Where(f => f.Rooms.Any(r => r.Id == roomId)))
+                        .ThenInclude(f => f.Rooms.Where(r => r.Id == roomId))
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
         }
     }
 }

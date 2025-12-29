@@ -1,4 +1,5 @@
 ﻿using HotelCatalogService.Domain.Common;
+using HotelCatalogService.Domain.Enum;
 
 namespace HotelCatalogService.Domain.Entities
 {
@@ -39,6 +40,11 @@ namespace HotelCatalogService.Domain.Entities
             var room = _rooms.FirstOrDefault(r => r.Id == roomId);
             if (room == null)
                 throw new InvalidOperationException($"Phòng với Id {roomId} không tồn tại ở tầng {FloorNumber}");
+
+            if(room.Status == RoomStatus.Occupied)
+            {
+                throw new InvalidOperationException($"Không thể xóa phòng {room.RoomName} vì đang có khách thuê.");
+            }
 
             _rooms.Remove(room);
         }

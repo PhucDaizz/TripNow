@@ -4,6 +4,7 @@ using Application.DTOs.User;
 using Application.Features.StaffProfile.Commands.CreateStaffProfile;
 using Application.Features.StaffProfile.Commands.DeleteStaffProfile;
 using Application.Features.StaffProfile.Commands.UpdateStaffProfile;
+using Application.Features.StaffProfile.Queries.GetStaffProfile;
 using Application.Features.User.Commands.ConfirmEmail;
 using Application.Features.User.Commands.ForgotPassword;
 using Application.Features.User.Commands.Login;
@@ -16,7 +17,6 @@ using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
 using Application.Features.User.Queries.GetUsersWithPagination;
 using Domain.Common;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -419,6 +419,22 @@ namespace API.Controllers
                 return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
 
             return BadRequest(ApiResponse<StaffProfileDto>.ErrorResponse(result.Error.Message));
+        }
+
+        [HttpGet("staff-profile")]
+        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner},{AppRoles.Housekeeping},{AppRoles.Receptionist}")]
+        public async Task<IActionResult> GetStaffProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _mediator.Send(new GetStaffProfileQuery { UserId = userId });
+
+            if (result.IsFailure)
+            {
+                return NotFound(ApiResponse<string>.ErrorResponse("Employee information not found."));
+            }
+
+            return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
         }
 
     }
