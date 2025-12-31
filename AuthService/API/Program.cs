@@ -10,6 +10,7 @@ using Infrastructure.BackgroundJobs.Consumer.User;
 using Infrastructure.Persistence.SeedData;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
 
@@ -19,7 +20,11 @@ namespace API
     {
         public static async Task Main(string[] args)
         {
-            Env.Load($"../Config/.env");
+            var envPath = Path.Combine(Directory.GetCurrentDirectory(), "../Config/.env");
+            if (File.Exists(envPath))
+            {
+                Env.Load(envPath);
+            }
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +81,12 @@ namespace API
                 var services = scope.ServiceProvider;
                 try
                 {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        await context.Database.MigrateAsync();
+                    }
+
                     var initializer = services.GetRequiredService<IDbInitializer>();
                     await initializer.SeedAsync(); 
                 }

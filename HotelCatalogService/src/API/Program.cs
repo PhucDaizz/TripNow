@@ -9,6 +9,7 @@ using HotelCatalogService.Infrastructure;
 using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
 
@@ -18,7 +19,11 @@ namespace HotelCatalogService.API
     {
         public static void Main(string[] args)
         {
-            Env.Load($"../Config/.env");
+            var envPath = Path.Combine(Directory.GetCurrentDirectory(), "../Config/.env");
+            if (File.Exists(envPath))
+            {
+                Env.Load(envPath);
+            }
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +80,25 @@ namespace HotelCatalogService.API
 
 
             app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        context.Database.Migrate();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error or handle exception
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
+                }
+            }
 
             app.Run();
         }

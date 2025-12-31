@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tripup_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: phucdai011
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - tripup-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: tripup_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ADMIN
+      RABBITMQ_DEFAULT_PASS: ADMIN
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - tripup-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth_service:
+    build:
+      context: ./AuthService
+      dockerfile: Dockerfile
+    container_name: tripup_auth_service
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7001:8080"
+    env_file:
+      - ./AuthService/Config/.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Overrides for Docker Network
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=Auth.TravelNow.Service;user=root;password=phucdai011;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=ADMIN
+      - RabbitMQ__Password=ADMIN
+    networks:
+      - tripup-network
+
+  hotel_service:
+    build:
+      context: ./HotelCatalogService
+      dockerfile: Dockerfile
+    container_name: tripup_hotel_service
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7002:8080"
+    env_file:
+      - ./HotelCatalogService/src/Config/.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Overrides for Docker Network
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=HotelCatalog.TravelNow.Service;user=root;password=phucdai011;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=ADMIN
+      - RabbitMQ__Password=ADMIN
+    networks:
+      - tripup-network
+
+networks:
+  tripup-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
