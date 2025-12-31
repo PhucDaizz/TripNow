@@ -210,5 +210,24 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                         .ThenInclude(f => f.Rooms.Where(r => r.Id == roomId))
                 .FirstOrDefaultAsync(h => h.Id == hotelId, token);
         }
+
+        public async Task<Hotel?> GetHotelWithRoomTypePricesAsync(Guid hotelId, Guid roomTypeId, CancellationToken token)
+        {
+            return await _context.Hotel
+                .Include(h => h.RoomTypes.Where(rt => rt.Id == roomTypeId))
+                    .ThenInclude(rt => rt.Prices) 
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+        }
+
+        public async Task<Hotel?> GetHotelCatalogAsync(Guid hotelId, DateTime checkInDate, CancellationToken token)
+        {
+            return await _context.Hotel
+                .Include(h => h.RoomTypes)
+                    .ThenInclude(rt => rt.Images) 
+                .Include(h => h.RoomTypes)
+                    .ThenInclude(rt => rt.Prices
+                        .Where(p => p.Date.Date == checkInDate.Date)) 
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+        }
     }
 }

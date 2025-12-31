@@ -1,5 +1,7 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Application.DTOs.RoomPrice;
 using HotelCatalogService.Application.DTOs.RoomType;
+using HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomTypeCalendar;
 using HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomType;
 using HotelCatalogService.Application.Features.RoomType.Commands.DeleteRoomType;
 using HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomType;
@@ -25,14 +27,56 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Lấy danh sách các loại phòng của khách sạn, có thể lọc theo ngày check-in.
+        /// </summary>
+        /// <param name="hotelId">ID của khách sạn.</param>
+        /// <param name="checkInDate">Ngày check-in (tùy chọn).</param>
+        /// <returns>Danh sách các loại phòng.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetRoomTypes(Guid hotelId)
+        public async Task<IActionResult> GetRoomTypes(Guid hotelId, [FromQuery] DateTime? checkInDate)
         {
-            var result = await _mediator.Send(new GetRoomTypesByHotelQuery { HotelId = hotelId });
-            return result.IsSuccess ? Ok(ApiResponse<List<RoomTypeDto>>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse("", new List<string> { result.Error.Message }));
+            var result = await _mediator.Send(new GetRoomTypesByHotelQuery
+            {
+                HotelId = hotelId,
+                CheckInDate = checkInDate
+            });
+            return result.IsSuccess
+                ? Ok(ApiResponse<List<RoomTypeDto>>.SuccessResponse(result.Value))
+                : BadRequest(ApiResponse<object>.ErrorResponse("", new List<string> { result.Error.Message }));
+        }
+
+        /// <summary>
+        /// Xem lịch giá của một loại phòng trong tháng cụ thể.
+        /// </summary>
+        [HttpGet("calendar")]
+        public async Task<IActionResult> GetPriceCalendar(Guid hotelId, Guid roomTypeId, [FromQuery] int month, [FromQuery] int year)
+        {
+            if (month == 0 || year == 0)
+            {
+                month = DateTime.Today.Month;
+                year = DateTime.Today.Year;
+            }
+
+            var query = new GetRoomTypeCalendarQuery
+            {
+                HotelId = hotelId,
+                RoomTypeId = roomTypeId,
+                Month = month,
+                Year = year
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.IsSuccess
+                ? Ok(ApiResponse<List<CalendarDayDto>>.SuccessResponse(result.Value))
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
 
+        /// <summary>
+        /// Tạo mới một loại phòng cho khách sạn (Yêu cầu quyền chủ khách sạn).
+        /// </summary>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create(Guid hotelId, [FromBody] CreateRoomTypeRequest request)
@@ -56,6 +100,9 @@ namespace HotelCatalogService.API.Controllers
         }
 
 
+        /// <summary>
+        /// Cập nhật thông tin của một loại phòng (Yêu cầu quyền chủ khách sạn).
+        /// </summary>
         [HttpPut("{roomTypeId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Update(Guid hotelId, Guid roomTypeId, [FromBody] UpdateRoomTypeRequest request)
@@ -76,6 +123,9 @@ namespace HotelCatalogService.API.Controllers
         }
 
 
+        /// <summary>
+        /// Xóa một loại phòng khỏi hệ thống (Yêu cầu quyền chủ khách sạn).
+        /// </summary>
         [HttpDelete("{roomTypeId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid roomTypeId)

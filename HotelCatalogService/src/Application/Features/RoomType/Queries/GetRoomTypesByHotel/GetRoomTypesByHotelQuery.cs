@@ -7,5 +7,6 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
     public class GetRoomTypesByHotelQuery: IRequest<Result<List<RoomTypeDto>>>
     {
         public Guid HotelId { get; init; }
+        public DateTime? CheckInDate { get; set; }
     }
 }

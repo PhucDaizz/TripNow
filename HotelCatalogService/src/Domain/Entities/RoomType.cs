@@ -36,10 +36,18 @@ namespace HotelCatalogService.Domain.Entities
             var existingPrice = _prices.FirstOrDefault(p => p.Date == date.Date);
             if (existingPrice != null)
             {
-                // Nếu đã có giá ngày đó thì update (Cần thêm hàm Update trong RoomPrice hoặc thay thế object mới)
-                _prices.Remove(existingPrice);
+                existingPrice.UpdatePrice(price);
             }
             _prices.Add(new RoomPrice(date, price));
+        }
+
+        public void RemovePriceForDate(DateTime date)
+        {
+            var existingPrice = _prices.FirstOrDefault(p => p.Date.Date == date.Date);
+            if (existingPrice != null)
+            {
+                _prices.Remove(existingPrice);
+            }
         }
 
         public decimal GetPriceForDate(DateTime date)
@@ -85,6 +93,25 @@ namespace HotelCatalogService.Domain.Entities
             BasePrice = basePrice;
             Capacity = capacity;
             SizeM2 = sizeM2;
+        }
+
+        public void SetBulkPrices(DateTime fromDate, DateTime toDate, decimal price, List<DayOfWeek>? specificDays = null)
+        {
+            if (fromDate > toDate)
+                throw new ArgumentException("The start date cannot be later than the end date.");
+
+            if (price < 0)
+                throw new ArgumentException("The price must not be negative.");
+
+            for (var date = fromDate.Date; date <= toDate.Date; date = date.AddDays(1))
+            {
+                if (specificDays != null && specificDays.Any() && !specificDays.Contains(date.DayOfWeek))
+                {
+                    continue;
+                }
+
+                SetSpecialPrice(date, price);
+            }
         }
     }
 }

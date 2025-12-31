@@ -14,5 +14,11 @@ namespace HotelCatalogService.Domain.Entities
             Date = date.Date; 
             Price = price;
         }
+
+        internal void UpdatePrice(decimal newPrice)
+        {
+            if (newPrice < 0) throw new ArgumentException("Price cannot be negative");
+            Price = newPrice;
+        }
     }
 }

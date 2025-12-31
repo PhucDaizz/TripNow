@@ -16,18 +16,42 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
 
         public async Task<Result<List<RoomTypeDto>>> Handle(GetRoomTypesByHotelQuery request, CancellationToken cancellationToken)
         {
-            var hotel = await _unitOfWork.Hotel.GetHotelWithRoomTypesAndImagesAsync(request.HotelId, cancellationToken);
+            var targetDate = request.CheckInDate ?? DateTime.Today;
+
+            var hotel = await _unitOfWork.Hotel.GetHotelCatalogAsync(request.HotelId, targetDate, cancellationToken);
 
             if (hotel == null) return Result.Failure<List<RoomTypeDto>>(new Error("Hotel.NotFound", "Not found"));
 
-            var dtos = hotel.RoomTypes.Select(rt => new RoomTypeDto
+            var dtos = hotel.RoomTypes.Select(rt =>
             {
-                Id = rt.Id,
-                Name = rt.Name,
-                BasePrice = rt.BasePrice,
-                Capacity = rt.Capacity,
-                SizeM2 = rt.SizeM2,
-                MainImage = rt.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl
+                var specialPriceObj = rt.Prices.FirstOrDefault();
+
+                decimal finalPrice;
+                bool isDiscounted = false;
+
+                if (specialPriceObj != null)
+                {
+                    finalPrice = specialPriceObj.Price;
+                    isDiscounted = finalPrice != rt.BasePrice;
+                }
+                else
+                {
+                    finalPrice = rt.BasePrice;
+                }
+
+                return new RoomTypeDto
+                {
+                    Id = rt.Id,
+                    Name = rt.Name,
+
+                    BasePrice = rt.BasePrice,      
+                    CurrentPrice = finalPrice,     
+                    IsDiscounted = isDiscounted,   
+
+                    Capacity = rt.Capacity,
+                    SizeM2 = rt.SizeM2,
+                    MainImage = rt.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl
+                };
             }).ToList();
 
             return Result.Success(dtos);
