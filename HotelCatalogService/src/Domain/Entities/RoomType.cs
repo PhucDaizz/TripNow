@@ -37,8 +37,9 @@ namespace HotelCatalogService.Domain.Entities
             if (existingPrice != null)
             {
                 existingPrice.UpdatePrice(price);
+                return;
             }
-            _prices.Add(new RoomPrice(date, price));
+            _prices.Add(new RoomPrice(this.Id, date, price));
         }
 
         public void RemovePriceForDate(DateTime date)

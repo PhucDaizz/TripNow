@@ -19,14 +19,14 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.HasMany(rt => rt.Prices)
                    .WithOne()
-                   .HasForeignKey("RoomTypeId") 
+                   .HasForeignKey(x => x.RoomTypeId) 
                    .OnDelete(DeleteBehavior.Cascade);
             builder.Navigation(h => h.Prices).HasField("_prices");
 
 
             builder.HasMany(rt => rt.Images)
                    .WithOne()
-                   .HasForeignKey("RoomTypeId")
+                   .HasForeignKey(x => x.RoomTypeId)
                    .OnDelete(DeleteBehavior.Cascade);
             builder.Navigation(h => h.Images).HasField("_images");
 

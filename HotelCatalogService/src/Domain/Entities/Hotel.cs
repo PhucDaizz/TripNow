@@ -206,7 +206,7 @@ namespace HotelCatalogService.Domain.Entities
             if (_promotions.Any(p => p.Code == code && p.IsValid()))
                 throw new InvalidOperationException("Mã giảm giá này đang tồn tại");
 
-            _promotions.Add(new Promotion(code, type, value, start, end, qty));
+            _promotions.Add(new Promotion(this.Id ,code, type, value, start, end, qty));
         }
 
         public void SetRoomPrice(Guid roomTypeId, DateTime date, decimal price)

@@ -16,7 +16,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.HasMany(f => f.Rooms)
                    .WithOne()
-                   .HasForeignKey("FloorId")
+                   .HasForeignKey(x => x.FloorId)
                    .OnDelete(DeleteBehavior.Cascade);
             builder.Navigation(h => h.Rooms).HasField("_rooms");
         }
