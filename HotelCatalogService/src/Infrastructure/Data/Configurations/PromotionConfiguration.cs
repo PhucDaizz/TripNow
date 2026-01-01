@@ -18,7 +18,8 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.Property(p => p.DiscountValue).HasColumnType("decimal(18,2)");
             builder.Property(p => p.StartDate).IsRequired();
             builder.Property(p => p.EndDate).IsRequired();
-            builder.Property(p => p.Quantity).IsRequired();
+            builder.Property(p => p.InitialQuantity).IsRequired();
+            builder.Property(p => p.RemainingQuantity).IsRequired();
         }
     }
 }

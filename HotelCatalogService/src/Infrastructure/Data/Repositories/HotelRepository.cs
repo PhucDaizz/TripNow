@@ -229,5 +229,12 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                         .Where(p => p.Date.Date == checkInDate.Date)) 
                 .FirstOrDefaultAsync(h => h.Id == hotelId, token);
         }
+
+        public async Task<Hotel?> GetHotelWithPromotionsAsync(Guid hotelId, CancellationToken token)
+        {
+            return await _context.Hotel
+                .Include(h => h.Promotions)
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+        }
     }
 }

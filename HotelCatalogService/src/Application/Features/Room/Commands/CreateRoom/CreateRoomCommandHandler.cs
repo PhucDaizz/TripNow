@@ -1,6 +1,5 @@
 ﻿using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
-using HotelCatalogService.Domain.Repositories;
 using MediatR;
 
 namespace HotelCatalogService.Application.Features.Room.Commands.CreateRoom
@@ -29,7 +28,6 @@ namespace HotelCatalogService.Application.Features.Room.Commands.CreateRoom
 
             try
             {
-                // Gọi hàm PUBLIC của Floor
                 floor.AddRoom(request.Name, request.RoomTypeId);
 
                 await _unitOfWork.Hotel.UpdateAsync(hotel, token);

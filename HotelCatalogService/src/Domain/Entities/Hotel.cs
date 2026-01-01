@@ -114,31 +114,8 @@ namespace HotelCatalogService.Domain.Entities
             _blocks.Remove(block);
         }
 
-        //public void AddPhysicalRoom(string blockName, int floorNumber, string roomName, Guid roomTypeId)
-        //{
-        //    if (!_roomTypes.Any(rt => rt.Id == roomTypeId))
-        //        throw new ArgumentException("Loại phòng không hợp lệ");
-
-        //    var block = _blocks.FirstOrDefault(b => b.Name == blockName);
-        //    if (block == null)
-        //    {
-        //        block = new Block(Id ,blockName);
-        //        _blocks.Add(block);
-        //    }
-
-        //    // Tìm hoặc tạo Floor trong Block
-        //    var floor = block.Floors.FirstOrDefault(f => f.FloorNumber == floorNumber);
-        //    if (floor == null)
-        //    {
-        //       floor = block.AddFloor(floorNumber); 
-        //    }
-
-        //    floor.AddRoom(roomName, roomTypeId); 
-        //}
-
         public void UpdateRoomStatus(Guid roomId, RoomStatus newStatus)
         {
-            // Tìm phòng trong tất cả các block/floor (Đây là sức mạnh của Aggregate Root)
             var room = _blocks.SelectMany(b => b.Floors).SelectMany(f => f.Rooms)
                               .FirstOrDefault(r => r.Id == roomId);
 
@@ -201,14 +178,6 @@ namespace HotelCatalogService.Domain.Entities
             floor.RemoveRoom(roomId); 
         }
 
-        public void CreatePromotion(string code, byte type, decimal value, DateTime start, DateTime end, int qty)
-        {
-            if (_promotions.Any(p => p.Code == code && p.IsValid()))
-                throw new InvalidOperationException("Mã giảm giá này đang tồn tại");
-
-            _promotions.Add(new Promotion(this.Id ,code, type, value, start, end, qty));
-        }
-
         public void SetRoomPrice(Guid roomTypeId, DateTime date, decimal price)
         {
             var roomType = _roomTypes.FirstOrDefault(rt => rt.Id == roomTypeId);
@@ -216,7 +185,6 @@ namespace HotelCatalogService.Domain.Entities
 
             roomType.SetSpecialPrice(date, price);
         }
-
 
         public void UpdateInfo(string name, string description, Address address, Coordinates location)
         {
@@ -300,6 +268,48 @@ namespace HotelCatalogService.Domain.Entities
             {
                 _images.First().SetThumbnail(true);
             }
+        }
+
+        public void AddPromotion(string code, DiscountType type, decimal value, DateTime start, DateTime end, int qty)
+        {
+            if (_promotions.Any(p => p.Code == code.ToUpper()))
+                throw new InvalidOperationException($"Promotion code '{code}' already exists.");
+
+            _promotions.Add(new Promotion(this.Id, code, type, value, start, end, qty));
+        }
+
+        public void UpdatePromotion(Guid promotionId, string code, DiscountType type, decimal value, DateTime start, DateTime end, int newTotalQty)
+        {
+            var promo = _promotions.FirstOrDefault(p => p.Id == promotionId);
+            if (promo == null) throw new KeyNotFoundException("Promotion not found");
+
+            if (_promotions.Any(p => p.Id != promotionId && p.Code == code.ToUpper()))
+                throw new InvalidOperationException($"Promotion code '{code}' already exists.");
+
+            promo.UpdateDetails(code, type, value, start, end, newTotalQty);
+        }
+
+        public void ChangePromotionStatus(Guid promoId, bool isActive)
+        {
+            var promo = _promotions.FirstOrDefault(p => p.Id == promoId);
+            if (promo == null) throw new KeyNotFoundException("Promotion not found");
+
+            if (isActive) promo.Activate();
+            else promo.Deactivate();
+        }
+
+        public void DeletePromotion(Guid promoId)
+        {
+
+            var promo = _promotions.FirstOrDefault(p => p.Id == promoId);
+            if (promo == null) throw new KeyNotFoundException("Promotion not found");
+
+            if (promo.IsUsed)
+            {
+                throw new InvalidOperationException("It is not possible to delete an encrypted user. Please select 'Deactivate' instead.");
+            }
+
+            _promotions.Remove(promo);
         }
     }
 }
