@@ -17,6 +17,7 @@ namespace HotelCatalogService.Application.Common.Interfaces
         public DbSet<RoomType> RoomType { get; set; }
         public DbSet<RoomTypeImage> RoomTypeImage { get; set; }
         public DbSet<HotelImage> HotelImage { get; set; }
+        public DbSet<PromotionUsage> PromotionUsage { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

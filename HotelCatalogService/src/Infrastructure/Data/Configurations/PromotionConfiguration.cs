@@ -20,6 +20,15 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.Property(p => p.EndDate).IsRequired();
             builder.Property(p => p.InitialQuantity).IsRequired();
             builder.Property(p => p.RemainingQuantity).IsRequired();
+            builder.Property(p => p.MinBookingAmount).HasColumnType("decimal(18,2)").IsRequired();
+
+            builder.HasMany(x => x.PromotionUsages)
+                .WithOne()
+                .HasForeignKey("PromotionId")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Navigation(p => p.PromotionUsages)
+                .HasField("_promotionUsages");
         }
     }
 }

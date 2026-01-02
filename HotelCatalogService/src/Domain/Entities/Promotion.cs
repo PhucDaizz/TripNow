@@ -13,8 +13,14 @@ namespace HotelCatalogService.Domain.Entities
         public DateTime EndDate { get; private set; }
         public int InitialQuantity { get; private set; }   
         public int RemainingQuantity { get; private set; }
+        public decimal MinBookingAmount { get; private set; }
 
         public bool IsActive { get; private set; }
+
+
+        // navigational properties
+        private readonly List<PromotionUsage> _promotionUsages = new();
+        public IReadOnlyCollection<PromotionUsage> PromotionUsages => _promotionUsages.AsReadOnly();
 
         public bool IsUsed => InitialQuantity > RemainingQuantity;
 
@@ -30,13 +36,17 @@ namespace HotelCatalogService.Domain.Entities
             }
         }
 
-        private Promotion() { }
+        private Promotion() 
+        { 
+            _promotionUsages = new List<PromotionUsage>();
+        }
 
-        internal Promotion(Guid hotelId, string code, DiscountType discountType, decimal discountValue, DateTime start, DateTime end, int qty) 
+        internal Promotion(Guid hotelId, string code, DiscountType discountType, decimal discountValue, DateTime start, DateTime end, int qty, decimal minBookingAmount) : this()
         {
             if (end < start) throw new ArgumentException("End date must be after start date.");
 
             if (discountType == DiscountType.Percent && discountValue > 100) throw new ArgumentException("Percentage discount cannot exceed 100%.");
+            if (minBookingAmount < 0) throw new ArgumentException("The minimum value must not be negative.");
 
             HotelId = hotelId;
             Code = code.ToUpper();
@@ -48,6 +58,7 @@ namespace HotelCatalogService.Domain.Entities
             InitialQuantity = qty;
             RemainingQuantity = qty;
             IsActive = true;
+            MinBookingAmount = minBookingAmount;
         }
 
         public void Deactivate()
@@ -68,9 +79,10 @@ namespace HotelCatalogService.Domain.Entities
         }
 
 
-        internal void UpdateDetails(string code, DiscountType type, decimal value, DateTime start, DateTime end, int newTotalQty)
+        internal void UpdateDetails(string code, DiscountType type, decimal value, DateTime start, DateTime end, int newTotalQty, decimal minBookingAmount)
         {
             if (end < start) throw new ArgumentException("End date must be after start date.");
+            if (minBookingAmount < 0) throw new ArgumentException("The minimum value must not be negative.");
 
             if (IsUsed)
             {
@@ -86,6 +98,7 @@ namespace HotelCatalogService.Domain.Entities
                 ValidateDiscount(type, value);
                 DiscountType = type;
                 DiscountValue = value;
+                MinBookingAmount = minBookingAmount;
             }
 
             int quantityDifference = newTotalQty - InitialQuantity;
@@ -104,23 +117,34 @@ namespace HotelCatalogService.Domain.Entities
             EndDate = end;
         }
 
-        public void UsePromotion()
+        public void UsePromotion(Guid bookingId, Guid hotelId, Guid userId, decimal bookingAmount)
         {
-            if (!IsUsable) 
-            {
-                if (!IsActive) throw new InvalidOperationException("Promotion is deactivated.");
-                if (RemainingQuantity <= 0) throw new InvalidOperationException("Promotion has no remaining uses.");
-                throw new InvalidOperationException("Promotion has not started yet or has expired.");
-            }
+            if (!IsUsable)
+                throw new InvalidOperationException("Promotion is not usable");
+
+            if (bookingAmount < MinBookingAmount)
+                throw new InvalidOperationException("Please add more items to use the promotion.");
+
+            if (_promotionUsages.Any(x => x.BookingId == bookingId))
+                throw new InvalidOperationException("Promotion already used for this booking");
 
             RemainingQuantity--;
+
+            _promotionUsages.Add(new PromotionUsage(Id, bookingId, userId));
         }
 
-        public void RestorePromotion()
+        public void RestorePromotion(Guid bookingId)
         {
-            if (RemainingQuantity < InitialQuantity)
+            var usage = _promotionUsages.FirstOrDefault(u => u.BookingId == bookingId);
+
+            if (usage != null)
             {
-                RemainingQuantity++;
+                _promotionUsages.Remove(usage); 
+
+                if (RemainingQuantity < InitialQuantity)
+                {
+                    RemainingQuantity++;
+                }
             }
         }
 

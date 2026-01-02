@@ -8,6 +8,7 @@
         public decimal Value { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public Decimal MinBookingAmount { get; set; }
 
         public int InitialQuantity { get; set; }
         public int RemainingQuantity { get; set; }

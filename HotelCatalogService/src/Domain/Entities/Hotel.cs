@@ -270,15 +270,15 @@ namespace HotelCatalogService.Domain.Entities
             }
         }
 
-        public void AddPromotion(string code, DiscountType type, decimal value, DateTime start, DateTime end, int qty)
+        public void AddPromotion(string code, DiscountType type, decimal value, DateTime start, DateTime end, int qty, decimal minBookingAmount)
         {
             if (_promotions.Any(p => p.Code == code.ToUpper()))
                 throw new InvalidOperationException($"Promotion code '{code}' already exists.");
 
-            _promotions.Add(new Promotion(this.Id, code, type, value, start, end, qty));
+            _promotions.Add(new Promotion(this.Id, code, type, value, start, end, qty, minBookingAmount));
         }
 
-        public void UpdatePromotion(Guid promotionId, string code, DiscountType type, decimal value, DateTime start, DateTime end, int newTotalQty)
+        public void UpdatePromotion(Guid promotionId, string code, DiscountType type, decimal value, DateTime start, DateTime end, int newTotalQty, decimal minBookingAmount)
         {
             var promo = _promotions.FirstOrDefault(p => p.Id == promotionId);
             if (promo == null) throw new KeyNotFoundException("Promotion not found");
@@ -286,7 +286,7 @@ namespace HotelCatalogService.Domain.Entities
             if (_promotions.Any(p => p.Id != promotionId && p.Code == code.ToUpper()))
                 throw new InvalidOperationException($"Promotion code '{code}' already exists.");
 
-            promo.UpdateDetails(code, type, value, start, end, newTotalQty);
+            promo.UpdateDetails(code, type, value, start, end, newTotalQty, minBookingAmount);
         }
 
         public void ChangePromotionStatus(Guid promoId, bool isActive)
@@ -310,6 +310,49 @@ namespace HotelCatalogService.Domain.Entities
             }
 
             _promotions.Remove(promo);
+        }
+
+        public decimal ApplyPromotion(string code, decimal orderAmount, Guid bookingId, Guid hotelId, Guid userId)
+        {
+            var promo = _promotions.FirstOrDefault(p => p.Code == code.ToUpper());
+
+            if (promo == null) throw new InvalidOperationException("Discount codes do not exist for this hotel.");
+
+            if (orderAmount < promo.MinBookingAmount)
+            {
+                throw new InvalidOperationException($"Orders must be {promo.MinBookingAmount:N0}đ or higher to use this code.");
+            }
+
+            try
+            {
+                promo.UsePromotion(bookingId, hotelId, userId, orderAmount); 
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"The code cannot be applied: {ex.Message}");
+            }
+
+            decimal discountAmount = 0;
+            if (promo.DiscountType == DiscountType.Amount)
+            {
+                discountAmount = promo.DiscountValue;
+            }
+            else
+            {
+                discountAmount = orderAmount * (promo.DiscountValue / 100);
+            }
+
+            return discountAmount > orderAmount ? orderAmount : discountAmount;
+        }
+
+        public void RefundPromotion(Guid bookingId)
+        {
+            var targetPromo = _promotions.FirstOrDefault(p => p.PromotionUsages.Any(u => u.BookingId == bookingId));
+
+            if (targetPromo != null)
+            {
+                targetPromo.RestorePromotion(bookingId);
+            }
         }
     }
 }

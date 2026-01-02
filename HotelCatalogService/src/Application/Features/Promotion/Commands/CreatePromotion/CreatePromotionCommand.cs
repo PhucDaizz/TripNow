@@ -14,5 +14,6 @@ namespace HotelCatalogService.Application.Features.Promotion.Commands.CreateProm
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int Quantity { get; set; }
+        public decimal MinBookingAmount { get; set; } = 0;
     }
 }

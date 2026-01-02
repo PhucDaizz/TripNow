@@ -45,7 +45,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.GetAvailabl
                         : $"Giảm {p.DiscountValue:N0}đ",
 
                     EndDate = p.EndDate,
-
+                    MinBookingAmount = p.MinBookingAmount,
                     RemainingCount = p.RemainingQuantity <= 20 ? p.RemainingQuantity : null,
 
                     TagLabel = label

@@ -6,6 +6,8 @@ using HotelCatalogService.API.StartUp;
 using HotelCatalogService.Application;
 using HotelCatalogService.Application.Contracts;
 using HotelCatalogService.Infrastructure;
+using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Booking;
+using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Room;
 using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
@@ -59,6 +61,9 @@ namespace HotelCatalogService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHostedService<BookingCancelledConsumer>();
+            builder.Services.AddHostedService<BookingEventsConsumer>();
 
             builder.Services.AddHttpClient<IStaffService, StaffService>(client =>
             {

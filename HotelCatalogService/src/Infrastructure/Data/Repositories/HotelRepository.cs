@@ -236,5 +236,38 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .Include(h => h.Promotions)
                 .FirstOrDefaultAsync(h => h.Id == hotelId, token);
         }
+
+        public async Task<Hotel?> GetHotelWithSpecificPromotionAsync(Guid hotelId, string code, CancellationToken token)
+        {
+            var normalizedCode = code.ToUpper();
+
+            return await _context.Hotel
+                .Include(h => h.Promotions.Where(p => p.Code == normalizedCode))
+                .ThenInclude(p => p.PromotionUsages) 
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+        }
+
+        public async Task<bool> IsPromotionUsedByUserAsync(Guid hotelId, string code, Guid userId, CancellationToken token)
+        {
+            var normalizedCode = code.ToUpper();
+
+            return await _context.Promotion
+                .AsNoTracking()
+                .AnyAsync(p =>
+                    p.HotelId == hotelId &&
+                    p.Code == normalizedCode &&
+                    p.PromotionUsages.Any(u => u.UserId == userId),
+                    token);
+        }
+
+        public async Task<Hotel?> GetHotelByBookingUsageAsync(Guid bookingId, CancellationToken token)
+        {
+            return await _context.Hotel
+                .Include(h => h.Promotions)
+                    .ThenInclude(p => p.PromotionUsages.Where(u => u.BookingId == bookingId))
+                .Where(h => h.Promotions.Any(p =>
+                                p.PromotionUsages.Any(u => u.BookingId == bookingId)))
+                .FirstOrDefaultAsync(token);
+        }
     }
 }

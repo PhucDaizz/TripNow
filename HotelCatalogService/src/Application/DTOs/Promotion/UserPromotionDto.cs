@@ -6,6 +6,7 @@
         public string Code { get; set; }
         public string DiscountInfo { get; set; } 
         public DateTime EndDate { get; set; }
+        public Decimal MinBookingAmount { get; set; }
 
         public int? RemainingCount { get; set; } 
         public string TagLabel { get; set; }     

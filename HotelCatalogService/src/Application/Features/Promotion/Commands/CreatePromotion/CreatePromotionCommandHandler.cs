@@ -29,7 +29,8 @@ namespace HotelCatalogService.Application.Features.Promotion.Commands.CreateProm
                     request.DiscountValue,
                     request.StartDate,
                     request.EndDate,
-                    request.Quantity
+                    request.Quantity,
+                    request.MinBookingAmount
                 );
 
                 await _unitOfWork.Hotel.UpdateAsync(hotel, token);

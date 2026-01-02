@@ -54,7 +54,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.GetPromotio
                 InitialQuantity = p.InitialQuantity,
                 RemainingQuantity = p.RemainingQuantity,
                 IsActive = p.IsActive,
-
+                MinBookingAmount = p.MinBookingAmount,
                 Status = !p.IsActive ? "Deactivated" :
                          (now > p.EndDate) ? "Expired" :
                          (p.RemainingQuantity <= 0) ? "Out of Stock" :
