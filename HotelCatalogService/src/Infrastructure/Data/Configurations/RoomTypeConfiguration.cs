@@ -30,6 +30,12 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .OnDelete(DeleteBehavior.Cascade);
             builder.Navigation(h => h.Images).HasField("_images");
 
+            builder.HasMany(rt => rt.Rooms)
+                   .WithOne()
+                   .HasForeignKey(x => x.RoomTypeId)
+                   .OnDelete(DeleteBehavior.Restrict);
+            builder.Navigation(h => h.Rooms).HasField("_rooms");
+
         }
     }
 }

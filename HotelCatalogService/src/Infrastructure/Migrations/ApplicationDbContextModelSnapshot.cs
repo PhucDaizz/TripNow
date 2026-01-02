@@ -539,7 +539,7 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Hotel", b =>
                 {
-                    b.OwnsOne("HotelCatalogService.Domain.ValueObject.Address", "Address", b1 =>
+                    b.OwnsOne("HotelCatalogService.Domain.Entities.Hotel.Address#HotelCatalogService.Domain.ValueObject.Address", "Address", b1 =>
                         {
                             b1.Property<Guid>("HotelId")
                                 .HasColumnType("char(36)");
@@ -564,13 +564,13 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
                             b1.HasKey("HotelId");
 
-                            b1.ToTable("Hotels");
+                            b1.ToTable("Hotels", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("HotelId");
                         });
 
-                    b.OwnsOne("HotelCatalogService.Domain.ValueObject.Coordinates", "Location", b1 =>
+                    b.OwnsOne("HotelCatalogService.Domain.Entities.Hotel.Location#HotelCatalogService.Domain.ValueObject.Coordinates", "Location", b1 =>
                         {
                             b1.Property<Guid>("HotelId")
                                 .HasColumnType("char(36)");
@@ -585,7 +585,7 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
                             b1.HasKey("HotelId");
 
-                            b1.ToTable("Hotels");
+                            b1.ToTable("Hotels", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("HotelId");

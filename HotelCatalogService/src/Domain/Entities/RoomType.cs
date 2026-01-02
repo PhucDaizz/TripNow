@@ -12,8 +12,10 @@ namespace HotelCatalogService.Domain.Entities
 
         private readonly List<RoomPrice> _prices = new();
         private readonly List<RoomTypeImage> _images = new();
+        private readonly List<Room> _rooms = new();
         public IReadOnlyCollection<RoomTypeImage> Images => _images.AsReadOnly();
         public IReadOnlyCollection<RoomPrice> Prices => _prices.AsReadOnly();
+        public IReadOnlyCollection<Room> Rooms => _rooms.AsReadOnly();
 
         private RoomType()
         {

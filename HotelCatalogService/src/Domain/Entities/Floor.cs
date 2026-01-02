@@ -1,5 +1,6 @@
 ﻿using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Enum;
+using HotelCatalogService.Domain.Events.Room;
 
 namespace HotelCatalogService.Domain.Entities
 {
@@ -28,6 +29,8 @@ namespace HotelCatalogService.Domain.Entities
                 throw new InvalidOperationException($"Phòng {roomName} đã tồn tại ở tầng {FloorNumber}");
 
             _rooms.Add(new Room(this.Id, roomName, roomTypeId));
+
+            this.AddDomainEvent(new RoomCreatedEvent(roomTypeId));
         }
 
         public void UpdateDetails(int floorNumber)
