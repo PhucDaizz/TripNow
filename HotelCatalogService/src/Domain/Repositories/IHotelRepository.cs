@@ -30,7 +30,6 @@ namespace HotelCatalogService.Domain.Repositories
             string? searchTerm,
             HotelStatus? status,
             Guid? ownerId,
-            bool? isActive,
             int pageNumber,
             int pageSize,
             CancellationToken cancellationToken = default);

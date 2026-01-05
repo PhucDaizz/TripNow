@@ -16,10 +16,8 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPa
         public decimal? MaxPrice { get; set; }   // Giá cao nhất
 
         public string? SearchTerm { get; set; } // Tìm theo tên, địa chỉ
-        public HotelStatus? Status { get; set; } // Lọc theo trạng thái (Pending, Active, Blocked)
+        public HotelStatus? Status { get; set; } // Lọc theo trạng thái (Pending, Active, Blocked,...)
         public Guid? OwnerId { get; set; }       // Lọc theo chủ sở hữu (Dùng cho trang My Hotels)
-        public bool? IsActive { get; set; }      // Lọc ẩn/hiện
-
         public int? GuestCount { get; set; }     // Đi bao nhiêu người?
         public DateTime? CheckInDate { get; set; } // Ngày nhận phòng
 

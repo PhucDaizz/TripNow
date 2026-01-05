@@ -70,7 +70,7 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
             return await _context.Hotel.AnyAsync(h => h.Id == id, cancellationToken);
         }
 
-        public async Task<PagedResult<HotelDto>> GetByFilterAsync(string? searchTerm, HotelStatus? status, Guid? ownerId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<HotelDto>> GetByFilterAsync(string? searchTerm, HotelStatus? status, Guid? ownerId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             var query = _context.Hotel.AsNoTracking().AsQueryable();
 
@@ -91,11 +91,6 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
             if (ownerId.HasValue)
             {
                 query = query.Where(h => h.OwnerId == ownerId.Value);
-            }
-
-            if (isActive.HasValue)
-            {
-                query = query.Where(h => h.IsActive == isActive.Value);
             }
 
             var totalCount = await query.CountAsync(cancellationToken);

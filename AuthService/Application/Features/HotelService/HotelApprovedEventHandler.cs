@@ -18,12 +18,12 @@ namespace Application.Features.HotelService
 
         public async Task Handle(HotelApproved notification, CancellationToken cancellationToken)
         {
-            var owner = _unitOfWork.Auth.GetUserByIdAsync(notification.OwnerId);
+            var owner = await _unitOfWork.Auth.GetUserByIdAsync(notification.OwnerId);
 
             if (owner is not null)
             {
-                string htmlBody = _emailServices.CreateHotelApprovedEmailBody(owner.Result.FullName, notification.HotelName);
-                var emailSent = await _emailServices.SendEmailAsync(owner.Result.Email, "🎉 Chúc mừng! Khách sạn của bạn đã được phê duyệt", htmlBody, true);
+                string htmlBody = _emailServices.CreateHotelApprovedEmailBody(owner.FullName, notification.HotelName);
+                var emailSent = await _emailServices.SendEmailAsync(owner.Email, "🎉 Chúc mừng! Khách sạn của bạn đã được phê duyệt", htmlBody, true);
             }
         }
     }

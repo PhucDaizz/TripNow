@@ -9,5 +9,6 @@
         string GenerateResetPasswordLink(string email, string token, string clientUrl = null);
         string CreateHotelApprovedEmailBody(string ownerName, string hotelName);
         string CreateHotelRejectedEmailBody(string ownerName, string hotelName, string reason = null);
+        string CreateHotelSuspendedEmailBody(string ownerName, string hotelName, string reason = null);
     }
 }

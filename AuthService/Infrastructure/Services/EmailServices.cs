@@ -213,7 +213,52 @@ namespace Infrastructure.Services
 
         public string CreateHotelRejectedEmailBody(string ownerName, string hotelName, string reason = null)
         {
-            throw new NotImplementedException();
+            return $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+                <h2>Xin chào {ownerName},</h2>
+                <p>Chúng tôi gửi email này để thông báo về kết quả phê duyệt khách sạn <strong>{hotelName}</strong> của bạn trên hệ thống TripUp.</p>
+            
+                <p>Rất tiếc, hồ sơ khách sạn của bạn <strong>chưa đủ điều kiện</strong> để được phê duyệt vào lúc này.</p>
+            
+                <div style='background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                    <strong>Lý do từ chối:</strong><br>
+                    <span style='color: #856404;'>{reason}</span>
+                </div>
+
+                <p>Đừng lo lắng, bạn hoàn toàn có thể cập nhật lại thông tin theo yêu cầu trên và gửi lại hồ sơ để chúng tôi xem xét.</p>
+            
+                <br>
+                <a href='https://tripup.com/dashboard/hotels/edit' style='background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Cập nhật hồ sơ ngay</a>
+                <br><br>
+            
+                <p>Nếu bạn có thắc mắc, vui lòng liên hệ với bộ phận hỗ trợ đối tác.</p>
+                <p>Trân trọng,<br>Đội ngũ TripUp</p>
+            </div>";
+        }
+
+        public string CreateHotelSuspendedEmailBody(string ownerName, string hotelName, string reason)
+        {
+            return $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+                <h2>Xin chào {ownerName},</h2>
+                <p>Đây là thông báo quan trọng liên quan đến khách sạn <strong>{hotelName}</strong> của bạn.</p>
+            
+                <p style='color: #d32f2f;'><strong>Khách sạn của bạn đã bị TẠM KHÓA (SUSPENDED) trên hệ thống TripUp.</strong></p>
+                <p>Trong thời gian này, khách sạn sẽ không hiển thị trên kết quả tìm kiếm và khách hàng không thể thực hiện đặt phòng mới.</p>
+
+                <div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                    <strong>Lý do đình chỉ:</strong><br>
+                    <span style='color: #721c24;'>{reason}</span>
+                </div>
+
+                <p>Để khôi phục hoạt động, vui lòng xem xét và khắc phục vấn đề nêu trên, hoặc liên hệ ngay với chúng tôi để giải quyết khiếu nại.</p>
+            
+                <br>
+                <a href='https://tripup.com/help-center/contact' style='background-color: #d32f2f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Liên hệ hỗ trợ</a>
+                <br><br>
+            
+                <p>Trân trọng,<br>Bộ phận Pháp chế & Kiểm soát chất lượng TripUp</p>
+            </div>";
         }
     }
 }

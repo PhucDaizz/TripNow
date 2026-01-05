@@ -28,6 +28,22 @@ namespace Infrastructure.BackgroundJobs.Consumer.Hotel
                 queueName: "auth-service-hotel-approved", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken) 
             );
+
+            await _consumer.Subscribe<RejectedHotelEvent>(
+                exchange: "hotel-catalog.events", // Khớp với Producer
+                exchangeType: "topic",
+                routingKey: "hotel.rejected",     // Khớp với Producer
+                queueName: "auth-service-hotel-rejected", // Queue riêng cho Auth xử lý reject
+                handler: (msg) => ProcessMessage(msg, stoppingToken)
+            );
+
+            await _consumer.Subscribe<SuspendHotelEvent>(
+                exchange: "hotel-catalog.events", // Khớp với Producer
+                exchangeType: "topic",
+                routingKey: "hotel.suspend",      // Khớp với Producer
+                queueName: "auth-service-hotel-suspend", // Queue riêng cho Auth xử lý suspend
+                handler: (msg) => ProcessMessage(msg, stoppingToken)
+             );
         }
 
         private async Task ProcessMessage<TMessage>(TMessage message, CancellationToken token) where TMessage : class

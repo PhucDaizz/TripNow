@@ -16,8 +16,6 @@ namespace HotelCatalogService.Domain.Entities
         public HotelStatus Status { get; private set; }
         public decimal Rating { get; private set; }
         public Coordinates Location { get; private set; }
-        public bool IsActive { get; private set; }
-
 
         private readonly List<Block> _blocks = new();
         private readonly List<RoomType> _roomTypes = new(); 
@@ -49,8 +47,7 @@ namespace HotelCatalogService.Domain.Entities
             Description = description;
             Address = address;
             Location = location;
-            Status = HotelStatus.Pending;
-            IsActive = false;
+            Status = HotelStatus.Draft;
             Rating = 0;
             Slug = SlugHelper.GenerateSlug(name);
         }
@@ -205,19 +202,54 @@ namespace HotelCatalogService.Domain.Entities
 
         public void Approve()
         {
-            if (Status == HotelStatus.Active) return;
+            if (Status != HotelStatus.PendingApproval)
+                throw new InvalidOperationException("Only applications that are pending approval will be granted.");
 
             Status = HotelStatus.Active;
-            IsActive = true;
 
             // Email thông báo cho chủ khách sạn
             AddDomainEvent(new HotelApprovedEvent(Id, Name, OwnerId));
         }
 
-        public void Suspend(string reason)
+        public void SubmitForApproval()
         {
-            Status = HotelStatus.Blocked;
-            IsActive = false;
+            if (Status != HotelStatus.Draft && Status != HotelStatus.Rejected)
+                throw new InvalidOperationException("Only drafts or rejected designs will be resubmitted.");
+
+            Status = HotelStatus.PendingApproval;
+        }
+
+        public void Reject(string reason, Guid adminId)
+        {
+            if (Status != HotelStatus.PendingApproval)
+                throw new InvalidOperationException("Only applications that are pending approval can be rejected.");
+
+            Status = HotelStatus.Rejected;
+            UpdatedBy = adminId.ToString();
+            AddDomainEvent(new HotelRejectedEvent(OwnerId ,Name, reason));
+        }
+
+        public void Suspend(string reason, Guid adminId)
+        {
+            Status = HotelStatus.Suspended;
+            UpdatedBy = adminId.ToString();
+            AddDomainEvent(new HotelSuspendedEvent(OwnerId, Name, reason));
+        }
+
+        public void CloseTemporarily()
+        {
+            if (Status != HotelStatus.Active)
+                throw new InvalidOperationException("Only hotels that are currently operating are allowed to temporarily close.");
+
+            Status = HotelStatus.TemporarilyClosed;
+        }
+
+        public void Reopen()
+        {
+            if (Status != HotelStatus.TemporarilyClosed)
+                throw new InvalidOperationException("Only hotels that are temporarily closed are allowed to reopen.");
+
+            Status = HotelStatus.Active;
         }
 
         public void AddImage(string imageUrl, string publicId, bool isThumbnail, string? caption)

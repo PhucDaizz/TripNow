@@ -21,7 +21,6 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPa
                 request.SearchTerm,
                 request.Status,
                 request.OwnerId,
-                request.IsActive,
                 request.PageNumber,
                 request.PageSize,
                 cancellationToken

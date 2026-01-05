@@ -25,7 +25,6 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.Property(h => h.Rating).HasColumnType("decimal(2,1)");
 
-            builder.Property(h => h.IsActive).IsRequired();
             builder.Property(h => h.OwnerId).IsRequired();
 
             // --- Value Object: Address ---

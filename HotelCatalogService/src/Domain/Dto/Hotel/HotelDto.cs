@@ -14,7 +14,6 @@ namespace HotelCatalogService.Domain.Dto.Hotel
         public string Status { get; init; }
         public decimal Rating { get; init; }
         public Coordinates Location { get; init; }
-        public bool IsActive { get; init; }
         public string Thumbnail { get; init; }
         public DateTime CreatedAt { get; init; }
     }
