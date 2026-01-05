@@ -48,7 +48,7 @@ namespace HotelCatalogService.Domain.Entities
             {
                 throw new InvalidOperationException($"Không thể xóa phòng {room.RoomName} vì đang có khách thuê.");
             }
-
+            AddDomainEvent(new RoomRemovedEvent(room.RoomTypeId));
             _rooms.Remove(room);
         }
     }

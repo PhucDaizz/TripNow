@@ -1,5 +1,6 @@
 ﻿using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Enum;
+using HotelCatalogService.Domain.Events.Room;
 
 namespace HotelCatalogService.Domain.Entities
 {
@@ -22,6 +23,13 @@ namespace HotelCatalogService.Domain.Entities
 
         public void UpdateDetails(string roomName, Guid roomTypeId)
         {
+            if(this.RoomTypeId != roomTypeId)
+            {
+                var oldRoomTypeId = this.RoomTypeId;
+                var newRoomTypeId = roomTypeId;
+                AddDomainEvent(new RoomMovedToAnotherRoomTypeEvent(oldRoomTypeId, newRoomTypeId));
+            }
+
             RoomName = roomName;
             RoomTypeId = roomTypeId;
         }
