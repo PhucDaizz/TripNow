@@ -5,6 +5,7 @@ using BookingService.API.StartUp;
 using BookingService.Application;
 using BookingService.Infrastructure;
 using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
+using BookingService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
@@ -16,6 +17,10 @@ namespace BookingService.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.Configure<InventorySettings>(
+               builder.Configuration.GetSection(InventorySettings.SectionName)
+            );
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

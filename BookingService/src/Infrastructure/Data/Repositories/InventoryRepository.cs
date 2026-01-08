@@ -70,5 +70,17 @@ namespace BookingService.Infrastructure.Data.Repositories
                     i => i.TotalStock + quantityChange), 
                 cancellationToken);
         }
+
+        public async Task UpdateBlockedStockBulkAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, int quantityChange, CancellationToken cancellationToken)
+        {
+            if (dates == null || !dates.Any()) return;
+
+            await _context.Inventory
+                .Where(x => x.RoomTypeId == roomTypeId && dates.Contains(x.Date)) 
+                .ExecuteUpdateAsync(s => s.SetProperty(
+                    i => i.BlockedStock,
+                    i => i.BlockedStock + quantityChange), 
+                cancellationToken);
+        }
     }
 }

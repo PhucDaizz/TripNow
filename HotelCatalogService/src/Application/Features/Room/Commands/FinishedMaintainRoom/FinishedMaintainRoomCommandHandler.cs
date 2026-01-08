@@ -5,23 +5,23 @@ using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Enum;
 using MediatR;
 
-namespace HotelCatalogService.Application.Features.Room.Commands.UpdateRoomStatus
+namespace HotelCatalogService.Application.Features.Room.Commands.FinishedMaintainRoom
 {
-    public class UpdateRoomStatusCommandHandler : IRequestHandler<UpdateRoomStatusCommand, Result>
+    public class FinishedMaintainRoomCommandHandler : IRequestHandler<FinishedMaintainRoomCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStaffService _staffService;
 
-        public UpdateRoomStatusCommandHandler(IUnitOfWork unitOfWork, IStaffService staffService)
+        public FinishedMaintainRoomCommandHandler(IUnitOfWork unitOfWork, IStaffService staffService)
         {
             _unitOfWork = unitOfWork;
             _staffService = staffService;
         }
 
-        public async Task<Result> Handle(UpdateRoomStatusCommand request, CancellationToken token)
+        public async Task<Result> Handle(FinishedMaintainRoomCommand request, CancellationToken token)
         {
             var hotel = await _unitOfWork.Hotel.GetHotelForRoomSetupAsync(request.HotelId, request.BlockId, request.FloorId, token);
-            
+
             if (hotel == null) return Result.Failure<Guid>(new Error("Hotel.NotFound", "Not found"));
 
             var block = hotel.Blocks.FirstOrDefault();
@@ -69,20 +69,7 @@ namespace HotelCatalogService.Application.Features.Room.Commands.UpdateRoomStatu
 
             try
             {
-                switch (request.NewStatus)
-                {
-                    case RoomStatus.Dirty:
-                        room.MarkAsDirty();
-                        break;
-                    case RoomStatus.Cleaning:
-                        room.StartCleaning();
-                        break;
-                    case RoomStatus.Available:
-                        room.FinishCleaning();
-                        break;
-                    default:
-                        return Result.Failure(new Error("Status.Invalid", "Invalid status"));
-                }
+                room.FinishMaintenance();
 
                 await _unitOfWork.Hotel.UpdateAsync(hotel, token);
                 await _unitOfWork.SaveChangesAsync(token);

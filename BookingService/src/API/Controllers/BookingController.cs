@@ -16,7 +16,5 @@ namespace BookingService.API.Controllers
             _currentUserService = currentUserService;
             _mediator = mediator;
         }
-
-
     }
 }

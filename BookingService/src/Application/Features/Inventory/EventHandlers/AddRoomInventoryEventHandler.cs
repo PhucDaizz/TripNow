@@ -7,17 +7,18 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
     public class AddRoomInventoryEventHandler : INotificationHandler<AddRoomInventoryEvent>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const int INVENTORY_LOOKAHEAD_DAYS = 180;
+        private readonly IInventorySettings _inventorySettings;
 
-        public AddRoomInventoryEventHandler(IUnitOfWork unitOfWork)
+        public AddRoomInventoryEventHandler(IUnitOfWork unitOfWork, IInventorySettings inventorySettings)
         {
             _unitOfWork = unitOfWork;
+            _inventorySettings = inventorySettings;
         }
 
         public async Task Handle(AddRoomInventoryEvent notification, CancellationToken cancellationToken)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var endDate = today.AddDays(INVENTORY_LOOKAHEAD_DAYS);
+            var endDate = today.AddDays(_inventorySettings.LookAheadDays);
             var roomTypeId = notification.RoomtypeId;
 
             var existingDates = await _unitOfWork.Inventory.GetExistingDatesAsync(
@@ -31,7 +32,7 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
 
             var newInventories = new List<Domain.Entities.Inventory>();
 
-            for (int i = 0; i <= INVENTORY_LOOKAHEAD_DAYS; i++)
+            for (int i = 0; i <= _inventorySettings.LookAheadDays; i++)
             {
                 var currentDate = today.AddDays(i);
 

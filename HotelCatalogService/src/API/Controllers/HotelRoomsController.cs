@@ -2,6 +2,8 @@
 using HotelCatalogService.Application.DTOs.Room;
 using HotelCatalogService.Application.Features.Room.Commands.CreateRoom;
 using HotelCatalogService.Application.Features.Room.Commands.DeleteRoom;
+using HotelCatalogService.Application.Features.Room.Commands.FinishedMaintainRoom;
+using HotelCatalogService.Application.Features.Room.Commands.MaintainRoom;
 using HotelCatalogService.Application.Features.Room.Commands.UpdateRoom;
 using HotelCatalogService.Application.Features.Room.Commands.UpdateRoomStatus;
 using HotelCatalogService.Domain.Common;
@@ -76,6 +78,44 @@ namespace HotelCatalogService.API.Controllers
                 RoomId = roomId,
                 OwnerId = Guid.Parse(_currentUser.UserId),
                 NewStatus = request.Status
+            };
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(ApiResponse<object>.SuccessResponse(null, "Update status successfully"))
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        [HttpPatch("{roomId}/maintain")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> Maintain(Guid hotelId, Guid blockId, Guid floorId, Guid roomId, [FromBody] MaintainRoomRequest request)
+        {
+            var command = new MaintainRoomCommand
+            {
+                HotelId = hotelId,
+                BlockId = blockId,
+                FloorId = floorId,
+                RoomId = roomId,
+                OwnerId = Guid.Parse(_currentUser.UserId),
+                FromDate = request.FromDate,
+                ToDate = request.ToDate
+            };
+            var result = await _mediator.Send(command);
+            return result.IsSuccess
+                ? Ok(ApiResponse<object>.SuccessResponse(null, "Update status successfully"))
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        [HttpPatch("{roomId}/finished-maintain")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> FinishedMaintain(Guid hotelId, Guid blockId, Guid floorId, Guid roomId)
+        {
+            var command = new FinishedMaintainRoomCommand
+            {
+                HotelId = hotelId,
+                BlockId = blockId,
+                FloorId = floorId,
+                RoomId = roomId,
+                OwnerId = Guid.Parse(_currentUser.UserId)
             };
             var result = await _mediator.Send(command);
             return result.IsSuccess

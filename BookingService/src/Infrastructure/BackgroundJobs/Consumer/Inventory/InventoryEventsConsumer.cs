@@ -42,11 +42,26 @@ namespace BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory
                 routingKey: "room.update",
                 queueName: "booking-service-update-room",
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
+
             await _consumer.Subscribe<InventoryStockChangedEvent>(
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "room.range.created",
                 queueName: "booking-service-inventory-change", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<RoomMaintenanceScheduledEvent>(
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "room.maintain",
+                queueName: "booking-service-maintain-room", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<RoomMaintenanceFinishedEvent>(
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "room.finished.maintain",
+                queueName: "booking-service-finished-maintain-room", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

@@ -12,5 +12,6 @@ namespace BookingService.Domain.Repositories
         Task<List<DateOnly>> GetExistingDatesAsync(Guid roomTypeId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken);
         Task AddRangeAsync(IEnumerable<Inventory> inventories, CancellationToken cancellationToken);
         Task UpdateTotalStockForDatesAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, int quantityChange, CancellationToken cancellationToken);
+        Task UpdateBlockedStockBulkAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, int quantityChange, CancellationToken cancellationToken);
     }
 }

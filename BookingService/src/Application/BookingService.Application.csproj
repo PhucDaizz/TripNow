@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Bookings\" />
-    <Folder Include="Features\Booking\Queries\" />
     <Folder Include="Features\Inventory\Command\" />
     <Folder Include="Features\Inventory\Queries\" />
     <Folder Include="Mappings\" />

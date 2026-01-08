@@ -10,8 +10,9 @@ namespace BookingService.Domain.Entities
         public DateOnly Date { get; private set; }
         public int TotalStock { get; private set; }
         public int SoldStock { get; private set; }
+        public int BlockedStock { get; private set; } // Phòng hỏng, sửa chữa
         public byte[] RowVersion { get; private set; }
-        public int AvailableStock => TotalStock - SoldStock;
+        public int AvailableStock => TotalStock - SoldStock - BlockedStock;
         private Inventory() { }
 
         private Inventory(Guid roomTypeId, DateOnly date, int totalStock)
@@ -28,6 +29,25 @@ namespace BookingService.Domain.Entities
             if (totalStock <= 0)
                 throw new DomainException("TotalStock phải lớn hơn 0.");
             return new Inventory(roomTypeId, date, totalStock);
+        }
+
+        /// <summary>
+        /// Khóa phòng do bảo trì
+        /// </summary>
+        public void BlockStock(int quantity)
+        {
+            if (quantity <= 0) return;
+            BlockedStock += quantity;
+        }
+
+        /// <summary>
+        /// Mở khóa (Khi bảo trì xong hoặc hủy lịch bảo trì)
+        /// </summary>
+        public void UnblockStock(int quantity)
+        {
+            if (quantity <= 0) return;
+            BlockedStock -= quantity;
+            if (BlockedStock < 0) BlockedStock = 0;
         }
 
         /// <summary>

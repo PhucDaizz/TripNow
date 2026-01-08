@@ -11,6 +11,9 @@ namespace HotelCatalogService.Domain.Entities
         public string RoomName { get; private set; } 
         public RoomStatus Status { get; private set; }
 
+        public DateOnly? MaintenanceStart { get; private set; }
+        public DateOnly? MaintenanceEnd { get; private set; }
+
         private Room() { }
 
         internal Room(Guid floorId, string roomName, Guid roomTypeId)
@@ -18,7 +21,9 @@ namespace HotelCatalogService.Domain.Entities
             FloorId = floorId;
             RoomName = roomName;
             RoomTypeId = roomTypeId;
-            Status = RoomStatus.Available; 
+            Status = RoomStatus.Available;
+            MaintenanceStart = null;
+            MaintenanceEnd = null;
         }
 
         public void UpdateDetails(string roomName, Guid roomTypeId)
@@ -35,7 +40,38 @@ namespace HotelCatalogService.Domain.Entities
         }
 
         public void MarkAsDirty() => Status = RoomStatus.Dirty;
-        public void MarkAsMaintain() => Status = RoomStatus.Maintain;
+        public void MarkAsMaintain(DateOnly fromDate, DateOnly toDate)
+        {
+            if (fromDate > toDate)
+            {
+                throw new InvalidOperationException("Ngày bắt đầu không được sau ngày kết thúc.");
+            }
+
+            Status = RoomStatus.Maintain;
+            MaintenanceStart = fromDate;
+            MaintenanceEnd = toDate;
+
+            AddDomainEvent(new RoomUnderMaintenanceEvent(RoomTypeId, fromDate, toDate));
+        }
+
+        /// <summary>
+        /// Kết thúc bảo trì (Sớm hoặc đúng hạn)
+        /// </summary>
+        public void FinishMaintenance()
+        {
+            if (Status != RoomStatus.Maintain)
+                throw new InvalidOperationException("Phòng không trong trạng thái bảo trì.");
+
+            var oldStart = MaintenanceStart;
+            var oldEnd = MaintenanceEnd;
+
+            Status = RoomStatus.Dirty;
+
+            MaintenanceStart = null;
+            MaintenanceEnd = null;
+
+            AddDomainEvent(new RoomMaintenanceFinishedEvent(RoomTypeId, oldStart.Value, oldEnd.Value));
+        }
 
         public void MarkAsClean()
         {
