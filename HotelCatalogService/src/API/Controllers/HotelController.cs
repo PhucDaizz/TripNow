@@ -1,5 +1,6 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.Hotel;
+using HotelCatalogService.Application.Features.Hotel.Commands.AddHotelStructure;
 using HotelCatalogService.Application.Features.Hotel.Commands.ApproveHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporarilyHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.CreateHotel;
@@ -155,6 +156,29 @@ namespace HotelCatalogService.API.Controllers
             }
             var result = await _mediator.Send(query);
             return Ok(result);
+        }
+
+
+        [HttpPost("create-structure")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> CreateHotelStructure([FromBody]AddHotelStructure request)
+        {
+            var userId = _currentUserService.UserId;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var command = new AddHotelStructureCommand
+            {
+                HotelId = request.HotelId,
+                Blocks = request.Blocks,
+                OwnerId =  Guid.Parse(userId)
+            };
+
+            var result = await _mediator.Send(command);
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("", new List<string> { result.Error.Message }));
+            }
+            return Ok(ApiResponse<object>.SuccessResponse(null, "Hotel structure created successfully."));
         }
 
 

@@ -1,4 +1,6 @@
 ﻿using BookingService.Application.Common.Interfaces;
+using BookingService.Domain.Repositories;
+using BookingService.Infrastructure.Data.Repositories;
 using BookingService.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +20,12 @@ namespace BookingService.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IInventoryRepository, InventoryRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

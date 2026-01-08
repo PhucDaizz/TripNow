@@ -1,0 +1,67 @@
+﻿using BookingService.Application.Common.Interfaces;
+using BookingService.Application.DTOs.Inventory;
+using MediatR;
+
+namespace BookingService.Application.Features.Inventory.EventHandlers
+{
+    public class AddRoomInventoryEventHandler : INotificationHandler<AddRoomInventoryEvent>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private const int INVENTORY_LOOKAHEAD_DAYS = 180;
+
+        public AddRoomInventoryEventHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task Handle(AddRoomInventoryEvent notification, CancellationToken cancellationToken)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var endDate = today.AddDays(INVENTORY_LOOKAHEAD_DAYS);
+            var roomTypeId = notification.RoomtypeId;
+
+            var existingDates = await _unitOfWork.Inventory.GetExistingDatesAsync(
+                roomTypeId,
+                today,
+                endDate,
+                cancellationToken
+            );
+
+            var existingDatesSet = new HashSet<DateOnly>(existingDates);
+
+            var newInventories = new List<Domain.Entities.Inventory>();
+
+            for (int i = 0; i <= INVENTORY_LOOKAHEAD_DAYS; i++)
+            {
+                var currentDate = today.AddDays(i);
+
+                if (!existingDatesSet.Contains(currentDate))
+                {
+                    var newInv = Domain.Entities.Inventory.Create(roomTypeId, currentDate, 1);
+                    newInventories.Add(newInv);
+                }
+            }
+
+            if (newInventories.Any())
+            {
+                await _unitOfWork.Inventory.AddRangeAsync(newInventories, cancellationToken);
+            }
+
+            if (existingDates.Any())
+            {
+                await _unitOfWork.Inventory.UpdateTotalStockForDatesAsync(
+                    roomTypeId,
+                    existingDates, 
+                    1,             
+                    cancellationToken
+                );
+            }
+
+            if (newInventories.Any())
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
+        }
+    }
+}

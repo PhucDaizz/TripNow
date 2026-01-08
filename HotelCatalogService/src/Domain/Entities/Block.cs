@@ -21,12 +21,15 @@ namespace HotelCatalogService.Domain.Entities
         }
 
 
-        public void AddFloor(int floorNumber)
+        public Floor AddFloor(int floorNumber)
         {
             if (_floors.Any(f => f.FloorNumber == floorNumber))
                 throw new InvalidOperationException($"Tầng {floorNumber} đã tồn tại trong khu {Name}");
 
-            _floors.Add(new Floor(this.Id, floorNumber));
+            var newFloor = new Floor(this.Id, floorNumber);
+            _floors.Add(newFloor);
+
+            return newFloor;
         }
 
         public void UpdateFloor(Guid floorId, int newFloorNumber)

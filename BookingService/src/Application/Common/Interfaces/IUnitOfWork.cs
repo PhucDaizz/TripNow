@@ -1,7 +1,11 @@
-﻿namespace BookingService.Application.Common.Interfaces
+﻿using BookingService.Domain.Repositories;
+
+namespace BookingService.Application.Common.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
+        IBookingRepository Booking { get; }
+        IInventoryRepository Inventory { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();

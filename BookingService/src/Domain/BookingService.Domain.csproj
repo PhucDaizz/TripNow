@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Dto\" />
     <Folder Include="Events\" />
     <Folder Include="ValueObject\" />
     <Folder Include="Specifications\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -81,12 +81,15 @@ namespace HotelCatalogService.Domain.Entities
             }
         }
 
-        public void AddBlock(string name)
+        public Block AddBlock(string name)
         {
             if (_blocks.Any(x => x.Name.ToLower() == name.ToLower()))
                 throw new InvalidOperationException($"Khu vực '{name}' đã tồn tại");
 
-            _blocks.Add(new Block(this.Id, name));
+            var newBlock = new Block(this.Id, name);
+            _blocks.Add(newBlock);
+
+            return newBlock;
         }
 
         public void UpdateBlock(Guid blockId, string newName)
@@ -149,19 +152,6 @@ namespace HotelCatalogService.Domain.Entities
             if (item == null) return; 
 
             item.UpdateInfo(description, isFree);
-        }
-
-        public void AddRoom(Guid blockId, Guid floorId, string roomName, Guid roomTypeId)
-        {
-            var block = _blocks.FirstOrDefault(b => b.Id == blockId);
-            if (block == null)
-                throw new InvalidOperationException("Khu vực (Block) không tồn tại");
-
-            var floor = block.Floors.FirstOrDefault(f => f.Id == floorId);
-            if (floor == null)
-                throw new InvalidOperationException("Tầng không tồn tại trong khu vực này");
-
-            floor.AddRoom(roomName, roomTypeId);
         }
 
         public void RemoveRoom(Guid blockId, Guid floorId, Guid roomId)

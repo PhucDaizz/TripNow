@@ -28,9 +28,19 @@ namespace HotelCatalogService.Domain.Entities
             if (_rooms.Any(r => r.RoomName == roomName))
                 throw new InvalidOperationException($"Phòng {roomName} đã tồn tại ở tầng {FloorNumber}");
 
-            _rooms.Add(new Room(this.Id, roomName, roomTypeId));
+            var newRoom = new Room(this.Id, roomName, roomTypeId);
+            _rooms.Add(newRoom);
 
             this.AddDomainEvent(new RoomCreatedEvent(roomTypeId));
+        }
+
+        public void AddRoomNoEvent(string roomName, Guid roomTypeId)
+        {
+            if (_rooms.Any(r => r.RoomName == roomName))
+                throw new InvalidOperationException($"Phòng {roomName} đã tồn tại ở tầng {FloorNumber}");
+
+            var newRoom = new Room(this.Id, roomName, roomTypeId);
+            _rooms.Add(newRoom);
         }
 
         public void UpdateDetails(int floorNumber)

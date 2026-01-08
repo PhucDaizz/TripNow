@@ -7,23 +7,26 @@ namespace BookingService.Domain.Entities
     {
 
         public Guid RoomTypeId { get; private set; }
-        public DateTime Date { get; private set; }
+        public DateOnly Date { get; private set; }
         public int TotalStock { get; private set; }
         public int SoldStock { get; private set; }
         public byte[] RowVersion { get; private set; }
         public int AvailableStock => TotalStock - SoldStock;
         private Inventory() { }
 
-        private Inventory(Guid roomTypeId, DateTime date, int totalStock)
+        private Inventory(Guid roomTypeId, DateOnly date, int totalStock)
         {
             RoomTypeId = roomTypeId;
             Date = date;
             TotalStock = totalStock;
             SoldStock = 0;
+            RowVersion = new byte[8];
         }
 
-        public static Inventory Create(Guid roomTypeId, DateTime date, int totalStock)
+        public static Inventory Create(Guid roomTypeId, DateOnly date, int totalStock)
         {
+            if (totalStock <= 0)
+                throw new DomainException("TotalStock phải lớn hơn 0.");
             return new Inventory(roomTypeId, date, totalStock);
         }
 

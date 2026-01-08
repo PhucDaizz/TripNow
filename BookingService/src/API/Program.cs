@@ -4,6 +4,7 @@ using BookingService.API.Extensions;
 using BookingService.API.StartUp;
 using BookingService.Application;
 using BookingService.Infrastructure;
+using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
@@ -30,6 +31,7 @@ namespace BookingService.API
                     context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
                 };
             });
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
 
@@ -38,6 +40,9 @@ namespace BookingService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHostedService<InventoryEventsConsumer>();
+
             var app = builder.Build();
 
             app.UseExceptionHandler();

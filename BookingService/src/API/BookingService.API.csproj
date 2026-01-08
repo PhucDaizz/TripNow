@@ -21,8 +21,4 @@
     <ProjectReference Include="..\Infrastructure\BookingService.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
