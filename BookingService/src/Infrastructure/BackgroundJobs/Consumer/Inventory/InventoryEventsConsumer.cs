@@ -1,4 +1,6 @@
 ﻿using BookingService.Application.DTOs.Inventory;
+using BookingService.Application.DTOs.InventoryConfiguration;
+using BookingService.Application.Features.InventoryConfiguration.EventHandlers.RoomTypeCreated;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -62,6 +64,27 @@ namespace BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory
                 exchangeType: "topic",
                 routingKey: "room.finished.maintain",
                 queueName: "booking-service-finished-maintain-room", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+            
+            await _consumer.Subscribe<RoomTypeCreatedEvent>(
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "roomtype.create",
+                queueName: "booking-service-room-type-create", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<HotelStatusChangedEvent>(
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "hotel.close.temporary",
+                queueName: "booking-service-hotel-close-temporary", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<HotelStatusChangedEvent>(
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "hotel.reopen",
+                queueName: "booking-service-hotel-reopen", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

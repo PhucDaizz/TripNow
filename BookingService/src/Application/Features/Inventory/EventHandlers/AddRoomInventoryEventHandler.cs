@@ -1,6 +1,7 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.DTOs.Inventory;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace BookingService.Application.Features.Inventory.EventHandlers
 {
@@ -8,11 +9,13 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventorySettings _inventorySettings;
+        private readonly ILogger<AddRoomInventoryEventHandler> _logger;
 
-        public AddRoomInventoryEventHandler(IUnitOfWork unitOfWork, IInventorySettings inventorySettings)
+        public AddRoomInventoryEventHandler(IUnitOfWork unitOfWork, IInventorySettings inventorySettings, ILogger<AddRoomInventoryEventHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _inventorySettings = inventorySettings;
+            _logger = logger;
         }
 
         public async Task Handle(AddRoomInventoryEvent notification, CancellationToken cancellationToken)
@@ -58,11 +61,17 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
                 );
             }
 
-            if (newInventories.Any())
+            var config = await _unitOfWork.InventoryConfiguration.GetByRoomTypeIdAsync(roomTypeId, cancellationToken);
+            if (config != null)
             {
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                config.UpdateDefaultStock(config.DefaultStock + 1);
+            }
+            else
+            {
+                _logger.LogWarning("Inventory configuration not found for RoomTypeId: {RoomTypeId}", roomTypeId);
             }
 
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

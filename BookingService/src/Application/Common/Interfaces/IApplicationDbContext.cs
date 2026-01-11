@@ -12,6 +12,7 @@ namespace BookingService.Application.Common.Interfaces
         public DbSet<BookingPriceSnapshot> BookingPriceSnapshot { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
         public DbSet<RoomAssignment> RoomAssignment { get; set; }
+        public DbSet<InventoryConfiguration> InventoryConfiguration { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

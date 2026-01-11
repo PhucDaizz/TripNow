@@ -222,12 +222,14 @@ namespace HotelCatalogService.API.Controllers
         /// </summary>
         [HttpPost("{id}/status/temporarily-close")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
-        public async Task<IActionResult> CloseTemporarily(Guid id)
+        public async Task<IActionResult> CloseTemporarily(Guid id, [FromBody]HotelCloseTemporarily closeTemporarily)
         {
             var command = new CloseTemporarilyHotelCommand
             {
                 HotelId = id,
-                OwerId = Guid.Parse(_currentUserService.UserId)
+                OwerId = Guid.Parse(_currentUserService.UserId),
+                FromDate = closeTemporarily.FromDate,
+                ToDate = closeTemporarily.ToDate
             };
 
             var result = await _mediator.Send(command);

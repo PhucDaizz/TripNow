@@ -62,10 +62,16 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
                 );
             }
 
-            if (newInventories.Any())
+            var config = await _unitOfWork.InventoryConfiguration.GetByRoomTypeIdAsync(roomTypeId, cancellationToken);
+
+            if (config != null)
             {
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                int newDefaultStock = config.DefaultStock + quantityChange;
+
+                config.UpdateDefaultStock(newDefaultStock);
             }
+            
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

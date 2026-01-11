@@ -12,12 +12,15 @@ namespace BookingService.Infrastructure
 
         public IBookingRepository Booking { get; }
         public IInventoryRepository Inventory { get; }
+        public IInventoryConfigurationRepository InventoryConfiguration { get; }
+        
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             Booking = new BookingRepository(_context);
             Inventory = new InventoryRepository(_context);
+            InventoryConfiguration = new InventoryConfigurationRepository(_context);
         }
         public async Task BeginTransactionAsync()
         {

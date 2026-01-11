@@ -20,6 +20,7 @@ namespace BookingService.Infrastructure
         public DbSet<BookingPriceSnapshot> BookingPriceSnapshot { get; set; } 
         public DbSet<Inventory> Inventory { get; set; } 
         public DbSet<RoomAssignment> RoomAssignment { get; set; } 
+        public DbSet<InventoryConfiguration> InventoryConfiguration { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

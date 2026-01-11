@@ -82,5 +82,28 @@ namespace BookingService.Infrastructure.Data.Repositories
                     i => i.BlockedStock + quantityChange), 
                 cancellationToken);
         }
+
+        public async Task<List<DateOnly>> GetDatesInRangeAsync(Guid roomTypeId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken)
+        {
+            return await _context.Inventory
+                .AsNoTracking() 
+                .Where(x => x.RoomTypeId == roomTypeId
+                            && x.Date >= fromDate
+                            && x.Date <= toDate)
+                .Select(x => x.Date) 
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task SetBlockedStockToZeroBulkAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, CancellationToken cancellationToken)
+        {
+            if (dates == null || !dates.Any()) return;
+
+            await _context.Inventory
+                .Where(x => x.RoomTypeId == roomTypeId && dates.Contains(x.Date))
+                .ExecuteUpdateAsync(s => s.SetProperty(
+                    i => i.BlockedStock,
+                    i => 0), // Set cứng về 0
+                cancellationToken);
+        }
     }
 }

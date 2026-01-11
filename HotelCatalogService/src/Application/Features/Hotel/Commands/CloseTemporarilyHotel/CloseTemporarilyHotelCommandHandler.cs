@@ -1,11 +1,10 @@
 ﻿using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
-using HotelCatalogService.Application.Features.Hotel.Commands.SubmitForApprovalHotel;
 using MediatR;
 
 namespace HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporarilyHotel
 {
-    public class CloseTemporarilyHotelCommandHandler : IRequestHandler<SubmitForApprovalCommand, Result>
+    public class CloseTemporarilyHotelCommandHandler : IRequestHandler<CloseTemporarilyHotelCommand, Result>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -14,7 +13,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporari
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result> Handle(SubmitForApprovalCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(CloseTemporarilyHotelCommand request, CancellationToken cancellationToken)
         {
             var hotel = await _unitOfWork.Hotel.GetByIdAsync(request.HotelId, cancellationToken);
 
@@ -28,7 +27,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporari
                 return Result.Failure(new Error("Hotel.Unauthorized", "You are not authorized to submit this hotel for approval."));
             }
 
-            hotel.CloseTemporarily();
+            hotel.CloseTemporarily(request.FromDate, request.ToDate);
             await _unitOfWork.Hotel.UpdateAsync(hotel, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

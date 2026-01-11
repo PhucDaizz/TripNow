@@ -7,5 +7,8 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporari
     {
         public Guid HotelId { get; init; }
         public Guid OwerId { get; init; }
+        public DateOnly FromDate { get; set; }
+        public DateOnly? ToDate { get; set; }
+
     }
 }
