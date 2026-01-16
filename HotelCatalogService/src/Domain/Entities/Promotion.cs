@@ -154,5 +154,30 @@ namespace HotelCatalogService.Domain.Entities
             if (type == DiscountType.Percent && value > 100)
                 throw new ArgumentException("Percentage discount cannot exceed 100%.");
         }
+
+        public bool IsValid(decimal bookingAmount)
+        {
+            var now = DateTime.UtcNow;
+
+            if (!IsActive) return false;
+            if (now < StartDate || now > EndDate) return false;
+            if (RemainingQuantity <= 0) return false;
+            if (bookingAmount < MinBookingAmount) return false;
+
+            return true;
+        }
+
+        public decimal CalculateDiscountAmount(decimal bookingAmount)
+        {
+            if (DiscountType == DiscountType.Amount)
+            {
+                return DiscountValue > bookingAmount ? bookingAmount : DiscountValue;
+            }
+            else 
+            {
+                var discount = bookingAmount * (DiscountValue / 100);
+                return discount;
+            }
+        }
     }
 }

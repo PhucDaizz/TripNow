@@ -23,7 +23,6 @@
     <Folder Include="Features\Inventory\Command\" />
     <Folder Include="Features\Inventory\Queries\" />
     <Folder Include="Mappings\" />
-    <Folder Include="Contracts\" />
   </ItemGroup>
 
 </Project>

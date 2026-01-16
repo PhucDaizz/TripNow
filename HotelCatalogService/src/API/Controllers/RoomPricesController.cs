@@ -3,6 +3,7 @@ using HotelCatalogService.Application.DTOs.RoomPrice;
 using HotelCatalogService.Application.Features.RoomPrice.Commands.BulkSetRoomPrice;
 using HotelCatalogService.Application.Features.RoomPrice.Commands.DeleteRoomPrice;
 using HotelCatalogService.Application.Features.RoomPrice.Commands.SetRoomPrice;
+using HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBatchRoomPrices;
 using HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomPrices;
 using HotelCatalogService.Domain.Common;
 using MediatR;
@@ -26,7 +27,24 @@ namespace HotelCatalogService.API.Controllers
         }
 
         /// <summary>
-        /// Lấy danh sách giá phòng trong một khoảng thời gian.
+        /// Lấy danh sách giá phòng của tất cả loại phòng trong một khoảng thời gian.
+        /// </summary>
+        [HttpGet("/api/Hotel/{hotelId}/room-types/prices")]
+        public async Task<IActionResult> GetBatchRoomPrices(Guid hotelId, [FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var query = new GetHotelBatchRoomPricesQuery
+            {
+                HotelId = hotelId,
+                FromDate = from,
+                ToDate = to
+            };
+            var result = await _mediator.Send(query);
+            return Ok(ApiResponse<List<RoomTypeCalendarDto>>.SuccessResponse(result.Value));
+        }
+
+
+        /// <summary>
+        /// Lấy danh sách giá phòng ngày đặt biệt kể thường trong một khoảng thời gian. (ưu tiên đặc biệt)
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetPrices(Guid hotelId, Guid roomTypeId, [FromQuery] DateTime from, [FromQuery] DateTime to)

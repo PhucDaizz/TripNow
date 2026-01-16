@@ -14,7 +14,11 @@ namespace HotelCatalogService.Application.Features.Promotion.EventHandlers.Booki
 
         public async Task Handle(BookingCancelledEvent notification, CancellationToken cancellationToken)
         {
-            var command = new RestorePromotionCommand { BookingId = notification.BookingId };
+            var command = new RestorePromotionCommand { 
+                HotelId = notification.HotelId,
+                BookingId = notification.BookingId,
+                PromotionCode = notification.PromotionCode
+            };
             await _mediator.Send(command, cancellationToken);
         }
     }

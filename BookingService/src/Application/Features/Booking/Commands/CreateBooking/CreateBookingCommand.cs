@@ -10,11 +10,12 @@ public record CreateBookingCommand : IRequest<Guid>
     public DateOnly CheckOutDate { get; init; }
     public List<BookingItemDto> Items { get; init; } = new();
     public BookingSource Source { get; init; } = BookingSource.Web;
+    public Guid? PromotionId { get; init; }
+    public string? PromotionCode { get; init; }
 }
 
 public record BookingItemDto
 {
     public Guid RoomTypeId { get; init; }
     public int Quantity { get; init; }
-    public decimal UnitPrice { get; init; }
 }

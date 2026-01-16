@@ -66,14 +66,30 @@ namespace HotelCatalogService.API.Controllers
         /// Người dùng kiểm tra mã giảm giá có hợp lệ không
         /// </summary>
         [HttpPost("check")]
-        [Authorize]
         public async Task<IActionResult> CheckPromotion(Guid hotelId, [FromBody] CheckPromotionRequest request)
         {
+            Guid userId = Guid.Empty;
+
+            if (request.UserId.HasValue && request.UserId != Guid.Empty)
+            {
+                userId = request.UserId.Value;
+            }
+
+            else if (!string.IsNullOrEmpty(_currentUser.UserId))
+            {
+                userId = Guid.Parse(_currentUser.UserId);
+            }
+
+            if (userId == Guid.Empty)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse("UserId is required."));
+            }
+
             var query = new CheckPromotionQuery
             {
                 HotelId = hotelId,
                 Code = request.Code,
-                UserId = Guid.Parse(_currentUser.UserId), 
+                UserId = userId, 
                 OrderAmount = request.OrderAmount
             };
 

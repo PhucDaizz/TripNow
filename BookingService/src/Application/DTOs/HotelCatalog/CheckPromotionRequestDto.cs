@@ -1,6 +1,6 @@
-﻿namespace HotelCatalogService.Application.DTOs.Promotion
+﻿namespace BookingService.Application.DTOs.HotelCatalog
 {
-    public class CheckPromotionRequest
+    public class CheckPromotionRequestDto
     {
         public string Code { get; set; }
         public decimal OrderAmount { get; set; }

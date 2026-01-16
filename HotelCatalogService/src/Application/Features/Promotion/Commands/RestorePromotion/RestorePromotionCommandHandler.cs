@@ -15,7 +15,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Commands.RestorePro
 
         public async Task<Result> Handle(RestorePromotionCommand request, CancellationToken token)
         {
-            var hotel = await _unitOfWork.Hotel.GetHotelByBookingUsageAsync(request.BookingId, token);
+            var hotel = await _unitOfWork.Hotel.GetHotelWithBookingPromotionUsageAsync(request.HotelId, request.PromotionCode, request.BookingId, token);
 
             if (hotel == null)
             {

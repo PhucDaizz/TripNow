@@ -3,8 +3,10 @@ using BookingService.API.ExceptionHandling;
 using BookingService.API.Extensions;
 using BookingService.API.StartUp;
 using BookingService.Application;
+using BookingService.Application.Contracts;
 using BookingService.Infrastructure;
 using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
+using BookingService.Infrastructure.Services;
 using BookingService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
@@ -47,6 +49,11 @@ namespace BookingService.API
             builder.Services.AddApplication();
 
             builder.Services.AddHostedService<InventoryEventsConsumer>();
+
+            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:7002");
+            });
 
             var app = builder.Build();
 

@@ -59,16 +59,20 @@ namespace BookingService.Domain.Entities
             var item = new BookingItem(this.Id, roomTypeId, quantity, unitPrice);
             _items.Add(item);
 
-            RecalculateTotal();
+            RecalculatePriceStructure();
         }
 
 
         public void ApplyPromotion(Guid promotionId, string code, decimal discountAmount)
         {
+            if (Status != BookingStatus.Pending)
+                throw new DomainException("Chỉ được áp dụng mã khi đơn đang chờ.");
+
             PromotionId = promotionId;
             PromotionCode = code;
             DiscountAmount = discountAmount;
-            RecalculateTotal();
+
+            RecalculatePriceStructure();
         }
 
         public void SetPriceSnapshot(BookingPriceSnapshot snapshot)
@@ -112,18 +116,69 @@ namespace BookingService.Domain.Entities
             Cancellation = new BookingCancellation(this.Id, who, reason, policy, refundAmount);
         }
 
-        private void RecalculateTotal()
+        public void AddPriceDetail(PriceType type, decimal amount, string description)
         {
-            var itemsTotal = _items.Sum(x => x.Price * x.Quantity);
-            if (!DiscountAmount.HasValue)
+            var detail = new BookingPriceDetail(this.Id, type, amount, description);
+            _priceDetails.Add(detail);
+
+            RecalculatePriceStructure();
+        }
+
+        private void RecalculatePriceStructure()
+        {
+            _priceDetails.Clear();
+
+            // Tính số đêm lưu trú
+            int nights = CheckOutDate.DayNumber - CheckInDate.DayNumber;
+            if (nights <= 0) nights = 1;
+
+            decimal totalRoomCharge = _items.Sum(i => i.Quantity * i.Price * nights);
+
+            _priceDetails.Add(new BookingPriceDetail(
+                Id,
+                PriceType.RoomCharge,
+                totalRoomCharge,
+                $"Room charge ({nights} nights))"
+            ));
+
+            decimal actualDiscount = (DiscountAmount.HasValue && DiscountAmount.Value > totalRoomCharge)
+                ? totalRoomCharge
+                : (DiscountAmount ?? 0m);
+
+            if (actualDiscount > 0)
             {
-                TotalAmount = itemsTotal - DiscountAmount.Value;
+                _priceDetails.Add(new BookingPriceDetail(
+                    Id,
+                    PriceType.Promotion,
+                    -actualDiscount, 
+                    $"Discount voucher: {PromotionCode}"
+                ));
             }
-            else
-            {
-                TotalAmount = itemsTotal;
-            }
-            if (TotalAmount < 0) TotalAmount = 0;
+
+            decimal taxableAmount = totalRoomCharge - actualDiscount;
+
+            decimal vatRate = 0.10m; 
+            decimal vatAmount = taxableAmount * vatRate;
+
+
+            _priceDetails.Add(new BookingPriceDetail(
+                Id,
+                PriceType.VAT,
+                vatAmount,
+                "VAT (10%)"
+            ));
+
+            TotalAmount = taxableAmount + vatAmount;
+        }
+
+        public void AddSurcharge(decimal amount, string description)
+        {
+            if (Status != BookingStatus.Pending) throw new DomainException("Cannot add surcharge confirmed booking");
+
+            _priceDetails.Add(new BookingPriceDetail(this.Id, PriceType.ServiceFee, amount, description));
+
+            // Update lại TotalAmount (Không gọi RecalculatePriceStructure vì sẽ bị clear mất)
+            TotalAmount = _priceDetails.Sum(x => x.Amount);
         }
 
     }

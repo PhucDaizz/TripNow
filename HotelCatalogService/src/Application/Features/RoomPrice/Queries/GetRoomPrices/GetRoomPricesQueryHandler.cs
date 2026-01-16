@@ -17,19 +17,40 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomPric
 
         public async Task<Result<List<RoomPriceDto>>> Handle(GetRoomPricesQuery request, CancellationToken token)
         {
-            var prices = await _context.RoomPrice
-                .Where(p => EF.Property<Guid>(p, "RoomTypeId") == request.RoomTypeId
+            var roomTypeData = await _context.RoomType
+                .Where(rt => rt.Id == request.RoomTypeId)
+                .Select(rt => new { rt.BasePrice })
+                .FirstOrDefaultAsync(token);
+
+            if (roomTypeData == null)
+            {
+                return Result.Failure<List<RoomPriceDto>>(new Error("RoomType.NotFound", "This room type does not exist.."));
+            }
+
+            var specialPrices = await _context.RoomPrice
+                .AsNoTracking()
+                .Where(p => p.RoomTypeId == request.RoomTypeId
                          && p.Date >= request.FromDate.Date
                          && p.Date <= request.ToDate.Date)
-                .OrderBy(p => p.Date)
-                .Select(p => new RoomPriceDto
-                {
-                    Date = p.Date,
-                    Price = p.Price
-                })
-                .ToListAsync(token);
+                .ToDictionaryAsync(k => k.Date.Date, v => v.Price, token);
 
-            return Result.Success(prices);
+            var result = new List<RoomPriceDto>();
+
+            for (var date = request.FromDate.Date; date <= request.ToDate.Date; date = date.AddDays(1))
+            {
+                decimal finalPrice = specialPrices.TryGetValue(date, out var specialPrice)
+                    ? specialPrice
+                    : roomTypeData.BasePrice;
+
+                result.Add(new RoomPriceDto
+                {
+                    RoomTypeId = request.RoomTypeId,
+                    Date = date,
+                    Price = finalPrice
+                });
+            }
+
+            return Result.Success(result);
         }
     }
 }

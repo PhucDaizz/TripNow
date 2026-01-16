@@ -44,6 +44,6 @@ namespace HotelCatalogService.Domain.Repositories
         Task<Hotel?> GetHotelWithPromotionsAsync(Guid hotelId, CancellationToken token);
         Task<Hotel?> GetHotelWithSpecificPromotionAsync(Guid hotelId, string code, CancellationToken token);
         Task<bool> IsPromotionUsedByUserAsync(Guid hotelId, string code, Guid userId, CancellationToken token);
-        Task<Hotel?> GetHotelByBookingUsageAsync(Guid bookingId, CancellationToken token);
+        Task<Hotel?> GetHotelWithBookingPromotionUsageAsync(Guid hotelId, string code, Guid bookingId, CancellationToken token);
     }
 }

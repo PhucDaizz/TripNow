@@ -254,14 +254,14 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                     p.PromotionUsages.Any(u => u.UserId == userId),
                     token);
         }
-
-        public async Task<Hotel?> GetHotelByBookingUsageAsync(Guid bookingId, CancellationToken token)
+        public async Task<Hotel?> GetHotelWithBookingPromotionUsageAsync(Guid hotelId, string code, Guid bookingId, CancellationToken token)
         {
+            var normalizedCode = code.ToUpper();
+
             return await _context.Hotel
-                .Include(h => h.Promotions)
-                    .ThenInclude(p => p.PromotionUsages.Where(u => u.BookingId == bookingId))
-                .Where(h => h.Promotions.Any(p =>
-                                p.PromotionUsages.Any(u => u.BookingId == bookingId)))
+                .Where(h => h.Id == hotelId) 
+                .Include(h => h.Promotions.Where(p => p.Code == normalizedCode)) 
+                .   ThenInclude(p => p.PromotionUsages.Where(u => u.BookingId == bookingId)) 
                 .FirstOrDefaultAsync(token);
         }
     }
