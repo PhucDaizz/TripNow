@@ -64,6 +64,25 @@ namespace BookingService.Domain.Entities
             SoldStock += quantity;
         }
 
+        public bool TryReserve(int quantity)
+        {
+            if (quantity <= 0) return false;
+
+            if (AvailableStock < quantity)
+            {
+                return false; 
+            }
+
+            SoldStock += quantity;
+            return true;
+        }
+
+        public void Release(int quantity)
+        {
+            SoldStock -= quantity;
+            if (SoldStock < 0) SoldStock = 0; 
+        }
+
         /// <summary>
         /// Nhả phòng (Giảm SoldStock - Khi hủy đơn)
         /// </summary>

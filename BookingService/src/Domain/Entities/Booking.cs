@@ -1,5 +1,6 @@
 ﻿using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
+using BookingService.Domain.Events.Booking;
 using BookingService.Domain.Exceptions;
 
 namespace BookingService.Domain.Entities
@@ -49,6 +50,8 @@ namespace BookingService.Domain.Entities
 
             Status = BookingStatus.Pending;
             PaymentStatus = PaymentStatus.Unpaid;
+
+            AddDomainEvent(new BookingCreatedDomainEvent(this));
         }
 
         public void AddItem(Guid roomTypeId, int quantity, decimal unitPrice)

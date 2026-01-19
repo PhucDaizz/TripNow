@@ -1,4 +1,5 @@
 ﻿using BookingService.Application.Common.Interfaces;
+using BookingService.Application.DTOs.Booking;
 using BookingService.Application.Features.Booking.Commands.CreateBooking;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -25,19 +26,24 @@ namespace BookingService.API.Controllers
         /// Tạo mới đơn đặt phòng
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingCommand command, CancellationToken cancellationToken)
         {
-            var bookingId = await _mediator.Send(command, cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
-            // 3. Chuẩn hóa Response trả về
-            var response = ApiResponse<Guid>.SuccessResponse(bookingId, "Booking created successfully.");
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+            var bookingResponse = result.Value;
 
-            // 4. Trả về 201 Created + Header Location + Body
-            // Header Location: api/bookings/{id}
-            return CreatedAtAction(nameof(GetBookingById), new { id = bookingId }, response);
+            var apiResponse = ApiResponse<CreateBookingResponse>.SuccessResponse(bookingResponse, "Booking created successfully.");
+
+            return CreatedAtAction(
+                nameof(GetBookingById),
+                new { id = bookingResponse.BookingId },
+                apiResponse
+            );
+
         }
 
         [HttpGet("{id}")]

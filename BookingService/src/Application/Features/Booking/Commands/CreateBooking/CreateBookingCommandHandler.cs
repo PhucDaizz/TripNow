@@ -1,35 +1,77 @@
-using BookingService.Application.Common.Interfaces;
+﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.Contracts;
+using BookingService.Application.DTOs.Booking;
 using BookingService.Application.DTOs.HotelCatalog;
 using BookingService.Domain.Exceptions;
+using Domain.Common.Response;
 using MediatR;
 
 namespace BookingService.Application.Features.Booking.Commands.CreateBooking;
 
-public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand, Guid>
+public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand, Result<CreateBookingResponse>>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHotelCatalogService _hotelCatalogService;
     private readonly IIntegrationEventService _integrationEventService;
+    private readonly IPaymentService _paymentService;
 
     public CreateBookingCommandHandler(ICurrentUserService currentUserService, 
         IUnitOfWork unitOfWork, 
         IHotelCatalogService hotelCatalogService,
-        IIntegrationEventService integrationEventService)
+        IIntegrationEventService integrationEventService, 
+        IPaymentService paymentService)
     {
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _hotelCatalogService = hotelCatalogService;
         _integrationEventService = integrationEventService;
+        _paymentService = paymentService;
     }
 
-    public async Task<Guid> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateBookingResponse>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
         if (_currentUserService.UserId == null || !Guid.TryParse(_currentUserService.UserId, out var userId))
         {
             throw new UnauthorizedAccessException("User is not authenticated or invalid user ID.");
         }
+
+        var listRoomTypeIds = request.Items.Select(i => i.RoomTypeId).Distinct().ToList();
+
+        var inventoryList = await _unitOfWork.Inventory.GetInventoriesInRangeAsync(
+            listRoomTypeIds,
+            request.CheckInDate,
+            request.CheckOutDate,
+            cancellationToken
+        );
+
+        var inventoryLookup = inventoryList
+            .ToDictionary(k => new { k.RoomTypeId, k.Date }, v => v);
+
+        int nights = request.CheckOutDate.DayNumber - request.CheckInDate.DayNumber;
+        if (inventoryList.Count < nights)
+        {
+            throw new DomainException("There is no room schedule for this time period yet..");
+        }
+
+        foreach (var item in request.Items)
+        {
+            for (var date = request.CheckInDate; date < request.CheckOutDate; date = date.AddDays(1))
+            {
+                var key = new { item.RoomTypeId, Date = date };
+
+                if (!inventoryLookup.TryGetValue(key, out var inventory))
+                {
+                    throw new DomainException($"Room type {item.RoomTypeId} has not been opened for sale on {date:dd/MM/yyyy}.");
+                }
+
+                if (!inventory.TryReserve(item.Quantity))
+                {
+                    throw new DomainException($"The room type {item.RoomTypeId} is fully booked on {date:dd/MM/yyyy}.");
+                }
+            }
+        }
+
 
         var booking = new Domain.Entities.Booking(
             userId,
@@ -107,6 +149,10 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             );
         }
 
+        // Gọi sang payment service để tạo lệnh thanh toán -- hiện đang giả lập
+        var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, cancellationToken);
+
+
         try
         {
             await _unitOfWork.Booking.AddBookingAsync(booking);
@@ -129,6 +175,10 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw; 
         }
 
-        return booking.Id;
+        return Result.Success(new CreateBookingResponse
+        {
+            BookingId = booking.Id,
+            PaymentUrl = paymentResult
+        });
     }
 }

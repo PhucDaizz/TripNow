@@ -54,6 +54,10 @@ namespace BookingService.API
             {
                 client.BaseAddress = new Uri("http://localhost:7002");
             });
+            builder.Services.AddHttpClient<IPaymentService, PaymentService>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:7004");
+            });
 
             var app = builder.Build();
 

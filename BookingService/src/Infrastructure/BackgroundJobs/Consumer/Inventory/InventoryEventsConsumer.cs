@@ -38,42 +38,42 @@ namespace BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory
                 queueName: "booking-service-deduct-room",
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<RoomMovedToAnotherRoomTypeEvent>(
+            await _consumer.Subscribe<RoomMovedToAnotherRoomTypeEvent>( // đã làm conf
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "room.update",
                 queueName: "booking-service-update-room",
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<InventoryStockChangedEvent>(
+            await _consumer.Subscribe<InventoryStockChangedEvent>( // đã làm conf
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "room.range.created",
                 queueName: "booking-service-inventory-change", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<RoomMaintenanceScheduledEvent>(
+            await _consumer.Subscribe<RoomMaintenanceScheduledEvent>(  // lịch trong tháng cố định đã đoán trước không cần conf
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "room.maintain",
                 queueName: "booking-service-maintain-room", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<RoomMaintenanceFinishedEvent>(
+            await _consumer.Subscribe<RoomMaintenanceFinishedEvent>( // lịch trong tháng cố định đã đoán trước không cần conf
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "room.finished.maintain",
                 queueName: "booking-service-finished-maintain-room", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
             
-            await _consumer.Subscribe<RoomTypeCreatedEvent>(
+            await _consumer.Subscribe<RoomTypeCreatedEvent>( // đã làm conf
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "roomtype.create",
                 queueName: "booking-service-room-type-create", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<HotelStatusChangedEvent>(
+            await _consumer.Subscribe<HotelStatusChangedEvent>(  // vui lòng gọi hàm mở khách sạn để inventory hoạt động lại
                 exchange: "hotel-catalog.events",
                 exchangeType: "topic",
                 routingKey: "hotel.close.temporary",

@@ -7,6 +7,7 @@ namespace BookingService.Application.Common.Interfaces
         IBookingRepository Booking { get; }
         IInventoryRepository Inventory { get; }
         IInventoryConfigurationRepository InventoryConfiguration { get; }
+        IBookingPriceSnapshotRepository BookingPriceSnapshot { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();

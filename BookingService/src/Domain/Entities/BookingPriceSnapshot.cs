@@ -2,7 +2,7 @@
 
 namespace BookingService.Domain.Entities
 {
-    public class BookingPriceSnapshot : BaseEntity
+    public class BookingPriceSnapshot : BaseEntity, AggregateRoot
     {
         public Guid BookingId { get; private set; }
         public Guid HotelId { get; private set; } 

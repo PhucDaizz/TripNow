@@ -1,9 +1,11 @@
+using BookingService.Application.DTOs.Booking;
 using BookingService.Domain.Enum;
+using Domain.Common.Response;
 using MediatR;
 
 namespace BookingService.Application.Features.Booking.Commands.CreateBooking;
 
-public record CreateBookingCommand : IRequest<Guid>
+public record CreateBookingCommand : IRequest<Result<CreateBookingResponse>>
 {
     public Guid HotelId { get; init; }
     public DateOnly CheckInDate { get; init; }
