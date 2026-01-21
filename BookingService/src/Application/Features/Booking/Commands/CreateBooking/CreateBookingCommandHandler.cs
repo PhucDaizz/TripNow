@@ -3,6 +3,7 @@ using BookingService.Application.Contracts;
 using BookingService.Application.DTOs.Booking;
 using BookingService.Application.DTOs.HotelCatalog;
 using BookingService.Domain.Exceptions;
+using BookingService.Domain.ValueObject;
 using Domain.Common.Response;
 using MediatR;
 
@@ -94,6 +95,8 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw new DomainException("Unable to retrieve the room rate list from the system.");
         }
 
+        var roomDataLookup = allRoomPrices.ToDictionary(k => k.RoomTypeId, v => v);
+
         decimal tempBaseTotal = 0;
         int totalNights = request.CheckOutDate.DayNumber - request.CheckInDate.DayNumber;
 
@@ -101,9 +104,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         foreach (var item in request.Items)
         {
-            var roomPriceData = allRoomPrices.FirstOrDefault(x => x.RoomTypeId == item.RoomTypeId);
-
-            if (roomPriceData == null)
+            if (!roomDataLookup.TryGetValue(item.RoomTypeId, out var roomPriceData))
             {
                 throw new DomainException($"Room type {item.RoomTypeId} does not exist or has no price yet.");
             }
@@ -122,7 +123,19 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
             decimal avgUnitPrice = totalRoomCost / totalNights;
 
-            booking.AddItem(item.RoomTypeId, item.Quantity, avgUnitPrice);
+            var bookingItem = booking.AddItem(item.RoomTypeId, item.Quantity, avgUnitPrice);
+
+            if (roomPriceData.CancellationPolicy != null)
+            {
+                var snapshotRules = roomPriceData.CancellationPolicy.Rules.Select(r => new PolicyRuleSnapshot
+                {
+                    HoursBeforeCheckIn = r.HoursBeforeCheckIn,
+                    RefundPercentage = r.RefundPercentage
+                }).ToList();
+
+                bookingItem.SetPolicySnapshot(roomPriceData.CancellationPolicy.Name, snapshotRules);
+            }
+
             tempBaseTotal += (totalRoomCost * item.Quantity);
         }
 

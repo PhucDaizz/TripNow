@@ -1,4 +1,6 @@
-﻿namespace HotelCatalogService.Application.DTOs.RoomPrice
+﻿using HotelCatalogService.Application.DTOs.CancellationPolicy;
+
+namespace HotelCatalogService.Application.DTOs.RoomPrice
 {
     public class RoomTypeCalendarDto
     {
@@ -6,5 +8,6 @@
         public string RoomTypeName { get; set; }
         public decimal BasePrice { get; set; }
         public List<DailyPriceDto> Calendar { get; set; } = new();
+        public CancellationPolicyDto? CancellationPolicy { get; set; }
     }
 }

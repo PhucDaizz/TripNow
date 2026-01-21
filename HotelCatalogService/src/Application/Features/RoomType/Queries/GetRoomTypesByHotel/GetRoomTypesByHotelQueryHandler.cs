@@ -8,10 +8,12 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
     public class GetRoomTypesByHotelQueryHandler : IRequestHandler<GetRoomTypesByHotelQuery, Result<List<RoomTypeDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IApplicationDbContext _context;
 
-        public GetRoomTypesByHotelQueryHandler(IUnitOfWork unitOfWork)
+        public GetRoomTypesByHotelQueryHandler(IUnitOfWork unitOfWork, IApplicationDbContext context)
         {
             _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public async Task<Result<List<RoomTypeDto>>> Handle(GetRoomTypesByHotelQuery request, CancellationToken cancellationToken)
@@ -22,12 +24,12 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
 
             if (hotel == null) return Result.Failure<List<RoomTypeDto>>(new Error("Hotel.NotFound", "Not found"));
 
+
             var dtos = hotel.RoomTypes.Select(rt =>
             {
                 var specialPriceObj = rt.Prices.FirstOrDefault();
-
-                decimal finalPrice;
-                bool isDiscounted = false;
+                decimal finalPrice = specialPriceObj?.Price ?? rt.BasePrice;
+                bool isDiscounted = specialPriceObj != null && finalPrice != rt.BasePrice;
 
                 if (specialPriceObj != null)
                 {
@@ -50,7 +52,23 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
 
                     Capacity = rt.Capacity,
                     SizeM2 = rt.SizeM2,
-                    MainImage = rt.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl
+                    MainImage = rt.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl,
+                    CancellationPolicy = rt.CancellationPolicy == null ? null : new DTOs.CancellationPolicy.CancellationPolicyDto
+                    {
+                        Id = rt.CancellationPolicy.Id,
+                        Name = rt.CancellationPolicy.Name,
+                        Description = rt.CancellationPolicy.Description,
+                        Type = rt.CancellationPolicy.Type.ToString(),
+
+                        Rules = rt.CancellationPolicy.Rules
+                            .OrderByDescending(r => r.HoursBeforeCheckIn)
+                            .Select(r => new DTOs.CancellationPolicy.CancellationRuleDto
+                            {
+                                Id = r.Id,
+                                HoursBeforeCheckIn = r.HoursBeforeCheckIn,
+                                RefundPercentage = r.RefundPercentage
+                            }).ToList()
+                    }
                 };
             }).ToList();
 

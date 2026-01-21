@@ -28,6 +28,14 @@ namespace BookingService.Infrastructure.Data.Configurations
             builder.Navigation(bi => bi.Assignments)
                    .HasField("_assignments")
                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.Property(bi => bi.CancellationPolicyName)
+                   .HasMaxLength(200) 
+                   .IsRequired(false);
+
+            builder.Property(bi => bi.CancellationPolicyData)
+                   .HasColumnType("json") 
+                   .IsRequired(false);
         }
     }
 }

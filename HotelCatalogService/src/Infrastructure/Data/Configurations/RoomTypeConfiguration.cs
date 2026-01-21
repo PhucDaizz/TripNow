@@ -36,6 +36,11 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
             builder.Navigation(h => h.Rooms).HasField("_rooms");
 
+            builder.HasOne(rt => rt.CancellationPolicy)
+                   .WithMany() 
+                   .HasForeignKey(rt => rt.CancellationPolicyId)
+                   .IsRequired(false) 
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

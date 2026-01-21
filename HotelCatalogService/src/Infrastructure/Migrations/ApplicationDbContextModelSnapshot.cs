@@ -89,6 +89,80 @@ namespace HotelCatalogService.Infrastructure.Migrations
                     b.ToTable("Blocks", (string)null);
                 });
 
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.CancellationPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<sbyte>("Type")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CancellationPolicies", (string)null);
+                });
+
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.CancellationRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("CancellationPolicyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("HoursBeforeCheckIn")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("RefundPercentage")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancellationPolicyId");
+
+                    b.ToTable("CancellationRule");
+                });
+
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Floor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -445,6 +519,9 @@ namespace HotelCatalogService.Infrastructure.Migrations
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("CancellationPolicyId")
+                        .HasColumnType("char(36)");
+
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
@@ -474,6 +551,8 @@ namespace HotelCatalogService.Infrastructure.Migrations
                         .HasColumnType("varchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CancellationPolicyId");
 
                     b.HasIndex("HotelId");
 
@@ -527,6 +606,15 @@ namespace HotelCatalogService.Infrastructure.Migrations
                     b.HasOne("HotelCatalogService.Domain.Entities.Hotel", null)
                         .WithMany("Blocks")
                         .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.CancellationRule", b =>
+                {
+                    b.HasOne("HotelCatalogService.Domain.Entities.CancellationPolicy", null)
+                        .WithMany("Rules")
+                        .HasForeignKey("CancellationPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -669,11 +757,18 @@ namespace HotelCatalogService.Infrastructure.Migrations
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.RoomType", b =>
                 {
+                    b.HasOne("HotelCatalogService.Domain.Entities.CancellationPolicy", "CancellationPolicy")
+                        .WithMany()
+                        .HasForeignKey("CancellationPolicyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("HotelCatalogService.Domain.Entities.Hotel", null)
                         .WithMany("RoomTypes")
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CancellationPolicy");
                 });
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.RoomTypeImage", b =>
@@ -688,6 +783,11 @@ namespace HotelCatalogService.Infrastructure.Migrations
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Block", b =>
                 {
                     b.Navigation("Floors");
+                });
+
+            modelBuilder.Entity("HotelCatalogService.Domain.Entities.CancellationPolicy", b =>
+                {
+                    b.Navigation("Rules");
                 });
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Floor", b =>

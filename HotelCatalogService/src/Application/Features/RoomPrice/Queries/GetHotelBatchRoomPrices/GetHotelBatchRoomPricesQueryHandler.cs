@@ -1,5 +1,6 @@
 ﻿using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Application.DTOs.CancellationPolicy;
 using HotelCatalogService.Application.DTOs.RoomPrice;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,18 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBat
                 {
                     rt.Id,
                     rt.Name,
-                    rt.BasePrice
+                    rt.BasePrice,
+                    Policy = rt.CancellationPolicy == null ? null : new
+                    {
+                        rt.CancellationPolicy.Id,
+                        rt.CancellationPolicy.Name,
+                        rt.CancellationPolicy.Type,
+                        Rules = rt.CancellationPolicy.Rules.Select(r => new
+                        {
+                            r.HoursBeforeCheckIn,
+                            r.RefundPercentage
+                        }).ToList()
+                    }
                 })
                 .ToListAsync(token);
 
@@ -58,7 +70,20 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBat
                     RoomTypeId = rt.Id,
                     RoomTypeName = rt.Name,
                     BasePrice = rt.BasePrice,
-                    Calendar = new List<DailyPriceDto>()
+                    Calendar = new List<DailyPriceDto>(),
+                    CancellationPolicy = rt.Policy == null ? null : new CancellationPolicyDto
+                    {
+                        Id = rt.Policy.Id,
+                        Name = rt.Policy.Name,
+                        Type = rt.Policy.Type.ToString(), 
+                        Rules = rt.Policy.Rules.Select(r => new CancellationRuleDto
+                        {
+                            HoursBeforeCheckIn = r.HoursBeforeCheckIn,
+                            RefundPercentage = r.RefundPercentage
+                        })
+                        .OrderByDescending(r => r.HoursBeforeCheckIn) 
+                        .ToList()
+                    }
                 };
 
                 var hasSpecialConfig = specialPriceLookup.TryGetValue(rt.Id, out var roomSpecialPrices);

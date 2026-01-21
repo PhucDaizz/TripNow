@@ -26,7 +26,7 @@ namespace BookingService.Domain.Repositories
         /// <param name="toDate"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<Inventory>?> GetInventoriesInRangeAsync(List<Guid> roomTypeIds, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken);
+        Task<List<Inventory>?> GetInventoriesInRangeAsync(List<Guid> roomTypeIds, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken= default);
 
         /// <summary>
         /// Reset cột BlockedStock về 0 hàng loạt (Dùng khi mở cửa khách sạn lại).

@@ -217,11 +217,14 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
         public async Task<Hotel?> GetHotelCatalogAsync(Guid hotelId, DateTime checkInDate, CancellationToken token)
         {
             return await _context.Hotel
-                .Include(h => h.RoomTypes)
+                .AsSplitQuery()
+                .Include(h => h.RoomTypes.Where(x => x.HotelId == hotelId))
                     .ThenInclude(rt => rt.Images) 
-                .Include(h => h.RoomTypes)
-                    .ThenInclude(rt => rt.Prices
-                        .Where(p => p.Date.Date == checkInDate.Date)) 
+                .Include(h => h.RoomTypes.Where(x => x.HotelId == hotelId))
+                    .ThenInclude(rt => rt.Prices.Where(p => p.Date.Date == checkInDate.Date))
+                .Include(h => h.RoomTypes.Where(x => x.HotelId == hotelId))
+                    .ThenInclude(rt => rt.CancellationPolicy) 
+                        .ThenInclude(cp => cp.Rules)
                 .FirstOrDefaultAsync(h => h.Id == hotelId, token);
         }
 

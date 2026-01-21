@@ -135,6 +135,13 @@ namespace BookingService.Infrastructure.Migrations
                     b.Property<Guid>("BookingId")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("CancellationPolicyData")
+                        .HasColumnType("json");
+
+                    b.Property<string>("CancellationPolicyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 

@@ -5,6 +5,7 @@ namespace HotelCatalogService.Domain.Entities
     public class RoomType : BaseEntity
     {
         public Guid HotelId { get; private set; }
+        public Guid? CancellationPolicyId { get; private set; }
         public string Name { get; private set; }
         public decimal BasePrice { get; private set; }
         public int Capacity { get; private set; }
@@ -16,6 +17,7 @@ namespace HotelCatalogService.Domain.Entities
         public IReadOnlyCollection<RoomTypeImage> Images => _images.AsReadOnly();
         public IReadOnlyCollection<RoomPrice> Prices => _prices.AsReadOnly();
         public IReadOnlyCollection<Room> Rooms => _rooms.AsReadOnly();
+        public virtual CancellationPolicy? CancellationPolicy { get; private set; }
 
         private RoomType()
         {
@@ -115,6 +117,16 @@ namespace HotelCatalogService.Domain.Entities
 
                 SetSpecialPrice(date, price);
             }
+        }
+
+        public void SetPolicy(Guid policyId)
+        {
+            CancellationPolicyId = policyId;
+        }
+
+        public void RemovePolicy()
+        {
+            CancellationPolicyId = null;
         }
     }
 }

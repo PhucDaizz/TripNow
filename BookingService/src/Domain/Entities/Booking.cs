@@ -54,7 +54,7 @@ namespace BookingService.Domain.Entities
             AddDomainEvent(new BookingCreatedDomainEvent(this));
         }
 
-        public void AddItem(Guid roomTypeId, int quantity, decimal unitPrice)
+        public BookingItem AddItem(Guid roomTypeId, int quantity, decimal unitPrice)
         {
             if (Status != BookingStatus.Pending)
                 throw new DomainException("Chỉ được sửa phòng khi đơn đang chờ.");
@@ -63,6 +63,7 @@ namespace BookingService.Domain.Entities
             _items.Add(item);
 
             RecalculatePriceStructure();
+            return item;
         }
 
 
@@ -110,13 +111,46 @@ namespace BookingService.Domain.Entities
 
             Status = BookingStatus.Cancelled;
 
-            // Nếu đã thanh toán thì cập nhật trạng thái tiền để Payment Service xử lý hoàn tiền
             if (PaymentStatus == PaymentStatus.Paid)
             {
-                PaymentStatus = PaymentStatus.Refunded; // Hoặc PartialRefunded
+                if (refundAmount > 0)
+                {
+                    PaymentStatus = PaymentStatus.RefundPending;
+                }
+                else
+                {
+                    PaymentStatus = PaymentStatus.Paid;
+                }
+            }
+            else if (PaymentStatus == PaymentStatus.Unpaid)
+            {
+                PaymentStatus = PaymentStatus.Cancelled;
             }
 
             Cancellation = new BookingCancellation(this.Id, who, reason, policy, refundAmount);
+
+            AddDomainEvent(new BookingCancelledDomainEvent
+            {
+                Fromdate = this.CheckInDate,
+                ToDate = this.CheckOutDate,
+                Items = this.Items.ToList()
+            });
+
+            if (refundAmount > 0)
+            {
+                AddDomainEvent(new BookingRefundInitiatedDomainEvent
+                {
+                    BookingId = this.Id,
+                    Amount = refundAmount,
+                    UserId = this.UserId
+                });
+            }
+        }
+
+        public void PaymentSusscess()
+        {
+            PaymentStatus = PaymentStatus.Paid;
+            Status = BookingStatus.Confirmed;
         }
 
         public void AddPriceDetail(PriceType type, decimal amount, string description)
@@ -172,6 +206,16 @@ namespace BookingService.Domain.Entities
             ));
 
             TotalAmount = taxableAmount + vatAmount;
+        }
+
+        public decimal CalculateTotalRefundAmount(DateTime cancelTime)
+        {
+            decimal totalRefund = 0;
+            foreach (var item in _items)
+            {
+                totalRefund += item.CalculateRefund(cancelTime, this.CheckInDate.ToDateTime(new TimeOnly(14, 0)));
+            }
+            return totalRefund;
         }
 
         public void AddSurcharge(decimal amount, string description)

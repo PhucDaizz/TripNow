@@ -6,6 +6,7 @@ namespace HotelCatalogService.Application.Common.Interfaces
     {
 
         IHotelRepository Hotel { get; }
+        ICancellationPolicyRepository CancellationPolicy { get; }
         IAmenityRepository Amenity { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

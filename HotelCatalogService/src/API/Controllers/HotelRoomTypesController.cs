@@ -10,6 +10,8 @@ using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HotelCatalogService.Application.Features.RoomType.Commands.RemovePolicy;
+using HotelCatalogService.Application.Features.RoomType.Commands.SetPolicy;
 using Nexus.BuildingBlocks.Model;
 
 namespace HotelCatalogService.API.Controllers
@@ -145,6 +147,45 @@ namespace HotelCatalogService.API.Controllers
             }
 
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        /// <summary>
+        /// Thêm hoặc Cập nhật chính sách hủy cho loại phòng (Yêu cầu quyền chủ khách sạn).
+        /// </summary>
+        [HttpPut("{roomTypeId}/policy")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> SetPolicy(Guid hotelId, Guid roomTypeId, [FromBody] SetPolicyRequest request)
+        {
+            var command = new SetRoomTypePolicyCommand
+            {
+                HotelId = hotelId,
+                RoomTypeId = roomTypeId,
+                OwnerId = Guid.Parse(_currentUser.UserId),
+                PolicyId = request.PolicyId
+            };
+            var result = await _mediator.Send(command);
+            return result.IsSuccess 
+                ? Ok(ApiResponse<object>.SuccessResponse(null, "Policy updated successfully.")) 
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        /// <summary>
+        /// Xóa chính sách hủy khỏi loại phòng (Yêu cầu quyền chủ khách sạn).
+        /// </summary>
+        [HttpDelete("{roomTypeId}/policy")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> RemovePolicy(Guid hotelId, Guid roomTypeId)
+        {
+            var command = new RemoveRoomTypePolicyCommand
+            {
+                HotelId = hotelId,
+                RoomTypeId = roomTypeId,
+                OwnerId = Guid.Parse(_currentUser.UserId)
+            };
+            var result = await _mediator.Send(command);
+            return result.IsSuccess 
+                ? Ok(ApiResponse<object>.SuccessResponse(null, "Policy removed successfully.")) 
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
     }
 }

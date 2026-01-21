@@ -1,6 +1,5 @@
 ﻿using BookingService.Domain.Entities;
 using BookingService.Domain.Repositories;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingService.Infrastructure.Data.Repositories
@@ -95,7 +94,7 @@ namespace BookingService.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Inventory>?> GetInventoriesInRangeAsync(List<Guid>roomTypeIds, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken)
+        public async Task<List<Inventory>?> GetInventoriesInRangeAsync(List<Guid>roomTypeIds, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
         {
             return await _context.Inventory
                 .Where(x => roomTypeIds.Contains(x.RoomTypeId)

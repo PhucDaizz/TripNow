@@ -77,12 +77,6 @@ namespace BookingService.Domain.Entities
             return true;
         }
 
-        public void Release(int quantity)
-        {
-            SoldStock -= quantity;
-            if (SoldStock < 0) SoldStock = 0; 
-        }
-
         /// <summary>
         /// Nhả phòng (Giảm SoldStock - Khi hủy đơn)
         /// </summary>

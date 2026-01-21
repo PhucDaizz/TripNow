@@ -1,4 +1,6 @@
-﻿namespace HotelCatalogService.Application.DTOs.RoomType
+﻿using HotelCatalogService.Application.DTOs.CancellationPolicy;
+
+namespace HotelCatalogService.Application.DTOs.RoomType
 {
     public class RoomTypeDto
     {
@@ -11,6 +13,7 @@
 
         public int Capacity { get; set; }
         public decimal SizeM2 { get; set; }
-        public string MainImage { get; set; } 
+        public string MainImage { get; set; }
+        public CancellationPolicyDto? CancellationPolicy { get; set; }
     }
 }

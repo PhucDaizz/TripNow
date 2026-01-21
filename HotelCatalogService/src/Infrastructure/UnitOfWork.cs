@@ -13,12 +13,14 @@ namespace HotelCatalogService.Infrastructure
 
         public IHotelRepository Hotel { get; }
         public IAmenityRepository Amenity { get; }
+        public ICancellationPolicyRepository CancellationPolicy { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             Hotel = new HotelRepository(context);
             Amenity = new AmenityRepository(context);
+            CancellationPolicy = new CancellationPolicyRepository(context);
         }
         public async Task BeginTransactionAsync()
         {
