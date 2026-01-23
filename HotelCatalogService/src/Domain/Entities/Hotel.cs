@@ -3,7 +3,6 @@ using HotelCatalogService.Domain.Common.Helpers;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Events.Hotel;
 using HotelCatalogService.Domain.ValueObject;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HotelCatalogService.Domain.Entities
 {

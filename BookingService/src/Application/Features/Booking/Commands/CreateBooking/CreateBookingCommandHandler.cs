@@ -37,6 +37,12 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw new UnauthorizedAccessException("User is not authenticated or invalid user ID.");
         }
 
+        var hotel = await _hotelCatalogService.GetHotelSummary(request.HotelId, cancellationToken);
+        if (hotel == null)
+        {
+            throw new DomainException("The specified hotel does not exist.");
+        }
+
         var listRoomTypeIds = request.Items.Select(i => i.RoomTypeId).Distinct().ToList();
 
         var inventoryList = await _unitOfWork.Inventory.GetInventoriesInRangeAsync(
@@ -76,7 +82,10 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         var booking = new Domain.Entities.Booking(
             userId,
+            _currentUserService.FullName,
+            _currentUserService.Email,
             request.HotelId,
+            hotel.HotelName,
             request.CheckInDate,
             request.CheckOutDate,
             request.Source,

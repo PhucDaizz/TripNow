@@ -30,6 +30,12 @@ namespace BookingService.Infrastructure.Services
             _httpContextAccessor.HttpContext?.User?
                 .FindFirst(ClaimTypes.Role)?.Value;
 
+        public string? FullName =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Name)?.Value;
+        public string? PhoneNumber =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.MobilePhone)?.Value;
 
         public Guid? HotelId
         {

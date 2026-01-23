@@ -73,6 +73,22 @@ namespace BookingService.Infrastructure.Services
             return new List<CatalogBatchPriceDto>();
         }
 
+        public async Task<HotelSummaryDto?> GetHotelSummary(Guid hotelId, CancellationToken token = default)
+        {
+            var response = await _httpClient.GetAsync($"/api/Hotel/{hotelId}/summary");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<HotelSummaryDto?>>(cancellationToken: token);
+                if (apiResponse != null && apiResponse.Success && apiResponse.Data != null)
+                {
+                    return apiResponse.Data;
+                }
+            }
+
+            return null;
+        }
+
         public async Task<PromotionValidationResult> ValidatePromotionAsync(Guid hotelId, string code, decimal totalBaseAmount, Guid userId, CancellationToken token = default)
         {
             var context = _httpContextAccessor.HttpContext;

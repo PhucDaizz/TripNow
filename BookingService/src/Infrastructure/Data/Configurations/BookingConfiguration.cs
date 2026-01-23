@@ -14,7 +14,15 @@ namespace BookingService.Infrastructure.Data.Configurations
             builder.HasKey(b => b.Id);
 
             // --- PROPERTIES ---
+            builder.Property(b => b.CustomerEmail)
+                   .HasMaxLength(50);
 
+            builder.Property(b => b.CustomerName)
+                   .HasMaxLength(50);
+
+            builder.Property(b => b.HotelName)
+                   .HasMaxLength(50);
+            
             // Decimal cho tiền tệ trong MySQL
             builder.Property(b => b.TotalAmount)
                    .HasColumnType("decimal(18,2)")

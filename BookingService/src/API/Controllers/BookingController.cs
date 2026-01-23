@@ -2,6 +2,7 @@
 using BookingService.Application.DTOs.Booking;
 using BookingService.Application.Features.Booking.Commands.CancelBooking;
 using BookingService.Application.Features.Booking.Commands.CreateBooking;
+using BookingService.Application.Features.Booking.Queries.GetDetailBooking;
 using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
 using MediatR;
@@ -52,7 +53,7 @@ namespace BookingService.API.Controllers
 
 
         /// <summary>
-        /// Huỷ đơn đặt phòng lúc chưa thanh toán (Admin được huỷ tất cả, chủ ks và lễ tân chỉ huỷ trong khách sạn 9 mình, user chỉ huỷ cúa mình)
+        /// Huỷ đơn đặt phòng (Admin được huỷ tất cả, chủ ks và lễ tân chỉ huỷ trong khách sạn 9 mình, user chỉ huỷ cúa mình)
         /// </summary>
         [HttpPost]
         [Route("cancel")]
@@ -79,18 +80,23 @@ namespace BookingService.API.Controllers
             return Ok(apiResponse);
         }
 
-        /// <summary>
-        /// Huỷ đơn đặt phòng lúc đã thanh toán nhưng chưa đến ngày ở(Admin được huỷ tất cả, chủ ks và lễ tân chỉ huỷ trong khách sạn 9 mình, user chỉ huỷ cúa mình)
-        /// </summary>
-
-
 
         [HttpGet("{id}")]
         [ActionName(nameof(GetBookingById))]
         public async Task<IActionResult> GetBookingById(Guid id)
         {
-            // Todo: Implement Get Query later
-            return Ok();
+            var query = new GetDetailBookingQuery
+            {
+                BookingId = id,
+                UserId = Guid.Parse(_currentUserService.UserId)
+            };
+            var result =  await _mediator.Send(query);
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<BookingDetailResponse>.SuccessResponse(result.Value, "Booking retrieved successfully."));
         }
 
 

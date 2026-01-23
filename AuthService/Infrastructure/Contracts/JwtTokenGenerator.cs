@@ -16,20 +16,25 @@ namespace Infrastructure.Contracts
     {
         private readonly IOptions<JwtSettings> _jwtOptions;
         private readonly IApplicationDbContext _dbContext;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, IApplicationDbContext dbContext)
+        public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, IApplicationDbContext dbContext, IUnitOfWork unitOfWork)
         {
             _jwtOptions = jwtOptions;
             _dbContext = dbContext;
+            _unitOfWork = unitOfWork;
         }
         public async Task<string> CreateToken(CreateTokenDTO user, List<string> roles)
         {
             var userHotel = await _dbContext.StaffProfile.FirstOrDefaultAsync(x => x.UserId == user.UserId);
+            var userInfo = await _unitOfWork.Auth.GetUserByIdAsync(user.UserId);
 
             var claim = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId)
+                new Claim(ClaimTypes.NameIdentifier, user.UserId),
+                new Claim(ClaimTypes.Name, userInfo.FullName ?? "Unknown User"),
+                new Claim(ClaimTypes.MobilePhone, userInfo.PhoneNumber ?? "Unknown"),
             };
             foreach (var role in roles)
             {

@@ -8,7 +8,10 @@ namespace BookingService.Domain.Entities
     public class Booking: BaseEntity, AggregateRoot
     {
         public Guid UserId { get; private set; }
+        public string CustomerName { get; private set; }
+        public string CustomerEmail { get; private set; }
         public Guid HotelId { get; private set; }
+        public string HotelName { get; private set; }
         public DateOnly CheckInDate { get; private set; }
         public DateOnly CheckOutDate { get; private set; }
         public BookingStatus Status { get; private set; }
@@ -35,14 +38,17 @@ namespace BookingService.Domain.Entities
 
         private Booking() {}
 
-        public Booking(Guid userId, Guid hotelId, DateOnly checkIn, DateOnly checkOut,
+        public Booking(Guid userId, string customerName, string customerEmail, Guid hotelId, string hotelName, DateOnly checkIn, DateOnly checkOut,
                        BookingSource source, Guid createdBy)
         {
             if (checkOut <= checkIn)
                 throw new DomainException("Ngày Check-out phải sau ngày Check-in.");
 
             UserId = userId;
+            CustomerName = customerName;
+            CustomerEmail = customerEmail;
             HotelId = hotelId;
+            HotelName = hotelName;
             CheckInDate = checkIn;
             CheckOutDate = checkOut;
             Source = source;

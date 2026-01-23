@@ -1,5 +1,4 @@
 ﻿using Application.DTOs.User;
-using Application.Features.User.Commands;
 using Domain.Entities;
 
 namespace Application.Repositories

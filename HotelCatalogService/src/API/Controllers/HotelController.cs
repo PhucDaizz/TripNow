@@ -10,6 +10,7 @@ using HotelCatalogService.Application.Features.Hotel.Commands.ReopenHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.SubmitForApprovalHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.SuspendHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
 using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Enum;
@@ -325,5 +326,25 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(null, "Hotel suspended successfully."));
         }
 
+        /// <summary>
+        /// Lấy thông tin của khách sạn bằng ID (không cần map ra gateway)
+        /// </summary>
+        [HttpGet("{hotelId:Guid}/summary")]
+        public async Task<IActionResult> GetHotelSummary(Guid hotelId)
+        {
+            var result = await _mediator.Send(new GetHotelSummaryQuery{
+                HotelId = hotelId
+            });
+
+            if (result.IsFailure)
+            {
+                return NotFound(ApiResponse<HotelSummaryDto>.ErrorResponse(
+                    message: result.Error.Message,
+                    errors: new List<string> { result.Error.Code }
+                ));
+            }
+
+            return Ok(ApiResponse<HotelSummaryDto>.SuccessResponse(result.Value));
+        }
     }
 }
