@@ -1,4 +1,6 @@
 ﻿using HotelCatalogService.Application.Features.Promotion.EventHandlers.BookingCancelled;
+using HotelCatalogService.Application.Features.Room.EventHandlers.RoomCheckedOut;
+using HotelCatalogService.Application.Features.Room.EventHandlers.RoomCheckIn;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +31,12 @@ namespace HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Booking
                 exchangeType: "topic",
                 routingKey: "booking.cancelled",         
                 queueName: "hotel-service-booking-cancelled", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+            await _consumer.Subscribe<RoomCheckedOutEvent> (
+                exchange: "booking.events",              
+                exchangeType: "topic",
+                routingKey: "room.checkin",         
+                queueName: "hotel-service-booking-checkout", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

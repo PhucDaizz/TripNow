@@ -55,12 +55,18 @@ namespace BookingService.Domain.Entities
         }
 
         // Gán phòng vật lý (Lễ tân làm lúc Check-in)
-        public void AssignRoom(Guid physicalRoomId)
+        public void AssignRoom(Guid roomId, string roomName)
         {
             if (_assignments.Count >= Quantity)
                 throw new DomainException("Đã gán đủ số lượng phòng.");
 
-            _assignments.Add(new RoomAssignment(this.Id, physicalRoomId));
+            if (_assignments.Any(x => x.RoomId == roomId))
+            {
+                throw new DomainException("Phòng này đã được gán cho khách này rồi.");
+            }
+
+            var assignment = new RoomAssignment(this.Id, roomId, roomName);
+            _assignments.Add(assignment);
         }
     }
 }

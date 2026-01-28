@@ -19,9 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Bookings\" />
     <Folder Include="Features\BookingPriceSnapshot\Commands\" />
-    <Folder Include="Features\BookingPriceSnapshot\Queries\" />
     <Folder Include="Features\Inventory\Command\" />
     <Folder Include="Features\Inventory\Queries\" />
     <Folder Include="Mappings\" />

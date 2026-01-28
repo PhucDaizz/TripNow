@@ -154,5 +154,64 @@ namespace BookingService.Infrastructure.Services
                 Message = "Discount codes cannot be checked at this time."
             };
         }
+
+        public async Task<RoomResponse?> CheckInRoom(Guid HotelId, Guid RoomId, Guid CheckInBy, CancellationToken token = default) 
+        {
+            var context = _httpContextAccessor.HttpContext;
+            var bearerToken = context?.Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(bearerToken))
+            {
+                return null;
+            }
+
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", bearerToken);
+
+            var requestBody = new CheckInRoomRequestDto
+            {
+                HotelId = HotelId,
+                RoomId = RoomId,
+                CheckedInBy = CheckInBy
+            };
+
+            var response = await _httpClient.PostAsJsonAsync($"/api/Hotel/rooms/check-in", requestBody, token);
+            if (response.IsSuccessStatusCode)
+            {
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<RoomResponse?>>(cancellationToken: token);
+                if (apiResponse != null && apiResponse.Success)
+                {
+                    return apiResponse.Data;
+                }
+            }
+            return null;
+        }
+
+        public async Task RollbackCheckInRoom(Guid hotelId, Guid roomId, CancellationToken token)
+        {
+            var context = _httpContextAccessor.HttpContext;
+            var bearerToken = context?.Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(bearerToken))
+            {
+                throw new UnauthorizedAccessException("Cannot rollback without token.");
+            }
+
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", bearerToken);
+
+            var requestBody = new
+            {
+                HotelId = hotelId,
+                RoomId = roomId
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/Hotel/rooms/rollback-check-in", requestBody, token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(token);
+                throw new Exception($"Rollback failed with status {response.StatusCode}. Details: {errorContent}");
+            }
+
+        }
     }
 }

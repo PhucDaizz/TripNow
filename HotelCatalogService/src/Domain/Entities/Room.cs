@@ -1,6 +1,7 @@
 ﻿using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Events.Room;
+using HotelCatalogService.Domain.Exceptions;
 
 namespace HotelCatalogService.Domain.Entities
 {
@@ -96,6 +97,29 @@ namespace HotelCatalogService.Domain.Entities
                 throw new InvalidOperationException("Phải chuyển sang trạng thái Đang dọn (Cleaning) trước khi hoàn tất.");
 
             Status = RoomStatus.Available;
+        }
+
+        public void CheckIn(Guid updateBy)
+        {
+            if (Status != RoomStatus.Available)
+                throw new InvalidOperationException("Chỉ phòng sẵn sàng mới có thể nhận khách.");
+           
+            Status = RoomStatus.Occupied;
+            UpdatedBy = updateBy.ToString();
+        }
+
+        public void CancelCheckIn()
+        {
+            if (Status != RoomStatus.Occupied)
+                throw new InvalidOperationException("Chỉ phòng đang có khách mới có thể hủy nhận phòng.");
+            Status = RoomStatus.Available;
+        }
+
+        public void CheckOut()
+        {
+            if (Status != RoomStatus.Occupied)
+                throw new InvalidOperationException("Chỉ phòng đang có khách mới có thể trả phòng.");
+            Status = RoomStatus.Dirty;
         }
     }
 }

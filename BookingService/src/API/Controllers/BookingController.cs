@@ -2,6 +2,7 @@
 using BookingService.Application.DTOs.Booking;
 using BookingService.Application.Features.Booking.Commands.CancelBooking;
 using BookingService.Application.Features.Booking.Commands.CreateBooking;
+using BookingService.Application.Features.Booking.Queries.GetBookings;
 using BookingService.Application.Features.Booking.Queries.GetDetailBooking;
 using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
@@ -99,6 +100,36 @@ namespace BookingService.API.Controllers
             return Ok(ApiResponse<BookingDetailResponse>.SuccessResponse(result.Value, "Booking retrieved successfully."));
         }
 
+        /// <summary>
+        /// Lấy danh sách đơn hàng (Filter, Paging, Sort)
+        /// </summary>
+        /// <remarks>
+        /// API này tự động nhận diện Role của user (Admin, Owner, Customer) để trả về dữ liệu tương ứng.
+        /// </remarks>
+        [HttpGet]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<PagedResult<BookingSummaryDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetBookings([FromQuery] GetBookingsQuery query, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(
+                    message: result.Error.Message,
+                    errors: new List<string> { result.Error.Code }
+                ));
+            }
+
+            var response = ApiResponse<Domain.Common.Models.PagedResult<BookingSummaryDto>>.SuccessResponse(
+                data: result.Value,
+                message: "Booking list retrieved successfully."
+            );
+
+            return Ok(response);
+        }
 
         private static CancelledBy ResolveCancelledBy(
             ICurrentUserService currentUser)

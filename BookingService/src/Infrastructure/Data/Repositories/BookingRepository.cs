@@ -37,6 +37,14 @@ namespace BookingService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(x => x.Id == bookingId, cancellationToken);
         }
 
+        public async Task<Booking?> GetBookingWithDetailItemAssignmentAsync(Guid bookingId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Booking
+                .Include(b => b.Items.Where(x => x.BookingId == bookingId))
+                    .ThenInclude(i => i.Assignments)
+                .FirstOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
+        }
+
         public async Task<Booking?> GetBookingWithDetailItemAsync(Guid bookingId, CancellationToken cancellationToken = default)
         {
             return await _context.Booking

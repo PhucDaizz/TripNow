@@ -1,17 +1,19 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Application.DTOs.Block;
 using HotelCatalogService.Application.DTOs.RoomPrice;
 using HotelCatalogService.Application.DTOs.RoomType;
+using HotelCatalogService.Application.Features.Room.Queries.GetAvailableRoomsTree;
 using HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomTypeCalendar;
 using HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomType;
 using HotelCatalogService.Application.Features.RoomType.Commands.DeleteRoomType;
+using HotelCatalogService.Application.Features.RoomType.Commands.RemovePolicy;
+using HotelCatalogService.Application.Features.RoomType.Commands.SetPolicy;
 using HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomType;
 using HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypesByHotel;
 using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using HotelCatalogService.Application.Features.RoomType.Commands.RemovePolicy;
-using HotelCatalogService.Application.Features.RoomType.Commands.SetPolicy;
 using Nexus.BuildingBlocks.Model;
 
 namespace HotelCatalogService.API.Controllers
@@ -46,6 +48,36 @@ namespace HotelCatalogService.API.Controllers
             return result.IsSuccess
                 ? Ok(ApiResponse<List<RoomTypeDto>>.SuccessResponse(result.Value))
                 : BadRequest(ApiResponse<object>.ErrorResponse("", new List<string> { result.Error.Message }));
+        }
+
+
+        /// <summary>
+        ///  Lấy danh sách phân cấp các phòng còn trống cho một khách sạn và loại phòng được chỉ định
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
+        public async Task<IActionResult> GetAvailableRoomsTree(Guid hotelId, Guid roomTypeId)
+        {
+            if (_currentUser.Role == AppRoles.Receptionist)
+            {
+                var tokenHotelId = _currentUser.HotelId;
+                if (tokenHotelId != null && tokenHotelId != hotelId)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden,
+                        ApiResponse<object>.ErrorResponse("Receptionist can only access their assigned hotel."));
+                }
+            }
+
+            var query = new GetAvailableRoomsTreeQuery
+            {
+                HotelId = hotelId,
+                RoomTypeId = roomTypeId
+            };
+
+            var result = await _mediator.Send(query);
+            return result.IsSuccess
+                ? Ok(ApiResponse<List<BlockResponse>>.SuccessResponse(result.Value))
+                : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
         /// <summary>
