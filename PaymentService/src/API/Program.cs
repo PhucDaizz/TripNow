@@ -1,32 +1,20 @@
-using BookingService.API.Common.ExceptionHandling;
-using BookingService.API.ExceptionHandling;
-using BookingService.API.Extensions;
-using BookingService.API.StartUp;
-using BookingService.Application;
-using BookingService.Application.Contracts;
-using BookingService.Infrastructure;
-using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
-using BookingService.Infrastructure.Services;
-using BookingService.Infrastructure.Settings;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Options;
-using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http.Features;
+using Nexus.BuildingBlocks.Extensions;
+using PaymentService.API.Common.ExceptionHandling;
+using PaymentService.API.ExceptionHandling;
+using PaymentService.API.Extensions;
+using PaymentService.API.StartUp;
+using PaymentService.Application;
+using PaymentService.Infrastructure;
 
-namespace BookingService.API
+namespace PaymentService.API
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.Configure<InventorySettings>(
-               builder.Configuration.GetSection(InventorySettings.SectionName)
-            );
-
-            builder.Services.Configure<ServiceUrlOptions>(
-                builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -42,7 +30,6 @@ namespace BookingService.API
                     context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
                 };
             });
-            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
 
@@ -51,23 +38,6 @@ namespace BookingService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
-
-            builder.Services.AddHostedService<InventoryEventsConsumer>();
-
-            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
-                (sp, client) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
-                    client.BaseAddress = new Uri(options.HotelCatalog);
-                });
-
-            builder.Services.AddHttpClient<IPaymentService, PaymentService>(
-                (sp, client) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
-                    client.BaseAddress = new Uri(options.Payment);
-                });
-
             var app = builder.Build();
 
             app.UseExceptionHandler();

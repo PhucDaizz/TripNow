@@ -12,6 +12,7 @@ using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
 
@@ -35,6 +36,10 @@ namespace HotelCatalogService.API
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection(EmailSettings.SectionName)
             );
+
+            builder.Services.Configure<ServiceUrlOptions>(
+                builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
+
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -65,10 +70,12 @@ namespace HotelCatalogService.API
             builder.Services.AddHostedService<BookingCancelledConsumer>();
             builder.Services.AddHostedService<BookingEventsConsumer>();
 
-            builder.Services.AddHttpClient<IStaffService, StaffService>(client =>
-            {
-                client.BaseAddress = new Uri("http://localhost:7001"); 
-            });
+            builder.Services.AddHttpClient<IStaffService, StaffService>(
+                (sp, client) =>
+                {
+                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                    client.BaseAddress = new Uri(options.Auth);
+                });
 
 
             var app = builder.Build();
