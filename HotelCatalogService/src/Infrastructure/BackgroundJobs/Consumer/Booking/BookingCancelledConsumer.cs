@@ -35,7 +35,7 @@ namespace HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Booking
             await _consumer.Subscribe<RoomCheckedOutEvent> (
                 exchange: "booking.events",              
                 exchangeType: "topic",
-                routingKey: "room.checkin",         
+                routingKey: "room.checkout",         
                 queueName: "hotel-service-booking-checkout", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
