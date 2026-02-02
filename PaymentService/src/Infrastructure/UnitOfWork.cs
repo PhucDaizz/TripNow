@@ -1,6 +1,6 @@
-﻿using Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
 using PaymentService.Application.Common.Interfaces;
+using PaymentService.Domain.Repositories;
 
 namespace PaymentService.Infrastructure
 {
@@ -9,9 +9,24 @@ namespace PaymentService.Infrastructure
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
 
-        public UnitOfWork(ApplicationDbContext context)
+        public ISettlementPeriodRepository SettlementPeriods { get; }
+        public IPaymentTransactionRepository PaymentTransactions { get; }
+        public IOwnerWalletRepository OwnerWallets { get; }
+        public IEscrowAccountRepository EscrowAccounts { get; }
+
+
+        public UnitOfWork(
+            ApplicationDbContext context,
+            ISettlementPeriodRepository settlementPeriodRepository,
+            IPaymentTransactionRepository paymentTransactionRepository,
+            IOwnerWalletRepository ownerWalletRepository,
+            IEscrowAccountRepository escrowAccountRepository)
         {
             _context = context;
+            SettlementPeriods = settlementPeriodRepository;
+            PaymentTransactions = paymentTransactionRepository;
+            OwnerWallets = ownerWalletRepository;
+            EscrowAccounts = escrowAccountRepository;
         }
         public async Task BeginTransactionAsync()
         {

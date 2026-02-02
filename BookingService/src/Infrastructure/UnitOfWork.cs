@@ -1,6 +1,5 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Domain.Repositories;
-using BookingService.Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BookingService.Infrastructure
@@ -16,13 +15,17 @@ namespace BookingService.Infrastructure
         public IBookingPriceSnapshotRepository BookingPriceSnapshot { get; }
 
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context,
+            IBookingRepository bookingRepository,
+            IInventoryRepository inventoryRepository,
+            IInventoryConfigurationRepository inventoryConfigurationRepository,
+            IBookingPriceSnapshotRepository bookingPriceSnapshotRepository)
         {
             _context = context;
-            Booking = new BookingRepository(_context);
-            Inventory = new InventoryRepository(_context);
-            InventoryConfiguration = new InventoryConfigurationRepository(_context);
-            BookingPriceSnapshot = new BookingPriceSnapshotRepository(_context);
+            Booking = bookingRepository;
+            Inventory = inventoryRepository;
+            InventoryConfiguration = inventoryConfigurationRepository;
+            BookingPriceSnapshot = bookingPriceSnapshotRepository;
         }
         public async Task BeginTransactionAsync()
         {

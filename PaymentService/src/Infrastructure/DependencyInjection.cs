@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PaymentService.Application.Common.Interfaces;
+using PaymentService.Domain.Repositories;
+using PaymentService.Infrastructure.Data.Repositories;
 using PaymentService.Infrastructure.Services;
 
 namespace PaymentService.Infrastructure
@@ -18,8 +20,13 @@ namespace PaymentService.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IEscrowAccountRepository, EscrowAccountRepository>();
+            services.AddScoped<IOwnerWalletRepository, OwnerWalletRepository>();
+            services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
+            services.AddScoped<ISettlementPeriodRepository, SettlementPeriodRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

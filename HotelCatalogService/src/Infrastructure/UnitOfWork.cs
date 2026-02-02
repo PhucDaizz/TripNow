@@ -1,7 +1,5 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Domain.Repositories;
-using HotelCatalogService.Infrastructure.Data.Repositories;
-using Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HotelCatalogService.Infrastructure
@@ -15,12 +13,15 @@ namespace HotelCatalogService.Infrastructure
         public IAmenityRepository Amenity { get; }
         public ICancellationPolicyRepository CancellationPolicy { get; }
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context,
+            IHotelRepository hotelRepository,
+            IAmenityRepository amenityRepository,
+            ICancellationPolicyRepository cancellationPolicyRepository)
         {
             _context = context;
-            Hotel = new HotelRepository(context);
-            Amenity = new AmenityRepository(context);
-            CancellationPolicy = new CancellationPolicyRepository(context);
+            Hotel = hotelRepository;
+            Amenity = amenityRepository;
+            CancellationPolicy = cancellationPolicyRepository;
         }
         public async Task BeginTransactionAsync()
         {

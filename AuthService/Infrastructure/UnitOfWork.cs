@@ -15,11 +15,13 @@ namespace Infrastructure
         public IAuthRepository Auth { get; }
         public IStaffProfileRepository StaffProfile { get; }
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context,
+            IAuthRepository authRepository,
+            IStaffProfileRepository staffProfileRepository)
         {
             _context = context;
-            Auth = new AuthRepository(_context);
-            StaffProfile = new StaffProfileRepository(_context);
+            Auth = authRepository;
+            StaffProfile = staffProfileRepository;
         }
         public async Task BeginTransactionAsync()
         {
