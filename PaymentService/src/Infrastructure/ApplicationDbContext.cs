@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Domain.Common;
+using PaymentService.Domain.Entities;
 
 namespace PaymentService.Infrastructure
 {
@@ -11,12 +12,14 @@ namespace PaymentService.Infrastructure
         {
             _domainEventService = domainEventService;
         }
-        /*
-                public DbSet<Listing> Listings { get; set; } = null!;
-                public DbSet<AuctionBid> AuctionBids { get; set; } = null!;
-                public DbSet<PriceSuggestion> PriceSuggestions { get; set; } = null!;
-                public DbSet<Transactions> Transactions { get; set; } = null!;
-                public DbSet<CreditInventory> CreditInventories { get; set; } = null!;*/
+
+        public DbSet<EscrowAccount> EscrowAccount { get; set; } 
+        public DbSet<OwnerWallet> OwnerWallet { get; set; } 
+        public DbSet<PaymentTransaction> PaymentTransaction { get; set; } 
+        public DbSet<Payout> Payout { get; set; } 
+        public DbSet<SettlementItem> SettlementItem { get; set; } 
+        public DbSet<SettlementPeriod> SettlementPeriod { get; set; } 
+        public DbSet<WalletLedger> WalletLedger { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
