@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Nexus.BuildingBlocks.Extensions;
 using PaymentService.API.Common.ExceptionHandling;
@@ -7,6 +6,7 @@ using PaymentService.API.Extensions;
 using PaymentService.API.StartUp;
 using PaymentService.Application;
 using PaymentService.Infrastructure;
+using System.Diagnostics;
 
 namespace PaymentService.API
 {
@@ -32,6 +32,7 @@ namespace PaymentService.API
             });
 
             builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddSharedRabbitMQ(builder.Configuration);
 

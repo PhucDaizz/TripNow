@@ -2,9 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PaymentService.Application.Common.Interfaces;
+using PaymentService.Application.Contracts;
 using PaymentService.Domain.Repositories;
 using PaymentService.Infrastructure.Data.Repositories;
 using PaymentService.Infrastructure.Services;
+using PaymentService.Infrastructure.Settings;
+using VNPAY.Extensions;
 
 namespace PaymentService.Infrastructure
 {
@@ -18,6 +21,21 @@ namespace PaymentService.Infrastructure
                    new MySqlServerVersion(new Version(8, 0, 21)),
                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
+            services.Configure<VNPAYSettings>(
+                configuration.GetSection(VNPAYSettings.SectionName));
+
+            var vnpayConfig = configuration.GetSection(VNPAYSettings.SectionName);
+
+            services.AddVnpayClient(config =>
+            {
+                config.TmnCode = vnpayConfig["TmnCode"]!;
+                config.HashSecret = vnpayConfig["HashSecret"]!;
+                config.CallbackUrl = vnpayConfig["CallbackUrl"]!;
+                config.BaseUrl = vnpayConfig["BaseUrl"]!;
+                config.Version = vnpayConfig["Version"]!;
+                config.OrderType = vnpayConfig["OrderType"]!;
+            });
+
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
 
@@ -28,6 +46,7 @@ namespace PaymentService.Infrastructure
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IPaymentService, Settings.PaymentService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
 
