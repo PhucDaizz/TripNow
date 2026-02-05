@@ -30,6 +30,11 @@ namespace PaymentService.Infrastructure.Data.Repositories
             return await _context.EscrowAccount.FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
+        public async Task<EscrowAccount?> GetByBookingIdAsync(Guid bookingId, CancellationToken token = default)
+        {
+            return await _context.EscrowAccount.FirstOrDefaultAsync(x => x.BookingId == bookingId, token);
+        }
+
         public Task UpdateAsync(EscrowAccount escrowAccount, CancellationToken token = default)
         {
             _context.EscrowAccount.Update(escrowAccount);

@@ -1,5 +1,6 @@
 ﻿using PaymentService.Domain.Common;
 using PaymentService.Domain.Enum;
+using PaymentService.Domain.Events.PaymentTransaction;
 using PaymentService.Domain.Exceptions;
 
 namespace PaymentService.Domain.Entities
@@ -10,6 +11,7 @@ namespace PaymentService.Domain.Entities
         public Guid BookingId { get; private set; }
         public decimal Amount { get; private set; }
         public PaymentProvider Provider { get; private set; }
+        public string? MerchantRef { get; private set; }
         public string? ProviderTxnId { get; private set; }
         public decimal? ProviderFee { get; private set; }
         public string? RawResponse { get; private set; }
@@ -19,13 +21,14 @@ namespace PaymentService.Domain.Entities
 
         private PaymentTransaction() { }
 
-        internal PaymentTransaction(Guid bookingId, decimal amount, PaymentProvider provider, Guid? payerUserId = null)
+        public PaymentTransaction(Guid bookingId, decimal amount, PaymentProvider provider, string? merchantRef, Guid? payerUserId = null)
         {
             if (amount <= 0) throw new DomainException("Số tiền giao dịch phải lớn hơn 0.");
 
             BookingId = bookingId;
             Amount = amount;
             Provider = provider;
+            MerchantRef = merchantRef;
             PayerUserId = payerUserId;
             TransactionStatus = PaymentTransactionStatus.Pending;
         }
@@ -45,8 +48,7 @@ namespace PaymentService.Domain.Entities
             TransactionStatus = PaymentTransactionStatus.Success;
             PaymentDate = DateTime.UtcNow;
 
-            // bắn Domain Event để bên Escrow biết mà giữ tiền
-            // AddDomainEvent(new PaymentSucceededEvent(this.Id, this.BookingId, this.Amount));
+            AddDomainEvent(new PaymentSucceededEvent(this.BookingId, this.Amount, providerFee ?? 0m));
         }
 
         public void MarkAsFailed(string rawResponse, string reason)
@@ -57,6 +59,25 @@ namespace PaymentService.Domain.Entities
             RawResponse = rawResponse;
             FailureReason = reason;
             TransactionStatus = PaymentTransactionStatus.Failed;
+        }
+
+        public void SetMerchantRef(string merchantRef)
+        {
+            MerchantRef = merchantRef;
+        }
+
+        public void UpdatePaymentDate()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
+
+        public void Cancel(string reason)
+        {
+            if (TransactionStatus != PaymentTransactionStatus.Pending)
+                throw new DomainException("Chỉ có thể hủy giao dịch đang chờ xử lý.");
+            TransactionStatus = PaymentTransactionStatus.Cancelled;
+            FailureReason = reason;
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void Refund()

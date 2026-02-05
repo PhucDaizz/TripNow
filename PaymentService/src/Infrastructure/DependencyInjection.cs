@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Application.Contracts;
 using PaymentService.Domain.Repositories;
@@ -24,6 +25,9 @@ namespace PaymentService.Infrastructure
             services.Configure<VNPAYSettings>(
                 configuration.GetSection(VNPAYSettings.SectionName));
 
+            services.AddSingleton<IServiceFeeSettings>(sp =>
+                sp.GetRequiredService<IOptions<ServiceFeeSettings>>().Value);
+
             var vnpayConfig = configuration.GetSection(VNPAYSettings.SectionName);
 
             services.AddVnpayClient(config =>
@@ -46,7 +50,7 @@ namespace PaymentService.Infrastructure
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IPaymentService, Settings.PaymentService>();
+            services.AddScoped<IPaymentService, Services.PaymentService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
 

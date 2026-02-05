@@ -131,6 +131,12 @@ namespace BookingService.Domain.Entities
             else if (PaymentStatus == PaymentStatus.Unpaid)
             {
                 PaymentStatus = PaymentStatus.Cancelled;
+
+                AddDomainEvent(new BookingCancelledWithOutPayDomainEvent
+                {
+                    BookingId = this.Id,
+                    Reason = reason
+                });
             }
 
             Cancellation = new BookingCancellation(this.Id, who, reason, policy, refundAmount);
@@ -222,6 +228,24 @@ namespace BookingService.Domain.Entities
                 totalRefund += item.CalculateRefund(cancelTime, this.CheckInDate.ToDateTime(new TimeOnly(14, 0)));
             }
             return totalRefund;
+        }
+
+        public void CheckOutRoom(Guid roomId)
+        {
+            var assignment = Items.SelectMany(i => i.Assignments)
+                                  .FirstOrDefault(a => a.RoomId == roomId);
+
+            if (assignment == null) throw new DomainException("Phòng không thuộc đơn này.");
+
+            assignment.CheckOut();
+
+            var allAssignments = Items.SelectMany(i => i.Assignments);
+            if (allAssignments.All(a => !a.IsCheckedIn))
+            {
+                Status = BookingStatus.Completed;
+
+                AddDomainEvent(new BookingCompletedDomainEvent(this.Id, this.HotelId, this.TotalAmount));
+            }
         }
 
         public void AddSurcharge(decimal amount, string description)

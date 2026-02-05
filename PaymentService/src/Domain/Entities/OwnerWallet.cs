@@ -16,14 +16,14 @@ namespace PaymentService.Domain.Entities
 
         private OwnerWallet() { }
 
-        internal OwnerWallet(Guid ownerId)
+        public OwnerWallet(Guid ownerId)
         {
             OwnerId = ownerId;
             AvailableBalance = 0;
             PendingBalance = 0;
         }
 
-        public void ReceiveRevenue(Guid bookingId, decimal amount)
+        public void ReceiveRevenue(Guid bookingId, decimal amount, string? description)
         {
             if (amount <= 0) throw new DomainException("Doanh thu nhận được phải lớn hơn 0.");
 
@@ -37,7 +37,8 @@ namespace PaymentService.Domain.Entities
                 amount,
                 LedgerReferenceType.Booking,
                 bookingId,
-                currentTotal
+                currentTotal,
+                description
             );
 
             _walletLedgers.Add(ledger);

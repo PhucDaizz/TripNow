@@ -126,6 +126,10 @@ namespace PaymentService.Infrastructure.Migrations
                     b.Property<string>("FailureReason")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("MerchantRef")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<Guid?>("PayerUserId")
                         .HasColumnType("char(36)");
 

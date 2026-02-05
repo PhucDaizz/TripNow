@@ -5,7 +5,7 @@ using VNPAY;
 using VNPAY.Models;
 using VNPAY.Models.Enums;
 
-namespace PaymentService.Infrastructure.Settings
+namespace PaymentService.Infrastructure.Services
 {
     public class PaymentService : IPaymentService
     {
@@ -18,7 +18,7 @@ namespace PaymentService.Infrastructure.Settings
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<string> CreateVNPaymentLink(double moneyToPay, string description)
+        public Task<PaymentURLVNPayDetail> CreateVNPaymentLink(double moneyToPay, string description)
         {
             var request = new VnpayPaymentRequest
             {
@@ -31,7 +31,12 @@ namespace PaymentService.Infrastructure.Settings
             var paymentUrlInfor = _vnpayClient.CreatePaymentUrl(request);
             var paymentUrl = paymentUrlInfor.Url;
 
-            return Task.FromResult(paymentUrl);
+            return Task.FromResult(new PaymentURLVNPayDetail
+            {
+                PaymentUrl = paymentUrl,
+                MerchantRefId = paymentUrlInfor.PaymentId.ToString()
+            });
+
         }
 
         public PaymentCallbackResult HandleCallback(
@@ -41,11 +46,21 @@ namespace PaymentService.Infrastructure.Settings
 
             var result = _vnpayClient.GetPaymentResult(query);
 
+            var vnpResponseCode = parameters.GetValueOrDefault("vnp_ResponseCode");
+            var vnpTxnRef = parameters.GetValueOrDefault("vnp_TxnRef");       
+            var vnpTransactionNo = parameters.GetValueOrDefault("vnp_TransactionNo"); 
+            var vnpAmount = parameters.GetValueOrDefault("vnp_Amount");
+
+            bool isSuccess = vnpResponseCode == "00";
+
             return new PaymentCallbackResult
             {
-                IsSuccess = true,
-                TransactionId = result.VnpayTransactionId.ToString(),
-                FailureReason = result.Description
+                IsSuccess = isSuccess,
+                MerchantRef = vnpTxnRef, 
+                ProviderTxnId = vnpTransactionNo,
+                RawResponse = System.Text.Json.JsonSerializer.Serialize(parameters), 
+                FailureReason = isSuccess ? null : $"VnPay Error: {vnpResponseCode}",
+                Amount = Convert.ToDecimal(vnpAmount) / 100
             };
         }
     }

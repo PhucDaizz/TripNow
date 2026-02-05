@@ -171,9 +171,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             );
         }
 
-        // Gọi sang payment service để tạo lệnh thanh toán -- hiện đang giả lập
-        var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, cancellationToken);
-
+        var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, userId, request.paymentProvider, cancellationToken);
 
         try
         {

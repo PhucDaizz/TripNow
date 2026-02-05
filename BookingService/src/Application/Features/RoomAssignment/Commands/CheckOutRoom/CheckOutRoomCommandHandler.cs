@@ -1,5 +1,4 @@
 ﻿using BookingService.Application.Common.Interfaces;
-using BookingService.Application.Contracts;
 using BookingService.Domain.Exceptions;
 using Domain.Common.Response;
 using MediatR;
@@ -34,7 +33,7 @@ namespace BookingService.Application.Features.RoomAssignment.Commands.CheckOutRo
             }
             try
             {
-                assignment.CheckOut();
+                booking.CheckOutRoom(request.RoomId);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 

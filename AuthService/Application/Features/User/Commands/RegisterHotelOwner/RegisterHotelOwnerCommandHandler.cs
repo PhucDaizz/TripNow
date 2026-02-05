@@ -55,6 +55,15 @@ namespace Application.Features.User.Commands.RegisterHotelOwner
                         FullName = command.FullName
                     });
 
+            await _messagePublisher.PublishAsync(
+                    exchange: "user.events",
+                    exchangeType: ExchangeType.Topic,
+                    routingKey: "user.hotelowner.registered",
+                    message: new RegisterHotelOwer
+                    {
+                        UserId = newUser.Value.Id,
+                    });
+
             return Result.Success("Create user successfully");
         }
     }

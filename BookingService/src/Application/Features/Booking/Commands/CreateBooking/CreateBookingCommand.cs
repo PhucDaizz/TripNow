@@ -1,4 +1,5 @@
 using BookingService.Application.DTOs.Booking;
+using BookingService.Application.DTOs.Payment;
 using BookingService.Domain.Enum;
 using Domain.Common.Response;
 using MediatR;
@@ -14,6 +15,7 @@ public record CreateBookingCommand : IRequest<Result<CreateBookingResponse>>
     public BookingSource Source { get; init; } = BookingSource.Web;
     public Guid? PromotionId { get; init; }
     public string? PromotionCode { get; init; }
+    public PaymentProvider paymentProvider { get; init; } = PaymentProvider.VNPay;
 }
 
 public record BookingItemDto

@@ -25,6 +25,10 @@ namespace PaymentService.Infrastructure.Data.Configurations
                 .HasConversion<int>()
                 .IsRequired();
 
+            builder.Property(pt => pt.MerchantRef)
+                .IsRequired(false)
+                .HasMaxLength(100);
+
             builder.Property(pt => pt.ProviderTxnId)
                 .IsRequired(false)
                 .HasMaxLength(100);

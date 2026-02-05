@@ -22,6 +22,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary
             .Select(x => new HotelSummaryDto
             {
                 HotelName = x.Name,
+                OwnerId = x.OwnerId,
                 Street = x.Address.Street,
                 City = x.Address.City,
                 Country = x.Address.Country,

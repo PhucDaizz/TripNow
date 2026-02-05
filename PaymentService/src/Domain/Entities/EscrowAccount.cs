@@ -1,5 +1,7 @@
 ﻿using PaymentService.Domain.Common;
 using PaymentService.Domain.Enum;
+using PaymentService.Domain.Events.EscrowAccount;
+using PaymentService.Domain.Exceptions;
 
 namespace PaymentService.Domain.Entities
 {
@@ -11,5 +13,43 @@ namespace PaymentService.Domain.Entities
         public decimal ProviderFee { get; private set; }
 
         private EscrowAccount() { }
+
+        public EscrowAccount(Guid bookingId, decimal amount, decimal providerFee)
+        {
+            if (bookingId == Guid.Empty)
+                throw new DomainException("BookingId không được để trống khi tạo tài khoản giữ tiền.");
+
+            if (amount <= 0)
+                throw new DomainException("Số tiền giữ (Escrow Amount) phải lớn hơn 0.");
+
+            if (providerFee < 0)
+                throw new DomainException("Phí giao dịch (Provider Fee) không được là số âm.");
+
+            if (providerFee >= amount)
+                throw new DomainException("Phí giao dịch không được lớn hơn hoặc bằng tổng số tiền.");
+
+            BookingId = bookingId;
+            Amount = amount;
+            ProviderFee = providerFee;
+            Status = EscrowStatus.Holding;
+
+            AddDomainEvent(new EscrowCreatedEvent(this.BookingId));
+        }
+
+        public void Release()
+        {
+            if (Status != EscrowStatus.Holding)
+                throw new DomainException("Chỉ có thể giải phóng tiền (Release) khi đang ở trạng thái Giữ (Holding).");
+
+            Status = EscrowStatus.Released;
+        }
+
+        public void Refund()
+        {
+            if (Status != EscrowStatus.Holding)
+                throw new DomainException("Chỉ có thể hoàn tiền (Refund) khi đang ở trạng thái Giữ (Holding).");
+
+            Status = EscrowStatus.Refunded;
+        }
     }
 }

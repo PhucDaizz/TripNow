@@ -29,6 +29,10 @@ namespace PaymentService.Infrastructure.Data.Repositories
         {
             return await _context.OwnerWallet.FirstOrDefaultAsync(x => x.Id == id, token);
         }
+        public async Task<OwnerWallet?> GetByOwerIdAsync(Guid id, CancellationToken token = default)
+        {
+            return await _context.OwnerWallet.FirstOrDefaultAsync(x => x.OwnerId == id, token);
+        }
 
         public Task UpdateAsync(OwnerWallet ownerWallet, CancellationToken token = default)
         {
