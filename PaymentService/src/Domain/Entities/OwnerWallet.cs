@@ -23,7 +23,7 @@ namespace PaymentService.Domain.Entities
             PendingBalance = 0;
         }
 
-        public void ReceiveRevenue(Guid bookingId, decimal amount, string? description)
+        public void ReceiveRevenue(Guid bookingId, decimal amount, decimal transactionGrossAmount, decimal transactionFee , string? description)
         {
             if (amount <= 0) throw new DomainException("Doanh thu nhận được phải lớn hơn 0.");
 
@@ -35,6 +35,8 @@ namespace PaymentService.Domain.Entities
                 this.Id,
                 LedgerDirection.Credit, 
                 amount,
+                transactionGrossAmount,
+                transactionFee,
                 LedgerReferenceType.Booking,
                 bookingId,
                 currentTotal,
@@ -44,7 +46,7 @@ namespace PaymentService.Domain.Entities
             _walletLedgers.Add(ledger);
         }
 
-        public void ReleaseSettlement(Guid settlementId, decimal amount)
+        public void ReleaseSettlement(Guid settlementId, decimal amount, decimal transactionGrossAmount, decimal transactionFee)
         {
             if (amount <= 0) throw new DomainException("Số tiền đối soát phải > 0.");
             if (PendingBalance < amount) throw new DomainException("Số dư chờ không đủ để đối soát (Lỗi nghiêm trọng).");
@@ -52,16 +54,13 @@ namespace PaymentService.Domain.Entities
             PendingBalance -= amount;   
             AvailableBalance += amount; 
 
-            // Ghi sổ: Loại này đặc biệt, là chuyển đổi trạng thái tiền, nhưng tổng tài sản không đổi
-            // Tuy nhiên, thường ta sẽ ghi nhận là Credit vào Available để dễ theo dõi dòng tiền khả dụng.
-            // Hoặc có thể không ghi Ledger nếu bạn chỉ quan tâm tổng tài sản. 
-            // Nhưng tốt nhất nên ghi log loại "SettlementRelease".
-
             var currentTotal = AvailableBalance + PendingBalance;
             var ledger = new WalletLedger(
                this.Id,
                LedgerDirection.Credit,
                amount,
+               transactionGrossAmount,
+               transactionFee,
                LedgerReferenceType.Settlement, // Loại tham chiếu: Đối soát
                settlementId,
                currentTotal
@@ -69,7 +68,7 @@ namespace PaymentService.Domain.Entities
             _walletLedgers.Add(ledger);
         }
 
-        public void DebitForPayout(Guid payoutId, decimal amount)
+        public void DebitForPayout(Guid payoutId, decimal amount, decimal transactionGrossAmount, decimal transactionFee)
         {
             if (amount <= 0) throw new DomainException("Số tiền rút phải > 0.");
             if (AvailableBalance < amount) throw new DomainException("Số dư khả dụng không đủ.");
@@ -82,6 +81,8 @@ namespace PaymentService.Domain.Entities
                 this.Id,
                 LedgerDirection.Debit, 
                 amount,
+                transactionGrossAmount,
+                transactionFee,
                 LedgerReferenceType.Payout,
                 payoutId,
                 currentTotal
@@ -90,7 +91,7 @@ namespace PaymentService.Domain.Entities
             _walletLedgers.Add(ledger);
         }
 
-        public void AdjustBalance(decimal amount, string reasonRef)
+        public void AdjustBalance(decimal amount, decimal transactionGrossAmount, decimal transactionFee, string reasonRef)
         {
             AvailableBalance += amount;
 
@@ -102,6 +103,8 @@ namespace PaymentService.Domain.Entities
                 this.Id,
                 direction,
                 absAmount,
+                transactionGrossAmount,
+                transactionFee,
                 LedgerReferenceType.Adjustment,
                 Guid.NewGuid(), 
                 currentTotal,

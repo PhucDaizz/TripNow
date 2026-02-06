@@ -40,21 +40,11 @@ namespace PaymentService.Infrastructure.Data.Configurations
                 .HasColumnType("datetime(6)")
                 .IsRequired();
 
-            builder.HasMany(sp => sp.Payouts)
-                .WithOne()
-                .HasForeignKey(x => x.SettlementId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasMany(sp => sp.SettlementItems)
                 .WithOne()
                 .HasForeignKey(x => x.SettlementId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Navigation(sp => sp.Payouts)
-                .HasField("_payouts")
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             builder.Navigation(sp => sp.SettlementItems)
                 .HasField("_settlementItems")

@@ -8,6 +8,8 @@ namespace PaymentService.Application.Common.Interfaces
         IPaymentTransactionRepository PaymentTransactions {  get; }
         IOwnerWalletRepository OwnerWallets {  get; }
         IEscrowAccountRepository EscrowAccounts { get; }
+        IOwnerBankAccountRepository OwnerBankAccounts { get; }
+        IPayoutRepository Payouts { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

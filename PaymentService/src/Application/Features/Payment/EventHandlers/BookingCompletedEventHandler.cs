@@ -34,7 +34,7 @@ namespace PaymentService.Application.Features.Payment.EventHandlers
                 decimal commissionAmount = notification.Amount * commissionRate / 100;
                 decimal netAmount = notification.Amount - commissionAmount;
                 
-                var ownerWallet = await _unitOfWork.OwnerWallets.GetByOwerIdAsync(hotel.OwnerId);
+                var ownerWallet = await _unitOfWork.OwnerWallets.GetByOwnerIdAsync(hotel.OwnerId);
 
                 if (ownerWallet == null)
                 {
@@ -44,6 +44,8 @@ namespace PaymentService.Application.Features.Payment.EventHandlers
 
                 ownerWallet.ReceiveRevenue(
                     amount: netAmount,
+                    transactionGrossAmount: notification.Amount,
+                    transactionFee: commissionAmount,
                     bookingId: notification.BookingId,
                     description: $"Revenue from booking {notification.BookingId}"
                 );

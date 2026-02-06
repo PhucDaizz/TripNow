@@ -17,7 +17,7 @@ namespace PaymentService.Application.Features.OwnerWallet.EventHandlers
         {
             Guid.TryParse(notification.UserId, out Guid userId);
 
-            var isOwnerWalletExist = _unitOfWork.OwnerWallets.GetByOwerIdAsync(userId, cancellationToken);
+            var isOwnerWalletExist = _unitOfWork.OwnerWallets.GetByOwnerIdAsync(userId, cancellationToken);
 
             if (isOwnerWalletExist == null)
             {

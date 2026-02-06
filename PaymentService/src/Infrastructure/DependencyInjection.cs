@@ -47,9 +47,12 @@ namespace PaymentService.Infrastructure
             services.AddScoped<IOwnerWalletRepository, OwnerWalletRepository>();
             services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
             services.AddScoped<ISettlementPeriodRepository, SettlementPeriodRepository>();
+            services.AddScoped<IOwnerBankAccountRepository, OwnerBankAccountRepository>();
+            services.AddScoped<IPayoutRepository, PayoutRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<ISettlementService, SettlementService>();
             services.AddScoped<IPaymentService, Services.PaymentService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

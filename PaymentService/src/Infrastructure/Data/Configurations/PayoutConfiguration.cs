@@ -34,6 +34,12 @@ namespace PaymentService.Infrastructure.Data.Configurations
                 .HasConversion<int>()
                 .IsRequired();
 
+            builder.HasOne<SettlementPeriod>()
+               .WithMany() 
+               .HasForeignKey(p => p.SettlementId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(p => p.Id);
             builder.HasIndex(x => x.SettlementId);
         }

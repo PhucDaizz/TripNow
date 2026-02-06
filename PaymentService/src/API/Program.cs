@@ -8,6 +8,7 @@ using PaymentService.API.StartUp;
 using PaymentService.Application;
 using PaymentService.Application.Contracts;
 using PaymentService.Infrastructure;
+using PaymentService.Infrastructure.BackgroundJobs;
 using PaymentService.Infrastructure.BackgroundJobs.Consumer.OwnerWallet;
 using PaymentService.Infrastructure.BackgroundJobs.Consumer.Payment;
 using PaymentService.Infrastructure.Services;
@@ -24,6 +25,10 @@ namespace PaymentService.API
 
             builder.Services.Configure<ServiceUrlOptions>(
                 builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
+
+            builder.Services.Configure<PayoutSettings>(
+                builder.Configuration.GetSection(PayoutSettings.SectionName)
+            );
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -51,6 +56,7 @@ namespace PaymentService.API
 
             builder.Services.AddHostedService<PaymentEventsConsumer>();
             builder.Services.AddHostedService<OwnerWalletEventsConsumer>();
+            builder.Services.AddHostedService<SettlementWorker>();
 
             builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
                 (sp, client) =>

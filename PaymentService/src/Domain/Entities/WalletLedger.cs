@@ -13,10 +13,13 @@ namespace PaymentService.Domain.Entities
         public Guid ReferenceId { get; private set; }
         public decimal BalanceAfter { get; private set; }
         public string? Description { get; private set; }
+        public Guid? SettlementPeriodId { get; private set; } // Liên kết đến kỳ đối soát nếu có
+        public decimal TransactionGrossAmount { get; private set; } 
+        public decimal TransactionFee { get; private set; }
 
         private WalletLedger() { }
 
-        internal WalletLedger(Guid walletId, LedgerDirection direction, decimal amount,
+        internal WalletLedger(Guid walletId, LedgerDirection direction, decimal amount, decimal transactionGrossAmount, decimal transactionFee,
                               LedgerReferenceType referenceType, Guid referenceId, decimal balanceAfter, string? description = null)
         {
             if (amount <= 0) throw new DomainException("Số tiền ghi sổ cái phải lớn hơn 0.");
@@ -30,6 +33,14 @@ namespace PaymentService.Domain.Entities
             ReferenceId = referenceId;
             BalanceAfter = balanceAfter;
             Description = description;
+        }
+
+        public void MarkAsSettled(Guid settlementPeriodId)
+        {
+            if (SettlementPeriodId != null)
+                throw new DomainException("Giao dịch này đã được đối soát rồi.");
+
+            SettlementPeriodId = settlementPeriodId;
         }
     }
 }

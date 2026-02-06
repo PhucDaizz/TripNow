@@ -40,6 +40,9 @@ namespace PaymentService.Infrastructure.Data.Configurations
                 .HasMaxLength(500)
                 .IsRequired(false);
 
+            builder.Property(wl => wl.SettlementPeriodId)
+                .IsRequired(false);
+
             builder.HasIndex(x => x.WalletId);
 
         }

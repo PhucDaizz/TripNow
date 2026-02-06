@@ -14,14 +14,12 @@ namespace PaymentService.Domain.Entities
         public DateTime PeriodFrom { get; private set; }
         public DateTime PeriodTo { get; private set; }
 
-        private readonly List<Payout> _payouts = new();
         private readonly List<SettlementItem> _settlementItems = new();
-        public IReadOnlyCollection<Payout> Payouts => _payouts.AsReadOnly();
         public IReadOnlyCollection<SettlementItem> SettlementItems => _settlementItems.AsReadOnly();
 
         private SettlementPeriod() { }
 
-        internal SettlementPeriod(Guid ownerId, DateTime from, DateTime to)
+        public SettlementPeriod(Guid ownerId, DateTime from, DateTime to)
         {
             if (from >= to) throw new DomainException("Ngày bắt đầu kỳ đối soát phải nhỏ hơn ngày kết thúc.");
 
@@ -64,8 +62,12 @@ namespace PaymentService.Domain.Entities
 
             Status = PeriodStatus.Open; 
         }
+        public void MarkAsOpen()
+        {
+            Status = PeriodStatus.Open;
+        }
 
-        public void RequestPayout(string bankInfo)
+        /*public void RequestPayout(string bankInfo)
         {
             if (Status != PeriodStatus.Open)
             {
@@ -97,6 +99,6 @@ namespace PaymentService.Domain.Entities
             {
                 Status = PeriodStatus.Open;
             }
-        }
+        }*/
     }
 }
