@@ -83,17 +83,23 @@ namespace PaymentService.Infrastructure.Services
 
                 if (bankAccount != null)
                 {
-                    var bankInfoJson = JsonSerializer.Serialize(new
+                    // Lấy TỔNG SỐ DƯ KHẢ DỤNG THỰC TẾ (Bao gồm tiền mới + tiền hoàn cũ)
+                    decimal actualPayoutAmount = wallet.AvailableBalance;
+
+                    if (actualPayoutAmount > 0)
                     {
-                        bankAccount.BankName,
-                        bankAccount.BankAccountNumber,
-                        bankAccount.BankAccountHolder
-                    });
+                        var bankInfoJson = JsonSerializer.Serialize(new
+                        {
+                            bankAccount.BankName,
+                            bankAccount.BankAccountNumber,
+                            bankAccount.BankAccountHolder
+                        });
 
-                    var payout = new Payout(period.Id, wallet.Id, period.TotalNetPayable, bankInfoJson);
-                    await _unitOfWork.Payouts.AddAsync(payout);
+                        var payout = new Payout(period.Id, wallet.Id, actualPayoutAmount, bankInfoJson);
+                        await _unitOfWork.Payouts.AddAsync(payout);
 
-                    wallet.DebitForPayout(payout.Id, period.TotalNetPayable, period.TotalNetPayable, 0);
+                        wallet.DebitForPayout(payout.Id, actualPayoutAmount, actualPayoutAmount, 0);
+                    }
                 }
 
                 period.MarkAsOpen();

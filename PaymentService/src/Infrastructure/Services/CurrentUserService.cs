@@ -1,0 +1,59 @@
+﻿using Microsoft.AspNetCore.Http;
+using PaymentService.Application.Common.Interfaces;
+using System.Security.Claims;
+
+
+namespace PaymentService.Infrastructure.Services
+{
+    public class CurrentUserService : ICurrentUserService
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CurrentUserService(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public string? UserId =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+        public string? UserName =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Name)?.Value;
+
+        public string? Email =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Email)?.Value;
+
+        public string? Role =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Role)?.Value;
+
+        public string? FullName =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.Name)?.Value;
+        public string? PhoneNumber =>
+            _httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.MobilePhone)?.Value;
+
+        public Guid? HotelId
+        {
+            get
+            {
+                var hotelIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("hotelId")?.Value
+                                   ?? _httpContextAccessor.HttpContext?.User?.FindFirst("HotelId")?.Value;
+
+                if (string.IsNullOrEmpty(hotelIdClaim))
+                {
+                    return null;
+                }
+
+                return Guid.TryParse(hotelIdClaim, out var hotelId) ? hotelId : null;
+            }
+        }
+
+        public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+    }
+}

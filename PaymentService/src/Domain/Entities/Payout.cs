@@ -51,6 +51,11 @@ namespace PaymentService.Domain.Entities
                 throw new DomainException("Không thể đánh dấu thất bại cho Payout đã thành công.");
             }
 
+            if(Status != PayoutStatus.Processing)
+            {
+                throw new DomainException("Chỉ được hủy đơn đang chờ xử lý.");
+            }
+
             FailureReason = reason;
             Status = PayoutStatus.Failed;
 

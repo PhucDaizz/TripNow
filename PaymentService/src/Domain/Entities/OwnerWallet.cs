@@ -23,6 +23,7 @@ namespace PaymentService.Domain.Entities
             PendingBalance = 0;
         }
 
+        // Nhận doanh thu từ booking
         public void ReceiveRevenue(Guid bookingId, decimal amount, decimal transactionGrossAmount, decimal transactionFee , string? description)
         {
             if (amount <= 0) throw new DomainException("Doanh thu nhận được phải lớn hơn 0.");
@@ -46,6 +47,7 @@ namespace PaymentService.Domain.Entities
             _walletLedgers.Add(ledger);
         }
 
+        // Đối soát số tiền từ chờ sang khả dụng
         public void ReleaseSettlement(Guid settlementId, decimal amount, decimal transactionGrossAmount, decimal transactionFee)
         {
             if (amount <= 0) throw new DomainException("Số tiền đối soát phải > 0.");
@@ -68,6 +70,7 @@ namespace PaymentService.Domain.Entities
             _walletLedgers.Add(ledger);
         }
 
+        // Rút tiền từ ví
         public void DebitForPayout(Guid payoutId, decimal amount, decimal transactionGrossAmount, decimal transactionFee)
         {
             if (amount <= 0) throw new DomainException("Số tiền rút phải > 0.");
@@ -86,6 +89,30 @@ namespace PaymentService.Domain.Entities
                 LedgerReferenceType.Payout,
                 payoutId,
                 currentTotal
+            );
+
+            _walletLedgers.Add(ledger);
+        }
+
+        // Hoàn tiền cho lệnh rút thất bại
+        public void RefundFailedPayout(Guid payoutId, decimal amount, decimal transactionGrossAmount, decimal transactionFee)
+        {
+            if (amount <= 0) throw new DomainException("Số tiền hoàn lại phải > 0.");
+
+            AvailableBalance += amount;
+
+            var currentTotal = AvailableBalance + PendingBalance;
+
+            var ledger = new WalletLedger(
+                this.Id,
+                LedgerDirection.Credit,         // Cộng tiền
+                amount,
+                transactionGrossAmount,
+                transactionFee,
+                LedgerReferenceType.Refund,     
+                payoutId,                       
+                currentTotal,
+                "Hoàn tiền do lệnh rút thất bại"
             );
 
             _walletLedgers.Add(ledger);
