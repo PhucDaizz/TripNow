@@ -21,6 +21,13 @@ namespace PaymentService.Domain.Entities
             IsDefault = isDefault;
         }
 
+        public void UpdateDetails(string bankName, string accNum, string holder)
+        {
+            BankName = bankName;
+            BankAccountNumber = accNum;
+            BankAccountHolder = holder;
+        }
+
         public void SetAsDefault()
         {
             IsDefault = true;

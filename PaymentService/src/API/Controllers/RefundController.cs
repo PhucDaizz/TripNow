@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nexus.BuildingBlocks.Model;
 using PaymentService.Application.Features.RefundRequest.Queries.GetRefundRequest;
 using PaymentService.Domain.Common;
 
@@ -22,7 +23,7 @@ namespace PaymentService.API.Controllers
         public async Task<IActionResult> GetRequests([FromQuery] GetRefundRequestsQuery query)
         {
             var result = await _mediator.Send(query);
-            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
 

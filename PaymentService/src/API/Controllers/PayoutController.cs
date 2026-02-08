@@ -30,9 +30,9 @@ namespace PaymentService.API.Controllers
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)
-                return BadRequest(result.Error);
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
 
-            return Ok(result);
+            return Ok(ApiResponse<object>.SuccessResponse(result));
         }
 
         [HttpPost("admin/reject")]
@@ -64,9 +64,9 @@ namespace PaymentService.API.Controllers
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)
-                return BadRequest(result.Error);
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
 
-            return Ok(result);
+            return Ok(ApiResponse<object>.SuccessResponse(result));
         }
 
     }

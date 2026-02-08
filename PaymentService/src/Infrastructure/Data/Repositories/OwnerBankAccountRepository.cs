@@ -18,10 +18,20 @@ namespace PaymentService.Infrastructure.Data.Repositories
             await _context.OwnerBankAccount.AddAsync(ownerBankAccount, token);
         }
 
+        public async Task<int> CountAsync(Guid ownerId, CancellationToken token = default)
+        {
+            return await _context.OwnerBankAccount.CountAsync(x => x.OwnerId == ownerId, token);
+        }
+
         public Task DeleteAsync(OwnerBankAccount ownerBankAccount, CancellationToken token = default)
         {
             _context.OwnerBankAccount.Remove(ownerBankAccount);
             return Task.CompletedTask;
+        }
+
+        public async Task<List<OwnerBankAccount?>> GetAllByOwnerId(Guid OwnernerId, CancellationToken token = default)
+        {
+            return await _context.OwnerBankAccount.Where(x => x.OwnerId == OwnernerId).ToListAsync(token);
         }
 
         public Task<OwnerBankAccount?> GetByIdAsync(Guid id, CancellationToken token = default)
