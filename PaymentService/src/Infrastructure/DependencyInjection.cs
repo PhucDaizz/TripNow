@@ -49,6 +49,7 @@ namespace PaymentService.Infrastructure
             services.AddScoped<ISettlementPeriodRepository, SettlementPeriodRepository>();
             services.AddScoped<IOwnerBankAccountRepository, OwnerBankAccountRepository>();
             services.AddScoped<IPayoutRepository, PayoutRepository>();
+            services.AddScoped<IRefundRequestRepository, RefundRequestRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -56,6 +57,7 @@ namespace PaymentService.Infrastructure
             services.AddScoped<IPaymentService, Services.PaymentService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

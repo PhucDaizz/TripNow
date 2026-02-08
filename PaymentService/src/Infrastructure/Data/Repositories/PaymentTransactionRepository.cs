@@ -57,5 +57,11 @@ namespace PaymentService.Infrastructure.Data.Repositories
             _context.PaymentTransaction.Update(paymentTransaction);
             return Task.CompletedTask;
         }
+
+        public Task<PaymentTransaction?> GetSuccessTransactionByBookingIdAsync(Guid bookingId, CancellationToken token = default)
+        {
+            return _context.PaymentTransaction.FirstOrDefaultAsync(x => x.BookingId == bookingId &&
+                    x.TransactionStatus == PaymentTransactionStatus.Success, token);
+        }
     }
 }

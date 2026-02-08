@@ -21,6 +21,7 @@ namespace PaymentService.Infrastructure
         public DbSet<SettlementPeriod> SettlementPeriod { get; set; } 
         public DbSet<WalletLedger> WalletLedger { get; set; } 
         public DbSet<OwnerBankAccount> OwnerBankAccount { get; set; }
+        public DbSet<RefundRequest> RefundRequest { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

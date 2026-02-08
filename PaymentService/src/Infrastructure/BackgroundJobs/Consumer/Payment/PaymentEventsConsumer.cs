@@ -33,6 +33,12 @@ namespace PaymentService.Infrastructure.BackgroundJobs.Consumer.Payment
                routingKey: "booking.completed",
                queueName: "payment-service-checkout-success",
                handler: (msg) => ProcessMessage(msg, stoppingToken));
+            await _consumer.Subscribe<BookingRefund>(
+               exchange: "booking.events",
+               exchangeType: "topic",
+               routingKey: "booking.refund",
+               queueName: "payment-service-refund",
+               handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 
         private async Task ProcessMessage<TMessage>(TMessage message, CancellationToken token) where TMessage : class

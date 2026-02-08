@@ -110,15 +110,25 @@ namespace BookingService.Domain.Entities
             // AddDomainEvent(new BookingCompletedEvent(this.Id));
         }
 
-        public void Cancel(CancelledBy who, string reason, RefundPolicy policy, decimal refundAmount)
+        public void Cancel(CancelledBy who, string reason, decimal refundAmount)
         {
             if (Status == BookingStatus.Completed)
                 throw new DomainException("Không thể hủy đơn đã hoàn tất.");
 
+            if (Status == BookingStatus.Cancelled)
+                throw new DomainException("Đơn hàng đã bị hủy trước đó.");
+
             Status = BookingStatus.Cancelled;
+
+            RefundPolicy determinedPolicy = RefundPolicy.NonRefundable;
 
             if (PaymentStatus == PaymentStatus.Paid)
             {
+                if (refundAmount >= TotalAmount)
+                    determinedPolicy = RefundPolicy.Free;
+                else if (refundAmount > 0)
+                    determinedPolicy = RefundPolicy.Partial;
+
                 if (refundAmount > 0)
                 {
                     PaymentStatus = PaymentStatus.RefundPending;
@@ -139,7 +149,7 @@ namespace BookingService.Domain.Entities
                 });
             }
 
-            Cancellation = new BookingCancellation(this.Id, who, reason, policy, refundAmount);
+            Cancellation = new BookingCancellation(this.Id, who, reason, determinedPolicy, refundAmount);
 
             AddDomainEvent(new BookingCancelledDomainEvent
             {
@@ -153,8 +163,9 @@ namespace BookingService.Domain.Entities
                 AddDomainEvent(new BookingRefundInitiatedDomainEvent
                 {
                     BookingId = this.Id,
-                    Amount = refundAmount,
-                    UserId = this.UserId
+                    RefundAmount = refundAmount,
+                    UserId = this.UserId,
+                    HotelId = this.HotelId
                 });
             }
         }

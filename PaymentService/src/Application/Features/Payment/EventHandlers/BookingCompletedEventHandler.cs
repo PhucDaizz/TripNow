@@ -3,6 +3,7 @@ using MediatR;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Application.Contracts;
 using PaymentService.Application.DTOs.Payment.Event;
+using PaymentService.Domain.Enum;
 
 namespace PaymentService.Application.Features.Payment.EventHandlers
 {
@@ -27,8 +28,12 @@ namespace PaymentService.Application.Features.Payment.EventHandlers
             {
                 var escrow = await _unitOfWork.EscrowAccounts.GetByBookingIdAsync(notification.BookingId);
 
-                if (escrow != null) 
-                    escrow.Release();
+                if (escrow.Status == EscrowStatus.Refunded || escrow.Status == EscrowStatus.Released)
+                {
+                    return; 
+                }
+
+                escrow.Release();
 
                 decimal commissionRate = _serviceFeeSettings.Percentage;
                 decimal commissionAmount = notification.Amount * commissionRate / 100;

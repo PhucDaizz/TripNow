@@ -13,6 +13,7 @@ namespace PaymentService.Application.Common.Interfaces
         public DbSet<SettlementPeriod> SettlementPeriod { get; }
         public DbSet<WalletLedger> WalletLedger { get; }
         public DbSet<OwnerBankAccount> OwnerBankAccount { get; }
+        public DbSet<RefundRequest> RefundRequest { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

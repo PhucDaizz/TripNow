@@ -8,6 +8,7 @@ namespace PaymentService.Domain.Repositories
     {
         Task<PaymentTransaction?> GetByIdAsync(Guid id, CancellationToken token = default);
         Task<PaymentTransaction?> GetByBookingIdAsync(Guid bookingId, CancellationToken token = default);
+        Task<PaymentTransaction?> GetSuccessTransactionByBookingIdAsync(Guid bookingId, CancellationToken token = default);
         Task<PaymentTransaction?> GetByBookingWithStatusAsync(Guid bookingId, PaymentTransactionStatus status, CancellationToken token = default);
         Task<PaymentTransaction?> GetByMerchantRefAsync(string merchantRef, CancellationToken token = default);
         Task<PaymentTransaction?> GetByIdWithStatusAsync(Guid id, PaymentTransactionStatus status, CancellationToken token = default);

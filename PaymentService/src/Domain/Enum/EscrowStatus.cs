@@ -4,6 +4,7 @@
     {
         Holding = 0,
         Released = 1,
-        Refunded = 2
+        Refunded = 2,
+        PartiallyRefunded = 3
     }
 }

@@ -15,6 +15,7 @@ namespace PaymentService.Infrastructure
         public IEscrowAccountRepository EscrowAccounts { get; }
         public IOwnerBankAccountRepository OwnerBankAccounts { get; }
         public IPayoutRepository Payouts { get; }
+        public IRefundRequestRepository RefundRequests { get; }
 
 
         public UnitOfWork(
@@ -24,7 +25,8 @@ namespace PaymentService.Infrastructure
             IOwnerWalletRepository ownerWalletRepository,
             IEscrowAccountRepository escrowAccountRepository,
             IOwnerBankAccountRepository ownerBankAccounts,
-            IPayoutRepository payouts)
+            IPayoutRepository payouts,
+            IRefundRequestRepository refundRequests)
         {
             _context = context;
             SettlementPeriods = settlementPeriodRepository;
@@ -33,6 +35,7 @@ namespace PaymentService.Infrastructure
             EscrowAccounts = escrowAccountRepository;
             OwnerBankAccounts = ownerBankAccounts;
             Payouts = payouts;
+            RefundRequests = refundRequests;
         }
         public async Task BeginTransactionAsync()
         {

@@ -32,32 +32,16 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
                     new Error("Booking.Forbidden", "You are not allowed to cancel this booking."));
 
 
-
-
             decimal refundAmount = 0;
             RefundPolicy determinedPolicy = RefundPolicy.NonRefundable;
             if (booking.PaymentStatus == PaymentStatus.Paid)
             {
-                    refundAmount = booking.CalculateTotalRefundAmount(DateTime.UtcNow);
-
-                if (refundAmount == booking.TotalAmount)
-                {
-                    determinedPolicy = RefundPolicy.Free;
-                }
-                else if (refundAmount > 0)
-                {
-                    determinedPolicy = RefundPolicy.Partial; 
-                }
-                else
-                {
-                    determinedPolicy = RefundPolicy.NonRefundable; 
-                }
+                refundAmount = booking.CalculateTotalRefundAmount(DateTime.UtcNow);
             }
 
             booking.Cancel(
                request.CancelledBy,
                request.Reason,
-               determinedPolicy,
                refundAmount
             );
 
@@ -85,9 +69,7 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
                 AppRoles.Receptionist =>
                     _currentUser.HotelId == booking.HotelId,
 
-                AppRoles.Customer =>
-                    _currentUser.UserId == booking.UserId.ToString(),
-
+                AppRoles.Customer => string.Equals(_currentUser.UserId, booking.UserId.ToString(), StringComparison.OrdinalIgnoreCase),
                 _ => false
             };
         }

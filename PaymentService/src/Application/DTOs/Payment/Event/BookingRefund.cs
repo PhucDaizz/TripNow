@@ -1,12 +1,12 @@
-﻿using BookingService.Domain.Common;
+﻿using MediatR;
 
-namespace BookingService.Domain.Events.Booking
+namespace PaymentService.Application.DTOs.Payment.Event
 {
-    public record BookingRefundInitiatedDomainEvent : DomainEvent
+    public class BookingRefund: INotification
     {
         public Guid BookingId { get; set; }
         public decimal RefundAmount { get; set; }
         public Guid UserId { get; set; }
         public Guid HotelId { get; set; }
-    };
+    }
 }

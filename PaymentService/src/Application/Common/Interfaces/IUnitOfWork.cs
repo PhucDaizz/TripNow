@@ -10,6 +10,7 @@ namespace PaymentService.Application.Common.Interfaces
         IEscrowAccountRepository EscrowAccounts { get; }
         IOwnerBankAccountRepository OwnerBankAccounts { get; }
         IPayoutRepository Payouts { get; }
+        IRefundRequestRepository RefundRequests { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
