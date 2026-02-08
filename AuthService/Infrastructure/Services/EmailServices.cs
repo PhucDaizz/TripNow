@@ -202,12 +202,12 @@ namespace Infrastructure.Services
                 <div style='font-family: Arial, sans-serif; padding: 20px;'>
                     <h2>Xin chào {ownerName},</h2>
                     <p>Chúng tôi rất vui mừng thông báo rằng khách sạn <strong>{hotelName}</strong> của bạn đã vượt qua quy trình kiểm duyệt.</p>
-                    <p>Hiện tại, khách sạn đã được kích hoạt và hiển thị trên hệ thống TripUp.</p>
+                    <p>Hiện tại, khách sạn đã được kích hoạt và hiển thị trên hệ thống TripNow.</p>
                     <p>Bạn có thể đăng nhập vào trang quản trị để bắt đầu quản lý phòng và đơn đặt chỗ ngay bây giờ.</p>
                     <br>
-                    <a href='https://tripup.com/dashboard' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Vào trang quản trị</a>
+                    <a href='https://tripnow.com/dashboard' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Vào trang quản trị</a>
                     <br><br>
-                    <p>Trân trọng,<br>Đội ngũ TripUp</p>
+                    <p>Trân trọng,<br>Đội ngũ TripNow</p>
                 </div>";
         }
 
@@ -216,7 +216,7 @@ namespace Infrastructure.Services
             return $@"
             <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
                 <h2>Xin chào {ownerName},</h2>
-                <p>Chúng tôi gửi email này để thông báo về kết quả phê duyệt khách sạn <strong>{hotelName}</strong> của bạn trên hệ thống TripUp.</p>
+                <p>Chúng tôi gửi email này để thông báo về kết quả phê duyệt khách sạn <strong>{hotelName}</strong> của bạn trên hệ thống TripNow.</p>
             
                 <p>Rất tiếc, hồ sơ khách sạn của bạn <strong>chưa đủ điều kiện</strong> để được phê duyệt vào lúc này.</p>
             
@@ -228,11 +228,11 @@ namespace Infrastructure.Services
                 <p>Đừng lo lắng, bạn hoàn toàn có thể cập nhật lại thông tin theo yêu cầu trên và gửi lại hồ sơ để chúng tôi xem xét.</p>
             
                 <br>
-                <a href='https://tripup.com/dashboard/hotels/edit' style='background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Cập nhật hồ sơ ngay</a>
+                <a href='https://tripnow.com/dashboard/hotels/edit' style='background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Cập nhật hồ sơ ngay</a>
                 <br><br>
             
                 <p>Nếu bạn có thắc mắc, vui lòng liên hệ với bộ phận hỗ trợ đối tác.</p>
-                <p>Trân trọng,<br>Đội ngũ TripUp</p>
+                <p>Trân trọng,<br>Đội ngũ TripNow</p>
             </div>";
         }
 
@@ -243,7 +243,7 @@ namespace Infrastructure.Services
                 <h2>Xin chào {ownerName},</h2>
                 <p>Đây là thông báo quan trọng liên quan đến khách sạn <strong>{hotelName}</strong> của bạn.</p>
             
-                <p style='color: #d32f2f;'><strong>Khách sạn của bạn đã bị TẠM KHÓA (SUSPENDED) trên hệ thống TripUp.</strong></p>
+                <p style='color: #d32f2f;'><strong>Khách sạn của bạn đã bị TẠM KHÓA (SUSPENDED) trên hệ thống TripNow.</strong></p>
                 <p>Trong thời gian này, khách sạn sẽ không hiển thị trên kết quả tìm kiếm và khách hàng không thể thực hiện đặt phòng mới.</p>
 
                 <div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0;'>
@@ -254,10 +254,60 @@ namespace Infrastructure.Services
                 <p>Để khôi phục hoạt động, vui lòng xem xét và khắc phục vấn đề nêu trên, hoặc liên hệ ngay với chúng tôi để giải quyết khiếu nại.</p>
             
                 <br>
-                <a href='https://tripup.com/help-center/contact' style='background-color: #d32f2f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Liên hệ hỗ trợ</a>
+                <a href='https://tripnow.com/help-center/contact' style='background-color: #d32f2f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Liên hệ hỗ trợ</a>
                 <br><br>
             
-                <p>Trân trọng,<br>Bộ phận Pháp chế & Kiểm soát chất lượng TripUp</p>
+                <p>Trân trọng,<br>Bộ phận Pháp chế & Kiểm soát chất lượng TripNow</p>
+            </div>";
+        }
+
+        public string CreateRefundSuccessEmailBody(string userName, string email, decimal refundAmount, string refundTransactionCode)
+        {
+            // Định dạng tiền tệ (Ví dụ: 500,000 VND)
+            string formattedAmount = refundAmount.ToString("N0") + " VND";
+
+            return $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;'>
+                <h2 style='color: #4CAF50;'>Thông báo hoàn tiền thành công</h2>
+            
+                <p>Xin chào <strong>{userName}</strong>,</p>
+            
+                <p>Chúng tôi viết email này để xác nhận rằng yêu cầu hoàn tiền của bạn trên hệ thống <strong>TripNow</strong> đã được xử lý thành công.</p>
+            
+                <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #e0e0e0; margin: 20px 0;'>
+                    <h3 style='margin-top: 0; color: #555;'>Chi tiết giao dịch:</h3>
+                    <ul style='list-style-type: none; padding: 0;'>
+                        <li style='margin-bottom: 10px;'>
+                            <strong>Tài khoản nhận:</strong> {email}
+                        </li>
+                        <li style='margin-bottom: 10px;'>
+                            <strong>Số tiền hoàn:</strong> <span style='color: #e53935; font-weight: bold; font-size: 1.1em;'>{formattedAmount}</span>
+                        </li>
+                        <li style='margin-bottom: 10px;'>
+                            <strong>Mã tham chiếu hoàn tiền:</strong> <span style='font-family: monospace; background: #eee; padding: 2px 5px; border-radius: 3px;'>{refundTransactionCode}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <p><strong>Lưu ý quan trọng:</strong></p>
+                <p style='font-size: 0.9em; color: #666;'>
+                    Mặc dù chúng tôi đã thực hiện lệnh chuyển tiền ngay lập tức, thời gian tiền về tài khoản ngân hàng của bạn có thể mất từ <strong>3 đến 14 ngày làm việc</strong> tùy thuộc vào quy trình xử lý của ngân hàng phát hành thẻ.
+                </p>
+
+                <br>
+                <div style='text-align: center;'>
+                    <a href='https://tripnow.com/my-bookings' style='background-color: #008CBA; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Kiểm tra lịch sử giao dịch</a>
+                </div>
+                <br><br>
+
+                <p>Nếu quá thời gian trên mà bạn vẫn chưa nhận được tiền, vui lòng liên hệ với ngân hàng của bạn và cung cấp mã tham chiếu <strong>{refundTransactionCode}</strong> để được hỗ trợ tra soát.</p>
+
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+            
+                <p style='font-size: 0.9em;'>
+                    Trân trọng,<br>
+                    <strong>Đội ngũ TripNow</strong>
+                </p>
             </div>";
         }
     }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PaymentService.Domain.Common.Models;
 using PaymentService.Domain.Entities;
+using PaymentService.Domain.Enum;
 using PaymentService.Domain.Repositories;
 
 namespace PaymentService.Infrastructure.Data.Repositories
@@ -27,6 +29,33 @@ namespace PaymentService.Infrastructure.Data.Repositories
         public async Task<RefundRequest?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             return await _context.RefundRequest.FirstOrDefaultAsync(rr => rr.Id == id, token);
+        }
+
+        public async Task<PagedResult<RefundRequest>> GetPagedListAsync(int pageNumber, int pageSize, RefundStatus? status, string? searchBookingId, CancellationToken token)
+        {
+            var query = _context.RefundRequest.AsNoTracking();
+
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+
+            if (!string.IsNullOrEmpty(searchBookingId) && Guid.TryParse(searchBookingId, out var bid))
+            {
+                query = query.Where(x => x.BookingId == bid);
+            }
+
+            query = query.OrderBy(x => x.Status)
+                         .ThenByDescending(x => x.CreatedAt);
+
+            var totalCount = await query.CountAsync(token);
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(token);
+
+            return new PagedResult<RefundRequest>(items, totalCount, pageNumber, pageSize);
         }
 
         public Task UpdateAsync(RefundRequest refundRequest, CancellationToken token = default)

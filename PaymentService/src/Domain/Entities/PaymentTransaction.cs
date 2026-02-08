@@ -11,6 +11,7 @@ namespace PaymentService.Domain.Entities
         public Guid BookingId { get; private set; }
         public decimal Amount { get; private set; }
         public PaymentProvider Provider { get; private set; }
+        public TransactionType Type { get; private set; }
         public string? MerchantRef { get; private set; }
         public string? ProviderTxnId { get; private set; }
         public decimal? ProviderFee { get; private set; }
@@ -18,6 +19,7 @@ namespace PaymentService.Domain.Entities
         public PaymentTransactionStatus TransactionStatus { get; private set; }
         public string? FailureReason { get; private set; }
         public DateTime? PaymentDate { get; private set; }
+        public string? Note { get; private set; }
 
         private PaymentTransaction() { }
 
@@ -30,6 +32,18 @@ namespace PaymentService.Domain.Entities
             Provider = provider;
             MerchantRef = merchantRef;
             PayerUserId = payerUserId;
+            Type = TransactionType.Payment;
+            TransactionStatus = PaymentTransactionStatus.Pending;
+        }
+
+        public PaymentTransaction(Guid bookingId, decimal amount, PaymentProvider provider, TransactionType type, string? refCode, string? note)
+        {
+            BookingId = bookingId;
+            Amount = amount;
+            Provider = provider;
+            Type = type;
+            MerchantRef = refCode;
+            Note = note;
             TransactionStatus = PaymentTransactionStatus.Pending;
         }
 
@@ -88,6 +102,15 @@ namespace PaymentService.Domain.Entities
             TransactionStatus = PaymentTransactionStatus.Refunded;
 
             // AddDomainEvent(new PaymentRefundedEvent(this.Id, this.BookingId));
+        }
+
+        public void MarkAsManualSuccess(string providerTxnId)
+        {
+            if (TransactionStatus == PaymentTransactionStatus.Success) return;
+
+            ProviderTxnId = providerTxnId; 
+            TransactionStatus = PaymentTransactionStatus.Success;
+            PaymentDate = DateTime.UtcNow;
         }
     }
 }

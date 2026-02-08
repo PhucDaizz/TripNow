@@ -1,4 +1,6 @@
-﻿using PaymentService.Domain.Entities;
+﻿using PaymentService.Domain.Common.Models;
+using PaymentService.Domain.Entities;
+using PaymentService.Domain.Enum;
 
 namespace PaymentService.Domain.Repositories
 {
@@ -8,5 +10,11 @@ namespace PaymentService.Domain.Repositories
         Task AddAsync(RefundRequest refundRequest, CancellationToken token = default);
         Task UpdateAsync(RefundRequest refundRequest, CancellationToken token = default);
         Task DeleteAsync(RefundRequest refundRequest, CancellationToken token = default);
+        Task<PagedResult<RefundRequest>> GetPagedListAsync(
+            int pageNumber,
+            int pageSize,
+            RefundStatus? status,
+            string? searchBookingId,
+            CancellationToken token);
     }
 }

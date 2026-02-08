@@ -59,7 +59,7 @@ namespace PaymentService.Application.Features.Payment.EventHandlers
 
             if (originalTxn == null) return;
 
-            var refundRequest = new RefundRequest(
+            var refundRequest = new Domain.Entities.RefundRequest(
                 notification.BookingId,
                 notification.UserId,
                 notification.RefundAmount,

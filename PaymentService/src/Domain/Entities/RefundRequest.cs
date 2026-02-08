@@ -1,5 +1,6 @@
 ﻿using PaymentService.Domain.Common;
 using PaymentService.Domain.Enum;
+using PaymentService.Domain.Events.RefundRequest;
 using PaymentService.Domain.Exceptions;
 
 namespace PaymentService.Domain.Entities
@@ -48,7 +49,6 @@ namespace PaymentService.Domain.Entities
             // AddDomainEvent(new RefundRequestCreatedEvent(this.Id)); 
         }
 
-        // Hàm 1: Xác nhận hoàn thành (Admin đã chuyển tiền thủ công/API)
         public void MarkAsCompleted(Guid refundPaymentTransactionId, string refundGatewayRef, string? note)
         {
             if (Status != RefundStatus.Pending)
@@ -61,10 +61,10 @@ namespace PaymentService.Domain.Entities
             ProcessedAt = DateTime.UtcNow;
 
             // Bắn event: Hoàn tiền thành công (để gửi mail cho khách)
-            // AddDomainEvent(new RefundRequestCompletedEvent(this.Id, this.UserId, this.Amount));
+            AddDomainEvent(new RefundRequestCompletedEvent(this.Id, this.UserId, this.Amount));
         }
 
-        // Hàm 2: Từ chối hoàn tiền (Nếu phát hiện gian lận hoặc sai sót)
+        // Từ chối hoàn tiền (Nếu phát hiện gian lận hoặc sai sót)
         public void Reject(string reason)
         {
             if (Status != RefundStatus.Pending)

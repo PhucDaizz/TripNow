@@ -25,6 +25,10 @@ namespace PaymentService.Infrastructure.Data.Configurations
                 .HasConversion<int>()
                 .IsRequired();
 
+            builder.Property(pt => pt.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
             builder.Property(pt => pt.MerchantRef)
                 .IsRequired(false)
                 .HasMaxLength(100);
@@ -50,6 +54,10 @@ namespace PaymentService.Infrastructure.Data.Configurations
             builder.Property(pt => pt.PaymentDate)
                 .HasColumnType("datetime(6)")
                 .IsRequired(false);
+
+            builder.Property(pt => pt.Note)
+                .IsRequired(false)
+                .HasMaxLength(500);
 
             builder.HasIndex(pt => pt.BookingId);
 

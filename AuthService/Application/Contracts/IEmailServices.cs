@@ -10,5 +10,6 @@
         string CreateHotelApprovedEmailBody(string ownerName, string hotelName);
         string CreateHotelRejectedEmailBody(string ownerName, string hotelName, string reason = null);
         string CreateHotelSuspendedEmailBody(string ownerName, string hotelName, string reason = null);
+        string CreateRefundSuccessEmailBody(string userName, string email, decimal refundAmount, string refundTransactionCode);
     }
 }
