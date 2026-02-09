@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Application.Common.Interfaces;
+using PaymentService.Domain.Common.Models;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enum;
 using PaymentService.Domain.Repositories;
@@ -43,6 +44,29 @@ namespace PaymentService.Infrastructure.Data.Repositories
         public async Task<OwnerWallet?> GetByOwnerIdAsync(Guid id, CancellationToken token = default)
         {
             return await _context.OwnerWallet.FirstOrDefaultAsync(x => x.OwnerId == id, token);
+        }
+
+        public async Task<PagedResult<WalletLedger>> GetPagedListAsync(Guid ownerId, int pageNumber, int pageSize, DateTime? fromDate, DateTime? toDate, string? type, CancellationToken token)
+        {
+            var query = from ledger in _context.WalletLedger
+                        join wallet in _context.OwnerWallet on ledger.WalletId equals wallet.Id
+                        where wallet.OwnerId == ownerId
+                        select ledger;
+
+            if (fromDate.HasValue) query = query.Where(x => x.CreatedAt >= fromDate.Value);
+            if (toDate.HasValue) query = query.Where(x => x.CreatedAt <= toDate.Value);
+
+            if (!string.IsNullOrEmpty(type) && Enum.TryParse<LedgerReferenceType>(type, out var enumType))
+            {
+                query = query.Where(x => x.ReferenceType == enumType);
+            }
+
+            query = query.OrderByDescending(x => x.CreatedAt);
+
+            var total = await query.CountAsync(token);
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
+
+            return new PagedResult<WalletLedger>(items, total, pageNumber, pageSize);
         }
 
         public async Task<List<WalletLedger>> GetPendingLedgersForSettlementAsync(Guid ownerId, DateTime cutOffDate, CancellationToken token)

@@ -11,10 +11,9 @@ namespace PaymentService.Domain.Repositories
         Task UpdateAsync(RefundRequest refundRequest, CancellationToken token = default);
         Task DeleteAsync(RefundRequest refundRequest, CancellationToken token = default);
         Task<PagedResult<RefundRequest>> GetPagedListAsync(
-            int pageNumber,
-            int pageSize,
-            RefundStatus? status,
-            string? searchBookingId,
+            int pageNumber, int pageSize,
+            RefundStatus? status, string? searchBookingId,
+            Guid? userId, string? transactionRef, DateTime? fromDate, DateTime? toDate, 
             CancellationToken token);
     }
 }

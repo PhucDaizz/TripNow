@@ -37,7 +37,7 @@ namespace PaymentService.Application.Features.Payout.Queries.GetPayouts
                 Amount = x.Amount,
                 TransactionReference = x.TransactionReference,
                 FailureReason = x.FailureReason,
-                Status = x.Status,
+                Status = x.Status.ToString(),
                 CreatedAt = x.CreatedAt 
             }).ToList();
 

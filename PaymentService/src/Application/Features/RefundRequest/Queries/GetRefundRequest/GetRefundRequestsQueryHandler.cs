@@ -22,6 +22,10 @@ namespace PaymentService.Application.Features.RefundRequest.Queries.GetRefundReq
                 request.PageSize,
                 request.Status,
                 request.SearchBookingId,
+                request.UserId,           
+                request.TransactionRef,   
+                request.FromDate,         
+                request.ToDate,           
                 token
             );
 

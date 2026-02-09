@@ -1,9 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using PaymentService.Application.DTOs.Payment;
 using PaymentService.Application.Features.Payment.Commands.CreatePaymentLink;
 using PaymentService.Application.Features.Payment.Commands.VnpayCallback;
+using PaymentService.Application.Features.Payment.Queries.GetTransactionById;
+using PaymentService.Application.Features.Payment.Queries.GetTransactions;
 
 namespace PaymentService.API.Controllers
 {
@@ -51,6 +54,22 @@ namespace PaymentService.API.Controllers
                 new VnpayCallbackCommand(parameters));
 
             return result.IsSuccess ? Ok() : BadRequest(result.Error);
+        }
+
+        [HttpGet("history")]
+        [Authorize] 
+        public async Task<IActionResult> GetHistory([FromQuery] GetTransactionsQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return result.IsSuccess ? Ok(ApiResponse<Domain.Common.Models.PagedResult<PaymentTransactionDto>>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetDetail(Guid id)
+        {
+            var result = await _mediator.Send(new GetTransactionByIdQuery(id));
+            return result.IsSuccess ? Ok(ApiResponse<PaymentTransactionDto>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
     }

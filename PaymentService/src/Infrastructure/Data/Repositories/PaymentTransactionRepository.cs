@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Nexus.BuildingBlocks.Model;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enum;
@@ -62,6 +63,26 @@ namespace PaymentService.Infrastructure.Data.Repositories
         {
             return _context.PaymentTransaction.FirstOrDefaultAsync(x => x.BookingId == bookingId &&
                     x.TransactionStatus == PaymentTransactionStatus.Success, token);
+        }
+
+        public async Task<Domain.Common.Models.PagedResult<PaymentTransaction>> GetPagedListAsync(int pageNumber, int pageSize, Guid? userId, Guid? bookingId, PaymentTransactionStatus? status, TransactionType? type, DateTime? fromDate, DateTime? toDate, CancellationToken token)
+        {
+            var query = _context.PaymentTransaction.AsNoTracking();
+
+            if (userId.HasValue) query = query.Where(x => x.PayerUserId == userId);
+            if (bookingId.HasValue) query = query.Where(x => x.BookingId == bookingId);
+            if (status.HasValue) query = query.Where(x => x.TransactionStatus == status);
+            if (type.HasValue) query = query.Where(x => x.Type == type);
+
+            if (fromDate.HasValue) query = query.Where(x => x.CreatedAt >= fromDate.Value);
+            if (toDate.HasValue) query = query.Where(x => x.CreatedAt <= toDate.Value);
+
+            query = query.OrderByDescending(x => x.CreatedAt);
+
+            var total = await query.CountAsync(token);
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
+
+            return new Domain.Common.Models.PagedResult<PaymentTransaction>(items, total, pageNumber, pageSize);
         }
     }
 }

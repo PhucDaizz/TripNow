@@ -31,9 +31,18 @@ namespace PaymentService.Infrastructure.Data.Repositories
             return await _context.RefundRequest.FirstOrDefaultAsync(rr => rr.Id == id, token);
         }
 
-        public async Task<PagedResult<RefundRequest>> GetPagedListAsync(int pageNumber, int pageSize, RefundStatus? status, string? searchBookingId, CancellationToken token)
+        public async Task<PagedResult<RefundRequest>> GetPagedListAsync(
+            int pageNumber, int pageSize,
+            RefundStatus? status, string? searchBookingId,
+            Guid? userId, string? transactionRef, DateTime? fromDate, DateTime? toDate, 
+            CancellationToken token)
         {
             var query = _context.RefundRequest.AsNoTracking();
+
+            if (userId.HasValue && userId.Value != Guid.Empty)
+            {
+                query = query.Where(x => x.UserId == userId.Value);
+            }
 
             if (status.HasValue)
             {
@@ -45,15 +54,27 @@ namespace PaymentService.Infrastructure.Data.Repositories
                 query = query.Where(x => x.BookingId == bid);
             }
 
-            query = query.OrderBy(x => x.Status)
-                         .ThenByDescending(x => x.CreatedAt);
+            if (!string.IsNullOrEmpty(transactionRef))
+            {
+                query = query.Where(x =>
+                    x.OriginalGatewayTransactionRef.Contains(transactionRef) ||
+                    (x.RefundGatewayTransactionRef != null && x.RefundGatewayTransactionRef.Contains(transactionRef))
+                );
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(x => x.CreatedAt >= fromDate.Value); 
+            }
+            if (toDate.HasValue)
+            {
+                query = query.Where(x => x.CreatedAt <= toDate.Value);
+            }
+
+            query = query.OrderByDescending(x => x.CreatedAt);
 
             var totalCount = await query.CountAsync(token);
-
-            var items = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync(token);
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
 
             return new PagedResult<RefundRequest>(items, totalCount, pageNumber, pageSize);
         }

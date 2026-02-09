@@ -1,4 +1,5 @@
-﻿using PaymentService.Domain.Entities;
+﻿using PaymentService.Domain.Common.Models;
+using PaymentService.Domain.Entities;
 
 namespace PaymentService.Domain.Repositories
 {
@@ -14,5 +15,10 @@ namespace PaymentService.Domain.Repositories
         Task AddAsync(OwnerWallet ownerWallet, CancellationToken token = default);
         Task UpdateAsync(OwnerWallet ownerWallet, CancellationToken token = default);
         Task DeleteAsync(OwnerWallet ownerWallet, CancellationToken token = default);
+
+        Task<PagedResult<WalletLedger>> GetPagedListAsync(
+            Guid ownerId, int pageNumber, int pageSize,
+            DateTime? fromDate, DateTime? toDate, string? type,
+            CancellationToken token);
     }
 }

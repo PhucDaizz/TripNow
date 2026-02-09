@@ -1,4 +1,5 @@
-﻿using PaymentService.Domain.Entities;
+﻿using PaymentService.Domain.Common.Models;
+using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enum;
 using System.Threading.Tasks;
 
@@ -15,5 +16,12 @@ namespace PaymentService.Domain.Repositories
         Task AddAsync(PaymentTransaction paymentTransaction, CancellationToken token = default);
         Task UpdateAsync(PaymentTransaction paymentTransaction, CancellationToken token = default);
         Task DeleteAsync(PaymentTransaction paymentTransaction, CancellationToken token = default);
+
+        Task<PagedResult<PaymentTransaction>> GetPagedListAsync(
+            int pageNumber, int pageSize,
+            Guid? userId, Guid? bookingId,
+            PaymentTransactionStatus? status, TransactionType? type,
+            DateTime? fromDate, DateTime? toDate,
+            CancellationToken token);
     }
 }

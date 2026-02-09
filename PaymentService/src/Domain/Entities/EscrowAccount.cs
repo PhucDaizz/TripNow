@@ -43,7 +43,7 @@ namespace PaymentService.Domain.Entities
             if (Status == EscrowStatus.Refunded) return; 
             if (Status == EscrowStatus.Released) return;
 
-            if (Status != EscrowStatus.Holding)
+            if (Status != EscrowStatus.Holding && Status != EscrowStatus.PartiallyRefunded)
                 throw new DomainException("Chỉ có thể giải phóng tiền (Release) khi đang ở trạng thái Giữ (Holding).");
 
             Status = EscrowStatus.Released;

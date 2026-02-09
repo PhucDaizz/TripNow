@@ -11,7 +11,7 @@ namespace PaymentService.Application.DTOs.Payout
         public decimal Amount { get; set; }
         public string? TransactionReference { get; set; }
         public string? FailureReason { get; set; }
-        public PayoutStatus Status { get; set; }
+        public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

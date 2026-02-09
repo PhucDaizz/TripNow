@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using PaymentService.Application.Features.OwnerBankAccount.Commands.CreateBankAccount;
+using PaymentService.Application.Features.OwnerBankAccount.Commands.DeleteBankAccount;
 using PaymentService.Application.Features.OwnerBankAccount.Commands.SetDefaultBankAccount;
 using PaymentService.Application.Features.OwnerBankAccount.Commands.UpdateBankAccount;
 using PaymentService.Application.Features.OwnerBankAccount.Queries.GetOwnerBankAccounts;
@@ -50,14 +51,14 @@ namespace PaymentService.API.Controllers
         public async Task<IActionResult> SetDefault(Guid id)
         {
             var result = await _mediator.Send(new SetDefaultBankAccountCommand { Id = id });
-            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _mediator.Send(new DeleteBankAccountCommand { Id = id });
-            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
     }
 }

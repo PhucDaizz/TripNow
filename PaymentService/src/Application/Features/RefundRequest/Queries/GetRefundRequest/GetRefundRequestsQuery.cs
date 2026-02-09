@@ -13,5 +13,10 @@ namespace PaymentService.Application.Features.RefundRequest.Queries.GetRefundReq
 
         public RefundStatus? Status { get; set; } // Null = Lấy hết, 0 = Pending
         public string? SearchBookingId { get; set; }     // Tìm theo mã đơn
+
+        public Guid? UserId { get; set; }            
+        public string? TransactionRef { get; set; }  
+        public DateTime? FromDate { get; set; }      
+        public DateTime? ToDate { get; set; }
     }
 }
