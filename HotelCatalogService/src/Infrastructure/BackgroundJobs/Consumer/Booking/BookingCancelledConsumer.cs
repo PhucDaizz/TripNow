@@ -1,6 +1,5 @@
 ﻿using HotelCatalogService.Application.Features.Promotion.EventHandlers.BookingCancelled;
 using HotelCatalogService.Application.Features.Room.EventHandlers.RoomCheckedOut;
-using HotelCatalogService.Application.Features.Room.EventHandlers.RoomCheckIn;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

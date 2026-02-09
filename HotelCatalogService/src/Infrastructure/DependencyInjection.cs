@@ -23,6 +23,7 @@ namespace HotelCatalogService.Infrastructure
 
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IAmenityRepository, AmenityRepository>();
+            services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IEmailServices, EmailServices>();

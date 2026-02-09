@@ -46,4 +46,3 @@ namespace PaymentService.Application.Features.SettlementPeriod.Queries.GetMySett
         }
     }
 }
-}

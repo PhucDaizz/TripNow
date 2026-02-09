@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: tripup_mysql
+    container_name: travelnow_mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: phucdai011
@@ -12,16 +12,16 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - tripup-network
+      - travelnow-network
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: tripup_rabbitmq
+    container_name: travelnow_rabbitmq
     restart: always
     ports:
       - "5672:5672"
@@ -32,7 +32,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - tripup-network
+      - travelnow-network
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 10s
@@ -43,7 +43,7 @@ services:
     build:
       context: ./AuthService
       dockerfile: Dockerfile
-    container_name: tripup_auth_service
+    container_name: travelnow_auth_service
     restart: on-failure
     depends_on:
       mysql:
@@ -63,13 +63,13 @@ services:
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
     networks:
-      - tripup-network
+      - travelnow-network
 
   hotel_service:
     build:
       context: ./HotelCatalogService
       dockerfile: Dockerfile
-    container_name: tripup_hotel_service
+    container_name: travelnow_hotel_service
     restart: on-failure
     depends_on:
       mysql:
@@ -89,10 +89,79 @@ services:
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
     networks:
-      - tripup-network
+      - travelnow-network
+
+  booking_service:
+    build:
+      context: ./BookingService
+      dockerfile: Dockerfile
+    container_name: travelnow_booking_service
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Overrides for Docker Network
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=Booking.TravelNow.Service;user=root;password=phucdai011;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=ADMIN
+      - RabbitMQ__Password=ADMIN
+      - ServiceUrls__HotelCatalog=http://hotel_service:8080
+      - ServiceUrls__Payment=http://payment_service:8080
+    networks:
+      - travelnow-network
+
+  payment_service:
+    build:
+      context: ./PaymentService
+      dockerfile: Dockerfile
+    container_name: travelnow_payment_service
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Overrides for Docker Network
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=Payment.TravelNow.Service;user=root;password=phucdai011;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=ADMIN
+      - RabbitMQ__Password=ADMIN
+      - ServiceUrls__HotelCatalog=http://hotel_service:8080
+    networks:
+      - travelnow-network
+
+  api_gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: travelnow_api_gateway
+    restart: on-failure
+    depends_on:
+      - auth_service
+      - hotel_service
+      - booking_service
+      - payment_service
+    ports:
+      - "7000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    networks:
+      - travelnow-network
 
 networks:
-  tripup-network:
+  travelnow-network:
     driver: bridge
 
 volumes:

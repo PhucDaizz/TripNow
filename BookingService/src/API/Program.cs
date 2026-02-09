@@ -9,6 +9,7 @@ using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
 using BookingService.Infrastructure.Services;
 using BookingService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
@@ -82,6 +83,24 @@ namespace BookingService.API
 
 
             app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<BookingService.Infrastructure.ApplicationDbContext>();
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        context.Database.Migrate();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
+                }
+            }
 
             app.Run();
         }
