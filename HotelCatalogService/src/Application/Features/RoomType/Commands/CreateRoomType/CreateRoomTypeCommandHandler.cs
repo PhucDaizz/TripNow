@@ -25,11 +25,19 @@ namespace HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomT
 
             hotel.DefineRoomType(request.Name, request.BasePrice, request.Capacity, request.SizeM2);
 
+            if (hotel.StartingPrice == 0 || request.BasePrice < hotel.StartingPrice)
+            {
+                hotel.UpdateStartingPrice(request.BasePrice);
+            }
+
             await _unitOfWork.Hotel.UpdateAsync(hotel, token);
             await _unitOfWork.SaveChangesAsync(token);
 
-            var newRoomTypeEvent = new RoomTypeCreatedEvent {
-                RoomTypeId = hotel.RoomTypes.Last().Id,
+            var createdRoomType = hotel.RoomTypes.Last();
+
+            var newRoomTypeEvent = new RoomTypeCreatedEvent
+            {
+                RoomTypeId = createdRoomType.Id,
                 HotelId = hotel.Id,
                 InitialStock = 0
             };

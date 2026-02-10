@@ -1,4 +1,5 @@
 ﻿using BookingService.Domain.Entities;
+using BookingService.Domain.Enum;
 using BookingService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +51,22 @@ namespace BookingService.Infrastructure.Data.Repositories
             return await _context.Booking
                 .Include(b => b.Items.Where(x => x.BookingId == bookingId))
                 .FirstOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
+        }
+
+        public async Task<bool> HaveAnyBookInFuture(Guid roomTypeId, CancellationToken cancellationToken = default)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var exists = await _context.Booking
+                .AnyAsync(b =>
+                    b.Status != BookingStatus.Cancelled &&       
+                    b.Status != BookingStatus.NoShow &&          
+                    b.CheckOutDate >= today &&                   
+                    b.Items.Any(i => i.RoomTypeId == roomTypeId),
+                    cancellationToken
+                );
+
+            return exists;
         }
 
         public Task UpdateBookingAsync(Booking booking, CancellationToken cancellationToken = default)

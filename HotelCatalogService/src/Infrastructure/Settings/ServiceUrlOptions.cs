@@ -4,5 +4,7 @@
     {
         public const string SectionName = "ServiceUrls";
         public string Auth { get; set; } = default!;
+        public string Booking { get; set; } = default!;
+
     }
 }

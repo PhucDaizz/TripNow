@@ -41,6 +41,9 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel
                 newLocation
             );
 
+            hotel.UpdateRating(request.Rating);
+
+            await _unitOfWork.Hotel.UpdateAsync(hotel, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();

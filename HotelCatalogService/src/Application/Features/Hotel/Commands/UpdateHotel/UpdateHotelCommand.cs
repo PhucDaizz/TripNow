@@ -10,6 +10,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel
 
         public string Name { get; set; }
         public string Description { get; set; }
+        public decimal Rating { get; set; }
 
         public string Street { get; set; }
         public string City { get; set; }

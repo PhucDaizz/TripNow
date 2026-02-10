@@ -80,6 +80,7 @@ namespace HotelCatalogService.API.Controllers
                 OwnerId = Guid.Parse(userId),
                 Name = request.Name,
                 Description = request.Description,
+                Rating = request.Rating,
                 Street = request.Street,
                 City = request.City,
                 Country = request.Country,

@@ -1,10 +1,12 @@
-﻿using HotelCatalogService.Domain.Common.Models;
+﻿using CloudinaryDotNet;
+using HotelCatalogService.Domain.Common.Models;
 using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Dto.Room;
 using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 
 namespace HotelCatalogService.Infrastructure.Data.Repositories
@@ -70,7 +72,11 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
             return await _context.Hotel.AnyAsync(h => h.Id == id, cancellationToken);
         }
 
-        public async Task<PagedResult<HotelDto>> GetByFilterAsync(string? searchTerm, HotelStatus? status, Guid? ownerId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<HotelDto>> GetByFilterAsync(string? searchTerm,string? city, HotelStatus? status, Guid? ownerId, decimal? minRating,
+            double? userLat, double? userLon, double? radiusKm,
+            decimal? minPrice, decimal? maxPrice, 
+            string? sortColumn, string? sortDirection,
+            int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             var query = _context.Hotel.AsNoTracking().AsQueryable();
 
@@ -83,6 +89,11 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                     EF.Functions.Like(h.Address.City, term));
             }
 
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                query = query.Where(h => h.Address.City.Contains(city.Trim()));
+            }
+
             if (status.HasValue)
             {
                 query = query.Where(h => h.Status == status.Value);
@@ -93,32 +104,106 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 query = query.Where(h => h.OwnerId == ownerId.Value);
             }
 
-            var totalCount = await query.CountAsync(cancellationToken);
+            if (minRating.HasValue)
+            {
+                query = query.Where(h => h.Rating >= minRating.Value);
+            }
 
-            var items = await query
-                .OrderByDescending(h => h.CreatedAt)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(h => new HotelDto
+            if (minPrice.HasValue)
+            {
+                query = query.Where(h => h.StartingPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(h => h.StartingPrice <= maxPrice.Value);
+            }
+
+            List<HotelDto> resultItems;
+            int totalCount;
+
+
+            if (userLat.HasValue && userLon.HasValue && radiusKm.HasValue)
+            {
+
+                double r = radiusKm.Value / 111.0; 
+                query = query.Where(h =>
+                    h.Location.Latitude >= userLat.Value - r && h.Location.Latitude <= userLat.Value + r &&
+                    h.Location.Longitude >= userLon.Value - r && h.Location.Longitude <= userLon.Value + r
+                );
+
+                var geoQuery = query.Select(h => new
                 {
-                    Id = h.Id,
-                    Name = h.Name,
-                    Slug = h.Slug,
-                    Description = h.Description,
-                    OwnerId = h.OwnerId,
-                    Status = h.Status.ToString(),
-                    Rating = h.Rating,
-                    AddressStreet = h.Address.Street,
-                    AddressCity = h.Address.City,
-                    Thumbnail = h.Images
+                    Hotel = h,
+                    Distance = 6371 * 2 * Math.Asin(Math.Sqrt(
+                        Math.Pow(Math.Sin((h.Location.Latitude * Math.PI / 180 - userLat.Value * Math.PI / 180) / 2), 2) +
+                        Math.Cos(userLat.Value * Math.PI / 180) * Math.Cos(h.Location.Latitude * Math.PI / 180) *
+                        Math.Pow(Math.Sin((h.Location.Longitude * Math.PI / 180 - userLon.Value * Math.PI / 180) / 2), 2)
+                    ))
+                })
+                .Where(x => x.Distance <= radiusKm.Value); 
+
+                totalCount = await geoQuery.CountAsync(cancellationToken);
+
+                var data = await geoQuery
+                    .OrderBy(x => x.Distance) 
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                resultItems = data.Select(x => new HotelDto
+                {
+                    Id = x.Hotel.Id,
+                    Name = x.Hotel.Name,
+                    Slug = x.Hotel.Slug,
+                    Description = x.Hotel.Description,
+                    OwnerId = x.Hotel.OwnerId,
+                    Status = x.Hotel.Status.ToString(),
+                    Rating = x.Hotel.Rating,
+                    Location = x.Hotel.Location,
+                    DistanceKm = Math.Round(x.Distance, 2),
+                    AddressStreet = x.Hotel.Address.Street,
+                    AddressCity = x.Hotel.Address.City,
+                    Thumbnail = x.Hotel.Images
                         .Where(i => i.IsThumbnail)
                         .Select(i => i.ImageUrl)
                         .FirstOrDefault(),
-                    CreatedAt = h.CreatedAt
-                })
-                .ToListAsync(cancellationToken);
+                    CreatedAt = x.Hotel.CreatedAt
+                }).ToList();
+            }
 
-            return new PagedResult<HotelDto>(items, totalCount, pageNumber, pageSize);
+            else
+            {
+                query = ApplySorting(query, sortColumn, sortDirection);
+
+                totalCount = await query.CountAsync(cancellationToken);
+
+                resultItems = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(h => new HotelDto
+                    {
+                        Id = h.Id,
+                        Name = h.Name,
+                        Slug = h.Slug,
+                        Description = h.Description,
+                        OwnerId = h.OwnerId,
+                        Status = h.Status.ToString(),
+                        Rating = h.Rating,
+                        Location = h.Location,
+                        DistanceKm = null,
+                        AddressStreet = h.Address.Street,
+                        AddressCity = h.Address.City,
+                        Thumbnail = h.Images
+                            .Where(i => i.IsThumbnail)
+                            .Select(i => i.ImageUrl)
+                            .FirstOrDefault(),
+                        CreatedAt = h.CreatedAt
+                    })
+                    .ToListAsync(cancellationToken);
+            }
+
+            return new PagedResult<HotelDto>(resultItems, totalCount, pageNumber, pageSize);
         }
 
         public async Task<Hotel?> GetByIdIncludeAsync(
@@ -266,6 +351,19 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 .Include(h => h.Promotions.Where(p => p.Code == normalizedCode)) 
                 .   ThenInclude(p => p.PromotionUsages.Where(u => u.BookingId == bookingId)) 
                 .FirstOrDefaultAsync(token);
+        }
+
+        private IQueryable<Hotel> ApplySorting(IQueryable<Hotel> query, string? column, string? direction)
+        {
+            bool isAsc = direction?.ToUpper() == "ASC";
+
+            return column?.ToLower() switch
+            {
+                "name" => isAsc ? query.OrderBy(h => h.Name) : query.OrderByDescending(h => h.Name),
+                "rating" => isAsc ? query.OrderBy(h => h.Rating) : query.OrderByDescending(h => h.Rating),
+                "price" => isAsc ? query.OrderBy(h => h.StartingPrice) : query.OrderByDescending(h => h.StartingPrice), // Sort theo giá
+                _ => query.OrderByDescending(h => h.CreatedAt) 
+            };
         }
     }
 }

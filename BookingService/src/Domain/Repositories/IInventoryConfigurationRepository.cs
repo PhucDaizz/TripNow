@@ -8,5 +8,6 @@ namespace BookingService.Domain.Repositories
         Task<List<InventoryConfiguration>> GetByHotelIdAsync(Guid hotelId, CancellationToken token = default);
         Task<bool> AnyAsync(Guid roomTypeId);
         Task AddAsync(InventoryConfiguration inventory, CancellationToken token = default);
+        Task DeleteAsync(InventoryConfiguration inventory, CancellationToken token = default);
     }
 }

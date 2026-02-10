@@ -21,7 +21,6 @@
   <ItemGroup>
     <Folder Include="Features\BookingPriceSnapshot\Commands\" />
     <Folder Include="Features\Inventory\Command\" />
-    <Folder Include="Features\Inventory\Queries\" />
     <Folder Include="Mappings\" />
   </ItemGroup>
 

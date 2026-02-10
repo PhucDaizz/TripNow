@@ -25,6 +25,11 @@ namespace HotelCatalogService.Application.Features.RoomType.Commands.UpdateRoomT
 
             roomType.UpdateDetails(request.Name, request.BasePrice, request.Capacity, request.SizeM2);
 
+            if (hotel.StartingPrice == 0 || request.BasePrice < hotel.StartingPrice)
+            {
+                hotel.UpdateStartingPrice(request.BasePrice);
+            }
+
             await _unitOfWork.Hotel.UpdateAsync(hotel, token);
             await _unitOfWork.SaveChangesAsync(token);
 

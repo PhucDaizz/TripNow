@@ -32,5 +32,6 @@ namespace BookingService.Domain.Repositories
         /// Reset cột BlockedStock về 0 hàng loạt (Dùng khi mở cửa khách sạn lại).
         /// </summary>
         Task SetBlockedStockToZeroBulkAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, CancellationToken cancellationToken);
+        Task DeleteAllByRoomTypeIdAsync(Guid roomTypeId, CancellationToken cancellationToken = default);
     }
 }

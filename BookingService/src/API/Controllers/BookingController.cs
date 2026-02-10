@@ -4,6 +4,7 @@ using BookingService.Application.Features.Booking.Commands.CancelBooking;
 using BookingService.Application.Features.Booking.Commands.CreateBooking;
 using BookingService.Application.Features.Booking.Queries.GetBookings;
 using BookingService.Application.Features.Booking.Queries.GetDetailBooking;
+using BookingService.Application.Features.Inventory.Queries.CheckRoomUsage;
 using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
 using MediatR;
@@ -129,6 +130,17 @@ namespace BookingService.API.Controllers
             );
 
             return Ok(response);
+        }
+
+        [HttpGet("check-room-usage/{roomTypeId}")] // không map ra gateway
+        public async Task<IActionResult> CheckRoomUsage(Guid roomTypeId)
+        {
+            var result = await _mediator.Send(new CheckRoomUsageQuery { RoomTypeId = roomTypeId });
+            if (result)
+            {
+                return Ok(ApiResponse<bool>.SuccessResponse(result)); 
+            }
+            return BadRequest(ApiResponse<bool>.SuccessResponse(result));
         }
 
         private static CancelledBy ResolveCancelledBy(

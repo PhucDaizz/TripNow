@@ -16,6 +16,7 @@ namespace HotelCatalogService.Domain.Entities
         public HotelStatus Status { get; private set; }
         public decimal Rating { get; private set; }
         public Coordinates Location { get; private set; }
+        public decimal StartingPrice { get; private set; }
 
         private readonly List<Block> _blocks = new();
         private readonly List<RoomType> _roomTypes = new(); 
@@ -40,26 +41,34 @@ namespace HotelCatalogService.Domain.Entities
         }
 
         private Hotel(Guid ownerId, string name, string description,
-                 Address address, Coordinates location) : this()
+                 Address address, Coordinates location, decimal rating) : this()
         {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+            if (ownerId == Guid.Empty) throw new ArgumentException("OwnerId invalid");
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
+            if (address == null) throw new ArgumentNullException(nameof(address));
+            if (location == null) throw new ArgumentNullException(nameof(location));
+            if (rating < 0 || rating > 5) throw new ArgumentOutOfRangeException(nameof(rating), "Rating must be between 0 and 5");
+
             OwnerId = ownerId;
             Name = name;
             Description = description;
             Address = address;
             Location = location;
             Status = HotelStatus.Draft;
-            Rating = 0;
+            Rating = rating;
+            StartingPrice = 0;
             Slug = SlugHelper.GenerateSlug(name);
         }
 
 
         public static Hotel Create(Guid ownerId, string name, string description,
-                                   Address address, Coordinates location)
+                                   Address address, Coordinates location, decimal rating)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
             if (ownerId == Guid.Empty) throw new ArgumentException("OwnerId invalid");
 
-            return new Hotel(ownerId, name, description, address, location);
+            return new Hotel(ownerId, name, description, address, location, rating);
         }
 
         public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size)
@@ -78,6 +87,17 @@ namespace HotelCatalogService.Domain.Entities
             {
                 // Nếu loại phòng này đã có người đặt (Booking) thì không được xóa
                 _roomTypes.Remove(item);
+            }
+
+            if (_roomTypes.Count == 0)
+            {
+                StartingPrice = 0;
+                Status = HotelStatus.Draft; 
+            }
+            else
+            {
+                var newMinPrice = _roomTypes.Min(rt => rt.BasePrice);
+                StartingPrice = newMinPrice;
             }
         }
 
@@ -377,6 +397,11 @@ namespace HotelCatalogService.Domain.Entities
             {
                 targetPromo.RestorePromotion(bookingId);
             }
+        }
+
+        public void UpdateStartingPrice(decimal newPrice)
+        {
+            StartingPrice = newPrice;
         }
     }
 }

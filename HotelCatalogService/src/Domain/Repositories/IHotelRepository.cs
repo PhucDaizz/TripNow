@@ -28,8 +28,13 @@ namespace HotelCatalogService.Domain.Repositories
         Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
         Task<PagedResult<HotelDto>> GetByFilterAsync(
             string? searchTerm,
+            string? city,
             HotelStatus? status,
             Guid? ownerId,
+            decimal? minRating,
+            double? userLat, double? userLon, double? radiusKm,
+            decimal? minPrice, decimal? maxPrice, 
+            string? sortColumn, string? sortDirection, 
             int pageNumber,
             int pageSize,
             CancellationToken cancellationToken = default);

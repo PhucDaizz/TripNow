@@ -1,6 +1,7 @@
 ﻿using BookingService.Application.DTOs.Inventory;
 using BookingService.Application.DTOs.InventoryConfiguration;
 using BookingService.Application.Features.InventoryConfiguration.EventHandlers.RoomTypeCreated;
+using BookingService.Application.Features.InventoryConfiguration.EventHandlers.RoomTypeDeletedEvent;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -71,6 +72,13 @@ namespace BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory
                 exchangeType: "topic",
                 routingKey: "roomtype.create",
                 queueName: "booking-service-room-type-create", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<RoomTypeDeletedEvent>( 
+                exchange: "hotel-catalog.events",
+                exchangeType: "topic",
+                routingKey: "roomtype.delete",
+                queueName: "booking-service-room-type-delete", 
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
 
             await _consumer.Subscribe<HotelStatusChangedEvent>(  // vui lòng gọi hàm mở khách sạn để inventory hoạt động lại

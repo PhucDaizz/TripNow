@@ -19,6 +19,9 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .HasMaxLength(300) 
                    .IsRequired();
 
+            builder.Property(h => h.StartingPrice)
+                    .HasColumnType("decimal(18,2)").IsRequired();
+
             builder.HasIndex(h => h.Slug).IsUnique();
             builder.Property(h => h.Description)
                    .HasColumnType("longtext");
@@ -34,6 +37,9 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                 a.Property(ad => ad.Street).HasColumnName("Address_Street").HasMaxLength(200).IsRequired();
                 a.Property(ad => ad.City).HasColumnName("Address_City").HasMaxLength(100);
                 a.Property(ad => ad.Country).HasColumnName("Address_Country").HasMaxLength(100);
+
+                a.HasIndex(ad => ad.City)
+                    .HasDatabaseName("IX_Hotels_Address_City");
             });
 
             // --- Value Object: Location ---
@@ -41,6 +47,9 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             {
                 l.Property(c => c.Latitude).HasColumnName("Latitude");
                 l.Property(c => c.Longitude).HasColumnName("Longitude");
+
+                l.HasIndex(c => new { c.Latitude, c.Longitude })
+                    .HasDatabaseName("IX_Hotels_Location");
             });
 
             // --- Relationships (Giữ nguyên) ---
@@ -73,6 +82,17 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .HasForeignKey(x => x.HotelId)
                    .OnDelete(DeleteBehavior.Cascade);
             builder.Navigation(h => h.Images).HasField("_images");
+
+            builder.HasIndex(h => new { h.Status, h.Rating })
+            .HasDatabaseName("IX_Hotels_Status_Rating");
+
+            builder.HasIndex(h => new { h.Status, h.StartingPrice })
+                   .HasDatabaseName("IX_Hotels_Status_Price");
+
+            builder.HasIndex(h => h.OwnerId)
+                .HasDatabaseName("IX_Hotels_OwnerId");
+
+            builder.HasIndex(h => h.Name);
         }
     }
 }

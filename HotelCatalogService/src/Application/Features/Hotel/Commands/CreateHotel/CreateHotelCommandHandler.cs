@@ -24,7 +24,8 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.CreateHotel
                 request.Name,
                 request.Description,
                 address,
-                location
+                location,
+                request.Rating
             );
             
             await _unitOfWork.Hotel.AddAsync(hotel, cancellationToken);

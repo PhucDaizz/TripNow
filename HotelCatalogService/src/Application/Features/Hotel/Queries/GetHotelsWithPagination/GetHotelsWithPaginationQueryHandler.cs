@@ -19,8 +19,17 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPa
         {
             var pagedData = await _hotelRepository.GetByFilterAsync(
                 request.SearchTerm,
+                request.City,
                 request.Status,
                 request.OwnerId,
+                request.MinRating,
+                request.UserLatitude,
+                request.UserLongitude,
+                request.RadiusInKm,
+                request.MinPrice, 
+                request.MaxPrice,
+                request.SortColumn,
+                request.SortDirection,
                 request.PageNumber,
                 request.PageSize,
                 cancellationToken

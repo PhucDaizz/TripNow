@@ -114,5 +114,12 @@ namespace BookingService.Infrastructure.Data.Repositories
                     i => 0), // Set cứng về 0
                 cancellationToken);
         }
+
+        public async Task DeleteAllByRoomTypeIdAsync(Guid roomTypeId, CancellationToken cancellationToken = default)
+        {
+            var inventories = _context.Inventory.Where(x => x.RoomTypeId == roomTypeId);
+            _context.Inventory.RemoveRange(inventories);
+            await Task.CompletedTask;
+        }
     }
 }
