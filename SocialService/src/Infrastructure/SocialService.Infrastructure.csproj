@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="BackgroundJobs\Consumer\" />
-    <Folder Include="Data\Repositories\" />
     <Folder Include="Settings\" />
   </ItemGroup>
 
