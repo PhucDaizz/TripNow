@@ -19,6 +19,7 @@ namespace SocialService.Infrastructure
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 
             services.AddScoped<IDomainEventService, DomainEventService>();

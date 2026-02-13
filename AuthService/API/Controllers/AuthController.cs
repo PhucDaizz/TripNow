@@ -16,6 +16,7 @@ using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
 using Application.Features.User.Queries.GetUsersWithPagination;
+using Application.Features.User.Queries.IsUserExisting;
 using Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -437,5 +438,16 @@ namespace API.Controllers
             return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
         }
 
+        [HttpGet("user-existing")]
+        public async Task<IActionResult> IsUsserExisting([FromQuery]Guid userId)
+        {
+            var request = new IsUserExistingQuery
+            {
+                UserId = userId
+            };
+
+            var result = await _mediator.Send(request);
+            return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
+        }
     }
 }

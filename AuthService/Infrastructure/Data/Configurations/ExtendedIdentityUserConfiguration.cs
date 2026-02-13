@@ -18,6 +18,9 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true);
+
+            builder.Property(x => x.Follower)
+                .HasDefaultValue(0);
         }
     }
 }

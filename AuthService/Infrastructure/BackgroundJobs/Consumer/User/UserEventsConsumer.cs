@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.User;
+using Application.DTOs.User.Event;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,6 +32,20 @@ namespace Infrastructure.BackgroundJobs.Consumer.User
                 exchangeType: "topic",
                 routingKey: "user.registered",
                 queueName: "auth-service-user-registered",
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<IncreaseFollowEvent> (
+                exchange: "social.events",
+                exchangeType: "topic",
+                routingKey: "increase.follow.user",
+                queueName: "auth-service-increase-follow",
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<UnfollowEvent>(
+                exchange: "social.events",
+                exchangeType: "topic",
+                routingKey: "unfollow.user",
+                queueName: "auth-service-unfollow",
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

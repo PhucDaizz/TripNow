@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Domain.Entities;
+using SocialService.Domain.Enum;
 using SocialService.Domain.Repositories;
 
 namespace SocialService.Infrastructure.Data.Repositories
@@ -27,6 +28,16 @@ namespace SocialService.Infrastructure.Data.Repositories
         public async Task<UserFollow?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             return await _context.UserFollows.FirstOrDefaultAsync(x => x.Id == id, token);
+        }
+
+        public async Task<UserFollow?> GetByUserAndTargetAsync(Guid userFollowId, Guid targetId, TypeFollow typeFollow, CancellationToken token = default)
+        {
+            return await _context.UserFollows.FirstOrDefaultAsync(x => x.TargetId == targetId && x.Type == typeFollow && x.FollowerId == userFollowId, token);
+        }
+
+        public Task<bool> IsExisting(Guid userFollowId, Guid targetId, TypeFollow typeFollow, CancellationToken token = default)
+        {
+            return _context.UserFollows.AnyAsync(x => x.TargetId == targetId && x.Type == typeFollow && x.FollowerId == userFollowId, token);
         }
 
         public Task UpdateAsync(UserFollow userFollow, CancellationToken token = default)

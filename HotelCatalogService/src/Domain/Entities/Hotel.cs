@@ -11,6 +11,7 @@ namespace HotelCatalogService.Domain.Entities
         public Guid OwnerId { get; private set; }
         public string Name { get; private set; }
         public string Slug { get; private set; }
+        public int Follower { get; set; }
         public string Description { get; private set; }
         public Address Address { get; private set; }
         public HotelStatus Status { get; private set; }
@@ -402,6 +403,17 @@ namespace HotelCatalogService.Domain.Entities
         public void UpdateStartingPrice(decimal newPrice)
         {
             StartingPrice = newPrice;
+        }
+
+        public void FollowHotel()
+        {
+            this.Follower += 1;
+        }
+
+        public void UnFollow()
+        {
+            if (this.Follower != 0 && this.Follower > 0)
+                this.Follower -= 1;
         }
     }
 }

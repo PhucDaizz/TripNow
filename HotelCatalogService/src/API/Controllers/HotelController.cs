@@ -11,8 +11,10 @@ using HotelCatalogService.Application.Features.Hotel.Commands.ReopenHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.SubmitForApprovalHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.SuspendHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
+using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting;
 using HotelCatalogService.Application.Features.Room.Commands.CheckInHotelRoom;
 using HotelCatalogService.Application.Features.Room.Commands.RollbackCheckInRoom;
 using HotelCatalogService.Domain.Common;
@@ -425,5 +427,35 @@ namespace HotelCatalogService.API.Controllers
             }
             return Ok(ApiResponse<object>.SuccessResponse("Rollback room success"));
         }
+
+        [HttpGet("hotel-existing")]
+        public async Task<IActionResult> IsHotelExisting([FromQuery]Guid hotelId)
+        {
+            var request = new IsHotelExistingQuery
+            {
+                HotelId = hotelId
+            };
+
+            var result = await _mediator.Send(request);
+
+            return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
+        }
+
+        [HttpGet("detail")]
+        public async Task<IActionResult> GetHotelDetail([FromQuery]Guid hotelId)
+        {
+            var request = new GetHotelDetailQuery
+            {
+                HotelId = hotelId
+            };
+
+            var result = await _mediator.Send(request);
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<HotelDetailDto>.SuccessResponse(result.Value));
+            }
+            return NotFound(ApiResponse<HotelDetailDto>.ErrorResponse(result.Error.Message.ToString()));
+        }
     }
 }
+

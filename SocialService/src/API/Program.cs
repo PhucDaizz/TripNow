@@ -1,12 +1,16 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using Nexus.BuildingBlocks.Extensions;
 using SocialService.API.Common.ExceptionHandling;
 using SocialService.API.ExceptionHandling;
 using SocialService.API.Extensions;
 using SocialService.API.StartUp;
 using SocialService.Application;
+using SocialService.Application.Contracts;
 using SocialService.Infrastructure;
+using SocialService.Infrastructure.Services;
+using SocialService.Infrastructure.Settings;
+using System.Diagnostics;
 
 namespace SocialService.API
 {
@@ -15,6 +19,9 @@ namespace SocialService.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.Configure<ServiceUrlOptions>(
+                builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -38,6 +45,20 @@ namespace SocialService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
+               (sp, client) =>
+               {
+                   var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                   client.BaseAddress = new Uri(options.HotelCatalog);
+               });
+            builder.Services.AddHttpClient<IAuthService, AuthService>(
+               (sp, client) =>
+               {
+                   var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                   client.BaseAddress = new Uri(options.Auth);
+               });
+
             var app = builder.Build();
 
             app.UseExceptionHandler();
