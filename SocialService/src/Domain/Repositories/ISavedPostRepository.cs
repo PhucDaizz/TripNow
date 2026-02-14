@@ -8,5 +8,6 @@ namespace SocialService.Domain.Repositories
         Task AddAsync(SavedPost savedPost, CancellationToken token = default);
         Task UpdateAsync(SavedPost savedPost, CancellationToken token = default);
         Task DeleteAsync(SavedPost savedPost, CancellationToken token = default);
+        Task<SavedPost?> IsUserSavePost(Guid userId, Guid postId, CancellationToken token = default);
     }
 }

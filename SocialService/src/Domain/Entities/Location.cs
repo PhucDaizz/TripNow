@@ -47,5 +47,22 @@ namespace SocialService.Domain.Entities
                 throw new DomainException("Loại địa điểm không hợp lệ.");
             Type = newType;
         }
+
+        public void UpdateDetails(string name, string address, Coordinates coordinates, LocationType type)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new DomainException("Tên vị trí không thể trống.");
+            if (string.IsNullOrWhiteSpace(address)) throw new DomainException("Địa chỉ không thể trống.");
+            if (coordinates == null) throw new DomainException("Toạ độ không thể trống.");
+
+            if (!System.Enum.IsDefined(typeof(LocationType), type))
+                throw new DomainException("Loại địa điểm không hợp lệ.");
+
+            Name = name.Trim();
+            Address = address.Trim();
+            Coordinates = coordinates;
+            Type = type;
+
+            IsVerify = false; 
+        }
     }
 }

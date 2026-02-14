@@ -37,6 +37,11 @@ namespace SocialService.Domain.Entities
             AddDomainEvent(new CommentCreatedEvent()); //this.Id, this.PostId, this.UserId
         }
 
+        public static Comment Create(Guid postId, Guid userId, string content, Guid? parentCommentId = null)
+        {
+            return new Comment(postId, userId, content, parentCommentId);
+        }
+
         /// <summary>
         /// Sửa nội dung comment
         /// </summary>
@@ -52,8 +57,7 @@ namespace SocialService.Domain.Entities
             Content = newContent.Trim();
             UpdatedAt = DateTime.UtcNow;
 
-            // Event: Comment đã bị sửa (có thể dùng để log lịch sử)
-            AddDomainEvent(new CommentEditedEvent()); //this.Id, this.PostId
+            AddDomainEvent(new CommentEditedEvent(this.Id, this.PostId, this.Content));
         }
 
         /// <summary>
@@ -66,10 +70,12 @@ namespace SocialService.Domain.Entities
                 throw new DomainException("Bạn không có quyền xóa comment này.");
             }
 
+            if (IsDeleted) return;
+
             IsDeleted = true;
             UpdatedAt = DateTime.UtcNow;
 
-            AddDomainEvent(new CommentDeletedEvent()); //this.Id, this.PostId
+            AddDomainEvent(new CommentDeletedEvent(this.Id, this.PostId));
         }
 
         /// <summary>
@@ -80,6 +86,8 @@ namespace SocialService.Domain.Entities
             IsHidden = true;
             HiddenReason = reason;
             UpdatedAt = DateTime.UtcNow;
+
+            AddDomainEvent(new CommentHiddenByAdminEvent(this.Id, this.PostId, reason));
         }
 
 
@@ -90,7 +98,7 @@ namespace SocialService.Domain.Entities
                 throw new DomainException("Nội dung bình luận không được để trống.");
             }
 
-            if (content.Length > 1000) // Business Rule: Giới hạn độ dài
+            if (content.Length > 1000) 
             {
                 throw new DomainException("Bình luận không được quá 1000 ký tự.");
             }

@@ -29,6 +29,11 @@ namespace SocialService.Infrastructure.Data.Repositories
             return await _context.SavedPosts.FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
+        public async Task<SavedPost?> IsUserSavePost(Guid userId, Guid postId, CancellationToken token = default)
+        {
+            return await _context.SavedPosts.FirstOrDefaultAsync(x => x.UserId == userId && x.PostId == postId, token);
+        }
+
         public Task UpdateAsync(SavedPost savedPost, CancellationToken token = default)
         {
             _context.SavedPosts.Update(savedPost);
