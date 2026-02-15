@@ -13,6 +13,8 @@ namespace SocialService.Infrastructure.Data.Configurations
 
             builder.ToTable("Comments");
 
+            builder.Property(c => c.UserId)
+                .IsRequired(true);
 
             builder.Property(c => c.Content)
                    .IsRequired()
@@ -47,7 +49,7 @@ namespace SocialService.Infrastructure.Data.Configurations
                    .HasForeignKey(c => c.ParentCommentId)
                    .IsRequired(false) 
                    .OnDelete(DeleteBehavior.Restrict);
-            
+
             builder.HasQueryFilter(c => !c.IsDeleted);
 
 

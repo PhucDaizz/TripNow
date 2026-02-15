@@ -46,4 +46,3 @@ namespace SocialService.Application.Features.Locations.Commands.CreateLocation
         }
     }
 }
-}

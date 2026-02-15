@@ -14,4 +14,3 @@ namespace SocialService.Application.Features.Locations.Queries.SearchLocations
         public int PageSize { get; set; } = 10;
     }
 }
-}

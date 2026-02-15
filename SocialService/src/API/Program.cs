@@ -8,6 +8,7 @@ using SocialService.API.StartUp;
 using SocialService.Application;
 using SocialService.Application.Contracts;
 using SocialService.Infrastructure;
+using SocialService.Infrastructure.BackgroundJobs.Consumer;
 using SocialService.Infrastructure.Services;
 using SocialService.Infrastructure.Settings;
 using System.Diagnostics;
@@ -27,6 +28,8 @@ namespace SocialService.API
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddHealthChecks();
 
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddProblemDetails(options =>
             {
                 options.CustomizeProblemDetails = context =>
@@ -45,6 +48,8 @@ namespace SocialService.API
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHostedService<MemberEventsConsumer>();
 
             builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
                (sp, client) =>

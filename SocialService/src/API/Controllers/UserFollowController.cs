@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using SocialService.Application.Features.UserFollow.Commands.FollowHotel;
 using SocialService.Application.Features.UserFollow.Commands.FollowUser;
+using SocialService.Application.Features.UserFollow.Commands.UnfollowHotel;
 using SocialService.Application.Features.UserFollow.Commands.UnfollowUser;
 using SocialService.Application.Features.UserFollow.Queries.IsFollow;
 using SocialService.Domain.Common;

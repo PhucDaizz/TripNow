@@ -15,6 +15,7 @@ namespace SocialService.Infrastructure
         public IPostRepository postRepository { get; }
         public ISavedPostRepository savedPostRepository { get; }
         public IUserFollowRepository userFollowRepository { get; }
+        public IMemberRepository memberRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context,
             ICommentRepository commentRepository,
@@ -22,7 +23,8 @@ namespace SocialService.Infrastructure
             IPostLikeRepository postLikeRepository,
             IPostRepository postRepository,
             ISavedPostRepository savedPostRepository,
-            IUserFollowRepository userFollowRepository)
+            IUserFollowRepository userFollowRepository,
+            IMemberRepository memberRepository)
         {
             _context = context;
             this.commentRepository = commentRepository;
@@ -31,6 +33,7 @@ namespace SocialService.Infrastructure
             this.postRepository = postRepository;
             this.savedPostRepository = savedPostRepository;
             this.userFollowRepository = userFollowRepository;
+            this.memberRepository = memberRepository;
         }
         public async Task BeginTransactionAsync()
         {

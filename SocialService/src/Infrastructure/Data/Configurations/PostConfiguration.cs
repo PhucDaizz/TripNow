@@ -15,7 +15,10 @@ namespace SocialService.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Content)
                    .IsRequired()
-                   .HasColumnType("longtext"); 
+                   .HasColumnType("longtext");
+
+            builder.Property(c => c.UserId)
+                .IsRequired(true);
 
             builder.Property(x => x.ThumbnailUrl)
                    .HasMaxLength(500)

@@ -29,6 +29,11 @@ namespace SocialService.Infrastructure.Data.Repositories
             return await _context.Posts.FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
+        public Task<bool> IsPostExisting(Guid postId, CancellationToken token = default)
+        {
+            return _context.Posts.AnyAsync(x => x.Id == postId && x.IsDeleted == false, token);
+        }
+
         public Task UpdateAsync(Post post, CancellationToken token = default)
         {
             _context.Posts.Update(post);

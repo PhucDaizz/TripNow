@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialService.Domain.Entities;
-using System.Collections.Generic;
 
 namespace SocialService.Application.Common.Interfaces
 {
@@ -14,6 +13,7 @@ namespace SocialService.Application.Common.Interfaces
         public DbSet<Review> Reviews { get; set; }
         public DbSet<PostImage> PostImages { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Member> Members { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

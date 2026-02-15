@@ -21,6 +21,7 @@ namespace SocialService.Infrastructure
         public DbSet<Review> Reviews { get; set; }
         public DbSet<PostImage> PostImages { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Member> Members { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

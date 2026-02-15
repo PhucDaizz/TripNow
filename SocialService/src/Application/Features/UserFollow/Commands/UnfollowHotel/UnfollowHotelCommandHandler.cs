@@ -6,7 +6,7 @@ using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.UserFollow.Commands.UnfollowHotel
 {
-    public class UnfollowHotelCommandHandler : INotificationHandler<UnfollowHotelCommand, Result<bool>>
+    public class UnfollowHotelCommandHandler : IRequestHandler<UnfollowHotelCommand, Result<bool>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;

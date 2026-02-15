@@ -19,7 +19,7 @@ namespace SocialService.Domain.Entities
 
         private Comment() {}
 
-        internal Comment(Guid postId, Guid userId, string content, Guid? parentCommentId = null)
+        public Comment(Guid postId, Guid userId, string content, Guid? parentCommentId = null)
         {
             if (postId == Guid.Empty) throw new DomainException("PostId không hợp lệ.");
             if (userId == Guid.Empty) throw new DomainException("UserId không hợp lệ.");

@@ -29,6 +29,11 @@ namespace SocialService.Infrastructure.Data.Repositories
             return await _context.Comments.FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
+        public async Task<bool> IsParentCommentExistingAsync(Guid commentId, CancellationToken token = default)
+        {
+            return await _context.Comments.AnyAsync(x => x.Id == commentId && !x.IsDeleted, token);
+        }
+
         public Task UpdateAsync(Comment comment, CancellationToken token = default)
         {
             _context.Comments.Update(comment);

@@ -10,6 +10,7 @@ namespace SocialService.Application.Common.Interfaces
         public IPostRepository postRepository { get; }
         public ISavedPostRepository savedPostRepository { get; }
         public IUserFollowRepository userFollowRepository { get; }
+        public IMemberRepository memberRepository { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();

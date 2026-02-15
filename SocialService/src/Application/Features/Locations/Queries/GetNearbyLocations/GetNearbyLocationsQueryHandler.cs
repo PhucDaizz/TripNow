@@ -73,7 +73,7 @@ namespace SocialService.Application.Features.Locations.Queries.GetNearbyLocation
                     Math.Cos(DegToRad(lat1)) * Math.Cos(DegToRad(lat2)) * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
 
             var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            var d = R * c
+            var d = R * c;
 
             return Math.Round(d, 2); 
         }

@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Domain.Repositories;
+using SocialService.Infrastructure.Data.Repositories;
 using SocialService.Infrastructure.Services;
 
 namespace SocialService.Infrastructure
@@ -18,10 +20,16 @@ namespace SocialService.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IPostLikeRepository, PostLikeRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<ISavedPostRepository, SavedPostRepository>();
+            services.AddScoped<IUserFollowRepository, UserFollowRepository>();
+            services.AddScoped<IMemberRepository, MemberRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
 

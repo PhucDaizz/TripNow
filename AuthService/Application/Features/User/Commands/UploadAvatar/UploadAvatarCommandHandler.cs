@@ -1,8 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Application.Contracts;
+using Application.DTOs.User.Event;
 using Domain.Common.Response;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nexus.BuildingBlocks.Interfaces;
 
 namespace Application.Features.User.Commands.UploadAvatar
 {
@@ -12,17 +14,20 @@ namespace Application.Features.User.Commands.UploadAvatar
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UploadAvatarCommandHandler> _logger;
         private readonly IImageProcessor _imageProcessor;
+        private readonly IMessagePublisher _messagePublisher;
 
         public UploadAvatarCommandHandler(
             ICloudinaryService cloudinaryService,
             IUnitOfWork unitOfWork,
             ILogger<UploadAvatarCommandHandler> logger,
-            IImageProcessor imageProcessor)
+            IImageProcessor imageProcessor, 
+            IMessagePublisher messagePublisher)
         {
             _cloudinaryService = cloudinaryService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _imageProcessor = imageProcessor;
+            _messagePublisher = messagePublisher;
         }
 
         public async Task<Result<UploadAvatarResult>> Handle(UploadAvatarCommand request, CancellationToken cancellationToken)
@@ -105,6 +110,17 @@ namespace Application.Features.User.Commands.UploadAvatar
 
                 _logger.LogInformation("Avatar uploaded successfully for user {UserId}: {PublicId}",
                     request.UserId, uploadResult.PublicId);
+
+                await _messagePublisher.PublishAsync<UserChangeAvatarEvent>(
+                        exchange: "user.events",
+                        exchangeType: "topic",
+                        routingKey: "user.registered",
+                        new UserChangeAvatarEvent
+                        {
+                            UserId = Guid.Parse(request.UserId),
+                            ImageUrl = uploadResult.SecureUrl,
+                        }
+                    );
 
                 // 7. Return result
                 return new UploadAvatarResult
