@@ -1,4 +1,5 @@
 ﻿using SocialService.Domain.Common;
+using SocialService.Domain.Events.PostLike;
 
 namespace SocialService.Domain.Entities
 {
@@ -13,6 +14,20 @@ namespace SocialService.Domain.Entities
         {
             PostId = postId;
             UserId = userId;
+        }
+
+        public static PostLike Create(Guid postId, Guid userId)
+        {
+            var like = new PostLike(postId, userId);
+
+            like.AddDomainEvent(new PostLikedEvent(postId));
+
+            return like;
+        }
+
+        public void Delete()
+        {
+            this.AddDomainEvent(new PostUnlikedEvent(this.PostId));
         }
     }
 }

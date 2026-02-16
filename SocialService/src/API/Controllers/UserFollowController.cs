@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
+using SocialService.Application.DTOs.UserFollow;
 using SocialService.Application.Features.UserFollow.Commands.FollowHotel;
 using SocialService.Application.Features.UserFollow.Commands.FollowUser;
 using SocialService.Application.Features.UserFollow.Commands.UnfollowHotel;
 using SocialService.Application.Features.UserFollow.Commands.UnfollowUser;
+using SocialService.Application.Features.UserFollow.Queries.GetFollowers;
+using SocialService.Application.Features.UserFollow.Queries.GetFollowing;
 using SocialService.Application.Features.UserFollow.Queries.IsFollow;
 using SocialService.Domain.Common;
 using SocialService.Domain.Enum;
@@ -85,6 +88,62 @@ namespace SocialService.API.Controllers
                 return BadRequest(ApiResponse<bool>.ErrorResponse(result.Error.ToString()));
 
             return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
+        }
+
+        [HttpGet("{userId}/following")]
+        [Authorize] 
+        public async Task<IActionResult> GetFollowingList(
+            Guid userId,
+            [FromQuery] TypeFollow? type,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetFollowingQuery
+            {
+                UserId = userId,
+                FilterType = type,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                if (result.Error.ToString().Contains("do not have permission"))
+                    return StatusCode(403, ApiResponse<string>.ErrorResponse(result.Error.ToString()));
+
+                return BadRequest(ApiResponse<string>.ErrorResponse(result.Error.ToString()));
+            }
+
+            return Ok(ApiResponse<Domain.Common.Models.PagedResult<FollowItemDto>>.SuccessResponse(result.Value));
+        }
+
+        [HttpGet("{userId}/followers")]
+        [Authorize] 
+        public async Task<IActionResult> GetFollowersList(
+            Guid userId,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetFollowersQuery
+            {
+                UserId = userId,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                if (result.Error.ToString().Contains("do not have permission"))
+                    return StatusCode(403, ApiResponse<string>.ErrorResponse(result.Error.ToString()));
+
+                return BadRequest(ApiResponse<string>.ErrorResponse(result.Error.ToString()));
+            }
+
+            return Ok(ApiResponse<Domain.Common.Models.PagedResult<FollowerDto>>.SuccessResponse(result.Value));
         }
 
     }

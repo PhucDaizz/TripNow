@@ -8,5 +8,6 @@ namespace SocialService.Domain.Repositories
         Task AddAsync(PostLike postLike, CancellationToken token = default);
         Task UpdateAsync(PostLike postLike, CancellationToken token = default);
         Task DeleteAsync(PostLike postLike, CancellationToken token = default);
+        Task<PostLike?> GetByUserIdAndPostAsync(Guid userId, Guid postId, CancellationToken token = default);
     }
 }

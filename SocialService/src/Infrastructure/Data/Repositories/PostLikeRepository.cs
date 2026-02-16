@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Domain.Entities;
 using SocialService.Domain.Repositories;
@@ -22,6 +23,11 @@ namespace SocialService.Infrastructure.Data.Repositories
         {
             _context.PostLikes.Remove(postLike);
             return Task.CompletedTask;
+        }
+
+        public async Task<PostLike?> GetByUserIdAndPostAsync(Guid userId, Guid postId, CancellationToken token = default)
+        {
+            return await _context.PostLikes.FirstOrDefaultAsync(x => x.PostId == postId && x.UserId == id, token);
         }
 
         public async Task<PostLike?> GetByIdAsync(Guid id, CancellationToken token = default)
