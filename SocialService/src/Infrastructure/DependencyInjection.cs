@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Application.Contracts;
 using SocialService.Domain.Repositories;
 using SocialService.Infrastructure.Data.Repositories;
 using SocialService.Infrastructure.Services;
@@ -29,6 +30,8 @@ namespace SocialService.Infrastructure
             services.AddScoped<IMemberRepository, MemberRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
+            services.AddSingleton<ICloudinaryService, CloudinaryService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();

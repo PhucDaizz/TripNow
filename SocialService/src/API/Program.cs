@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 using Nexus.BuildingBlocks.Extensions;
@@ -19,10 +20,19 @@ namespace SocialService.API
     {
         public static void Main(string[] args)
         {
+            var envPath = Path.Combine(Directory.GetCurrentDirectory(), "../Config/.env");
+            if (File.Exists(envPath))
+            {
+                Env.Load(envPath);
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.Configure<ServiceUrlOptions>(
                 builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
+            builder.Services.Configure<CloudinarySettings>(
+               builder.Configuration.GetSection(CloudinarySettings.SectionName)
+            );
 
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -110,6 +110,16 @@ namespace SocialService.Domain.Entities
             if (LikeCount > 0) LikeCount--;
         }
 
+        public void IncrementCommentCount()
+        {
+            CommentCount++;
+        }
+
+        public void DecrementCommentCount()
+        {
+            if (CommentCount > 0) CommentCount--;
+        }
+
 
         /// <summary>
         /// Xóa bài viết (Soft Delete)

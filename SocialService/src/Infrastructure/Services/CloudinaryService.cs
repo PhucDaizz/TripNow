@@ -1,13 +1,13 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using HotelCatalogService.Application.Contracts;
-using HotelCatalogService.Domain.Common.Cloudinary;
-using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SocialService.Application.Contracts;
+using SocialService.Domain.Common.Cloudinary;
+using SocialService.Infrastructure.Settings;
 using System.Text.RegularExpressions;
 
-namespace HotelCatalogService.Infrastructure.Services
+namespace SocialService.Infrastructure.Services
 {
     public class CloudinaryService : ICloudinaryService
     {
@@ -39,7 +39,7 @@ namespace HotelCatalogService.Infrastructure.Services
             Stream fileStream,
             string fileName,
             string folder = null,
-            int? width = null,   
+            int? width = null,
             int? height = null,
             Dictionary<string, string> tags = null,
             CancellationToken cancellationToken = default)
@@ -86,7 +86,7 @@ namespace HotelCatalogService.Infrastructure.Services
                 }
 
                 var transformation = new Transformation()
-                    .Quality("auto:good") 
+                    .Quality("auto:good")
                     .FetchFormat("auto");
 
                 transformation.Quality("auto:good");
