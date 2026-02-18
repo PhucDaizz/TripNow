@@ -9,7 +9,7 @@ namespace BookingService.Application.Features.InventoryConfiguration.EventHandle
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
-        public RoomTypeDeletedEventHandler(IUnitOfWork unitOfWork, ILogger logger)
+        public RoomTypeDeletedEventHandler(IUnitOfWork unitOfWork, ILogger<RoomTypeDeletedEventHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;

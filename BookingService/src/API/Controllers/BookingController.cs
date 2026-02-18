@@ -4,6 +4,7 @@ using BookingService.Application.Features.Booking.Commands.CancelBooking;
 using BookingService.Application.Features.Booking.Commands.CreateBooking;
 using BookingService.Application.Features.Booking.Queries.GetBookings;
 using BookingService.Application.Features.Booking.Queries.GetDetailBooking;
+using BookingService.Application.Features.Booking.Queries.IsBookingExisting;
 using BookingService.Application.Features.Inventory.Queries.CheckRoomUsage;
 using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
@@ -132,6 +133,7 @@ namespace BookingService.API.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpGet("check-room-usage/{roomTypeId}")] // không map ra gateway
         public async Task<IActionResult> CheckRoomUsage(Guid roomTypeId)
         {
@@ -141,6 +143,14 @@ namespace BookingService.API.Controllers
                 return Ok(ApiResponse<bool>.SuccessResponse(result)); 
             }
             return BadRequest(ApiResponse<bool>.SuccessResponse(result));
+        }
+
+        [AllowAnonymous]
+        [HttpGet("is-existing")] // không map ra gateway (kiểm ta người dùng đã từng ở đây chưa)
+        public async Task<IActionResult> IsBookingExisting([FromQuery]Guid bookingId, [FromQuery]Guid userId)
+        {
+            var result = await _mediator.Send(new IsBookingExistingQuery { BookingId = bookingId });
+            return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
         }
 
         private static CancelledBy ResolveCancelledBy(

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Nexus.BuildingBlocks.Model;
 using SocialService.Application.Contracts;
+using SocialService.Application.DTOs.Hotel;
 using System.Net.Http.Json;
 
 namespace SocialService.Infrastructure.Services
@@ -32,6 +33,25 @@ namespace SocialService.Infrastructure.Services
             catch
             {
                 return false;
+            }
+        }
+
+        public async Task<HotelDetailDto?> GetHotelDetail(Guid hotelId, CancellationToken cancellation = default)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Hotel/detail?hotelId={hotelId}", cancellation);
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<HotelDetailDto>>(cancellationToken: cancellation);
+                    return apiResponse?.Data ?? null;
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

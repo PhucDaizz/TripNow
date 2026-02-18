@@ -1,8 +1,5 @@
 ﻿using HotelCatalogService.Application.Contracts;
-using HotelCatalogService.Application.DTOs.StaffProfile;
 using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
-using System.Net.Http.Json;
 
 namespace HotelCatalogService.Infrastructure.Services
 {
@@ -19,7 +16,7 @@ namespace HotelCatalogService.Infrastructure.Services
 
         public async Task<bool> CheckIsHaveAnyBookInFunitue(Guid RoomTypeId, CancellationToken token = default)
         {
-            var response = await _httpClient.GetAsync("/api/Auth/staff-profile", token);
+            var response = await _httpClient.GetAsync($"/api/Booking/check-room-usage{RoomTypeId}", token);
 
             if (response.IsSuccessStatusCode)
             {

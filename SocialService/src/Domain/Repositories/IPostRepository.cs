@@ -1,4 +1,5 @@
 ﻿using SocialService.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace SocialService.Domain.Repositories
 {
@@ -9,5 +10,6 @@ namespace SocialService.Domain.Repositories
         Task UpdateAsync(Post post, CancellationToken token = default);
         Task DeleteAsync(Post post, CancellationToken token = default);
         Task<bool> IsPostExisting(Guid postId, CancellationToken token = default);
+        Task<Post?> GetPostDetailAsync(Guid postId, CancellationToken token = default);
     }
 }

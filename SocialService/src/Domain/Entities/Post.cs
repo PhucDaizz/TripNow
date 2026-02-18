@@ -132,5 +132,26 @@ namespace SocialService.Domain.Entities
 
             // Có thể bắn event PostDeletedEvent để trừ điểm uy tín user...
         }
+
+        public void UpdateContent(string newContent)
+        {
+            if (string.IsNullOrWhiteSpace(newContent)) throw new DomainException("Nội dung không được để trống.");
+            Content = newContent.Trim();
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void RemoveImage(Guid imageId)
+        {
+            var image = _images.FirstOrDefault(x => x.Id == imageId);
+            if (image != null)
+            {
+                _images.Remove(image);
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+        public string? GetImagePublicId(Guid imageId)
+        {
+            return _images.FirstOrDefault(x => x.Id == imageId)?.PublicId;
+        }
     }
 }

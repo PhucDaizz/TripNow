@@ -73,6 +73,12 @@ namespace SocialService.API
                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
                    client.BaseAddress = new Uri(options.Auth);
                });
+            builder.Services.AddHttpClient<IBookingService, BookingService>(
+               (sp, client) =>
+               {
+                   var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                   client.BaseAddress = new Uri(options.Booking);
+               });
 
             var app = builder.Build();
 

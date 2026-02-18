@@ -12,5 +12,6 @@ namespace BookingService.Domain.Repositories
         Task DeleteBookingAsync(Booking booking, CancellationToken cancellationToken = default);
         Task UpdateBookingAsync(Booking booking, CancellationToken cancellationToken = default);
         Task<bool> HaveAnyBookInFuture(Guid roomTypeId, CancellationToken cancellationToken = default);
+        Task<bool> IsBookingExistingAsync(Guid bookingId, CancellationToken cancellationToken = default);
     }
 }

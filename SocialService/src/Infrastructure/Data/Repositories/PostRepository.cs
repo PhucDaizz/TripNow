@@ -39,5 +39,15 @@ namespace SocialService.Infrastructure.Data.Repositories
             _context.Posts.Update(post);
             return Task.CompletedTask;
         }
+
+        public async Task<Post?> GetPostDetailAsync(Guid postId, CancellationToken token = default)
+        {
+            var post = await _context.Posts
+                .Include(x => x.Images)
+                .Include(x => x.ReviewDetail)
+                .FirstOrDefaultAsync(x => x.Id == postId);
+
+            return post;
+        }
     }
 }

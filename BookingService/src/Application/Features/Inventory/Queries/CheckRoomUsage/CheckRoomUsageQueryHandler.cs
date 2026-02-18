@@ -1,5 +1,4 @@
 ﻿using BookingService.Application.Common.Interfaces;
-using Domain.Common.Response;
 using MediatR;
 
 namespace BookingService.Application.Features.Inventory.Queries.CheckRoomUsage

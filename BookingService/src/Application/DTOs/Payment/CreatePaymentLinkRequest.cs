@@ -5,6 +5,6 @@
         public PaymentProvider providerBank { get; set; }
         public string BookingId { get; set; }
         public double MoneyToPay { get; set; }
-        public Guid? PayerUserId { get; set; }s
+        public Guid? PayerUserId { get; set; }
     }
 }

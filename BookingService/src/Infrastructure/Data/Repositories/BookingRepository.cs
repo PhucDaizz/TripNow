@@ -69,6 +69,11 @@ namespace BookingService.Infrastructure.Data.Repositories
             return exists;
         }
 
+        public async Task<bool> IsBookingExistingAsync(Guid bookingId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Booking.AnyAsync(x => x.Id == bookingId, cancellationToken);
+        }
+
         public Task UpdateBookingAsync(Booking booking, CancellationToken cancellationToken = default)
         {
             _context.Booking.Update(booking);

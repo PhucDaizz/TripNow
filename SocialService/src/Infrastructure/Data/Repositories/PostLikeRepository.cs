@@ -27,7 +27,7 @@ namespace SocialService.Infrastructure.Data.Repositories
 
         public async Task<PostLike?> GetByUserIdAndPostAsync(Guid userId, Guid postId, CancellationToken token = default)
         {
-            return await _context.PostLikes.FirstOrDefaultAsync(x => x.PostId == postId && x.UserId == id, token);
+            return await _context.PostLikes.FirstOrDefaultAsync(x => x.PostId == postId && x.UserId == userId, token);
         }
 
         public async Task<PostLike?> GetByIdAsync(Guid id, CancellationToken token = default)
