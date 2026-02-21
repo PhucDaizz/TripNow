@@ -2,6 +2,7 @@
 using MediatR;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Application.DTOs.Settlement;
+using PaymentService.Domain.Common;
 using PaymentService.Domain.Common.Models;
 
 namespace PaymentService.Application.Features.SettlementPeriod.Queries.GetMySettlements
@@ -19,7 +20,14 @@ namespace PaymentService.Application.Features.SettlementPeriod.Queries.GetMySett
 
         public async Task<Result<PagedResult<SettlementPeriodDto>>> Handle(GetMySettlementsQuery request, CancellationToken token)
         {
-            var ownerId = Guid.Parse(_currentUserService.UserId);
+            Guid? ownerId = Guid.Parse(_currentUserService.UserId);
+
+            var role = _currentUserService.Role;
+
+            if (role == AppRoles.SysAdmin)
+            {
+                ownerId = null; 
+            }
 
             var pagedData = await _unitOfWork.SettlementPeriods.GetPagedListAsync(
                 ownerId,

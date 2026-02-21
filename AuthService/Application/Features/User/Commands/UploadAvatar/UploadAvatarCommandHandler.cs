@@ -114,7 +114,7 @@ namespace Application.Features.User.Commands.UploadAvatar
                 await _messagePublisher.PublishAsync<UserChangeAvatarEvent>(
                         exchange: "user.events",
                         exchangeType: "topic",
-                        routingKey: "user.registered",
+                        routingKey: "user.avatar_changed",
                         new UserChangeAvatarEvent
                         {
                             UserId = Guid.Parse(request.UserId),

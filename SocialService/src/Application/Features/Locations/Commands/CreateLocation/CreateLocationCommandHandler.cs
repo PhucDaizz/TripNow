@@ -1,6 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Domain.Common;
 using SocialService.Domain.Entities;
 using SocialService.Domain.ValueObject;
 
@@ -20,6 +21,8 @@ namespace SocialService.Application.Features.Locations.Commands.CreateLocation
         public async Task<Result<Guid>> Handle(CreateLocationCommand request, CancellationToken cancellationToken)
         {
             var userId = Guid.Parse(_currentUserService.UserId);
+            var role = _currentUserService.Role;
+            var isAdmin = role == AppRoles.SysAdmin? true: false;
 
             Result<Coordinates> coordsResult;
             try
@@ -33,6 +36,11 @@ namespace SocialService.Application.Features.Locations.Commands.CreateLocation
                     request.Type,
                     userId
                 );
+
+                if ( isAdmin )
+                {
+                    location.Verify();
+                }
 
                 await _unitOfWork.locationRepository.AddAsync(location);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

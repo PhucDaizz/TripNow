@@ -27,6 +27,12 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Tạo phòng
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create(Guid hotelId, Guid blockId, Guid floorId, [FromBody] CreateRoomRequest request)
@@ -46,6 +52,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Cập nhật phòng
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPut("{roomId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Update(Guid hotelId, Guid blockId, Guid floorId, Guid roomId, [FromBody] UpdateRoomRequest request)
@@ -66,6 +78,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Thay đổi trạng thái phòng
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPatch("{roomId}/status")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> UpdateStatus(Guid hotelId, Guid blockId, Guid floorId, Guid roomId, [FromBody] UpdateRoomStatusRequest request)
@@ -85,6 +103,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Chuyển trạng thái sửa chửa phòng
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPatch("{roomId}/maintain")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Maintain(Guid hotelId, Guid blockId, Guid floorId, Guid roomId, [FromBody] MaintainRoomRequest request)
@@ -105,6 +129,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        ///  Chuyển trạng thái sửa chửa phòng hoàn tất
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPatch("{roomId}/finished-maintain")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> FinishedMaintain(Guid hotelId, Guid blockId, Guid floorId, Guid roomId)
@@ -123,6 +153,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xoá phòng
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpDelete("{roomId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid blockId, Guid floorId, Guid roomId)

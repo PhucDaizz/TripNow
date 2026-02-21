@@ -21,6 +21,12 @@ namespace PaymentService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Xem dánh sách tiền hệ thống đã chi trả cho khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin dùng
+        /// </remarks>
         [HttpGet("admin")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> GetPayouts([FromQuery] GetPayoutsQuery query)
@@ -35,6 +41,13 @@ namespace PaymentService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(result));
         }
 
+        /// <summary>
+        /// Admin từ chối thanh toán cho khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin dùng
+        /// - Lý do VD: chủ khásh sạn chưa cậ nhật tài khoản thụ hưởng
+        /// </remarks>
         [HttpPost("admin/reject")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> RejectPayout([FromBody]RejectPayoutCommand command)
@@ -45,6 +58,13 @@ namespace PaymentService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse("Complete refund rejection"));
         }
 
+        /// <summary>
+        /// Admin chấp nhân thanh toán cho khách sạn 
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin dùng
+        /// - Lưu ý: Yêu cầu thanh toán thủ công cho chủ khách sạn bằng tay tước sau đó mới chấp nhận và điền thông tin cần thiết
+        /// </remarks>
         [HttpPost("admin/accept")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> AcceptPayout([FromBody]AcceptPayoutCommand command)
@@ -57,6 +77,12 @@ namespace PaymentService.API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse("Payment completed"));
         }
 
+        /// <summary>
+        /// Chủ khách sạn xem danh sách rút tiền và trạng thái
+        /// </summary>
+        /// <remarks>
+        /// Chỉ chủ khách sạn dùng
+        /// </remarks>
         [HttpGet("my-payouts")] 
         [Authorize(Roles = $"{AppRoles.HotelOwner}")] 
         public async Task<IActionResult> GetMyPayouts([FromQuery] GetOwnerPayoutsQuery query)

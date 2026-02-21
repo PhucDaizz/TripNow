@@ -18,6 +18,11 @@ namespace BookingService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Truy vấn danh sách số lượng phòng còn trống của từng loại phòng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("availability")]
         public async Task<IActionResult> GetAvailability([FromQuery] GetAvailabilityQuery query)
         {

@@ -3,6 +3,7 @@ using MediatR;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Application.DTOs.Settlement;
 using PaymentService.Application.DTOs.SettlementItem;
+using PaymentService.Domain.Common;
 
 namespace PaymentService.Application.Features.SettlementPeriod.Queries.GetSettlementById
 {
@@ -19,14 +20,17 @@ namespace PaymentService.Application.Features.SettlementPeriod.Queries.GetSettle
 
         public async Task<Result<SettlementDetailDto>> Handle(GetSettlementByIdQuery request, CancellationToken token)
         {
-            var ownerId = Guid.Parse(_currentUserService.UserId);
+            var currentUserId = Guid.Parse(_currentUserService.UserId);
+            var role = _currentUserService.Role;
 
             var settlement = await _unitOfWork.SettlementPeriods.GetByIdWithItemsAsync(request.Id);
 
             if (settlement == null)
                 return Result.Failure<SettlementDetailDto>(new Error("Settlement.NotFound", "This Settlement was not found"));
 
-            if (settlement.OwnerId != ownerId)
+            bool isAdmin = role == AppRoles.SysAdmin;
+
+            if (!isAdmin && settlement.OwnerId != currentUserId)
                 return Result.Failure<SettlementDetailDto>(new Error("Auth.Forbidden", "You do not have permission to view this reconciliation period."));
 
             // Map Data

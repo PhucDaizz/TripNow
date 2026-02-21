@@ -24,9 +24,14 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Đăng tải nhiều ảnh về khách sạn (chú ý loại FromForm)
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPost("bulk")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
-        // Dùng [FromForm] 
         public async Task<IActionResult> UploadMultipleImages(Guid hotelId, [FromForm] List<IFormFile> files)
         {
             var command = new UploadHotelImagesCommand
@@ -46,6 +51,12 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Cập nhật thông tin, vị trí ảnh khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPut("{imageId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> UpdateImageDetails(Guid hotelId, Guid imageId, [FromBody] UpdateImageRequest request)
@@ -69,6 +80,12 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xoá ảnh khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpDelete("{imageId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> DeleteImage(Guid hotelId, Guid imageId)

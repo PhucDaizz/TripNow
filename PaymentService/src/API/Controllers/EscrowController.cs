@@ -20,6 +20,12 @@ namespace PaymentService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Lấy danh sách thanh toán người dùng đã trả cho hệ thống
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin được gọi 
+        /// </remarks>
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] GetEscrowsQuery query)
         {
@@ -27,6 +33,12 @@ namespace PaymentService.API.Controllers
             return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
+        /// <summary>
+        /// Xem chi tiết 1 thanh toán mà hệ thống đang giữ
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin được gọi 
+        /// </remarks>
         [HttpGet("booking/{bookingId}")]
         public async Task<IActionResult> GetByBookingId(Guid bookingId)
         {

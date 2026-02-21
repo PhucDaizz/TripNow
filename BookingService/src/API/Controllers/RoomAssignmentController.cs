@@ -20,6 +20,12 @@ namespace BookingService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Checkin cho khách hàng khi đến sảnh khách sạn 
+        /// </summary>
+        /// <remarks>
+        /// Các role HotelOwner,Housekeeping được gọi
+        /// </remarks>
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
         [HttpPost("{bookingId}/check-in")]
         public async Task<IActionResult> CheckIn(Guid bookingId, [FromBody]CheckInRoomDto command)
@@ -49,6 +55,12 @@ namespace BookingService.API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse("Check-in completed successfully."));
         }
 
+        /// <summary>
+        /// Checkout cho khách hàng khi họ đã ở xong các ngày book
+        /// </summary>
+        /// <remarks>
+        /// Các role HotelOwner,Housekeeping được gọi
+        /// </remarks>
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
         [HttpPost("{bookingId}/check-out")]
         public async Task<IActionResult> CheckOut(Guid bookingId, [FromBody]CheckOutRoomDto dto)

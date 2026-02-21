@@ -33,8 +33,8 @@ namespace SocialService.Infrastructure.BackgroundJobs.Consumer
             await _consumer.Subscribe<MemberChangeImageEvent>(
                exchange: "user.events",
                exchangeType: "topic",
-               routingKey: "user.registered",
-               queueName: "social-service-member-registered",
+               routingKey: "user.avatar_changed",
+               queueName: "social-service.member.avatar_changed",
                handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

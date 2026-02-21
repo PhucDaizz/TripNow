@@ -52,8 +52,11 @@ namespace HotelCatalogService.API.Controllers
 
 
         /// <summary>
-        ///  Lấy danh sách phân cấp các phòng còn trống cho một khách sạn và loại phòng được chỉ định
+        /// Lấy danh sách phân cấp các phòng còn trống cho một khách sạn và loại phòng được chỉ định
         /// </summary>
+        /// <remarks>
+        /// Chỉ chủ khách sạn và lễ tân được gọi
+        /// </remarks>
         [HttpGet("tree")]
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
         public async Task<IActionResult> GetAvailableRoomsTree(Guid hotelId, Guid roomTypeId)

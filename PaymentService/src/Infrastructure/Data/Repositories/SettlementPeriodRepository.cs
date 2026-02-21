@@ -38,10 +38,12 @@ namespace PaymentService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<PagedResult<SettlementPeriod>> GetPagedListAsync(Guid ownerId, int pageNumber, int pageSize, DateTime? fromDate, DateTime? toDate, CancellationToken token)
+        public async Task<PagedResult<SettlementPeriod>> GetPagedListAsync(Guid? ownerId, int pageNumber, int pageSize, DateTime? fromDate, DateTime? toDate, CancellationToken token)
         {
-            var query = _context.SettlementPeriod.AsNoTracking()
-                .Where(x => x.OwnerId == ownerId);
+            var query = _context.SettlementPeriod.AsNoTracking().AsQueryable();
+
+            if (ownerId.HasValue)
+                query = query.Where(x => x.OwnerId == ownerId.Value);
 
             if (fromDate.HasValue) query = query.Where(x => x.PeriodFrom >= fromDate.Value);
             if (toDate.HasValue) query = query.Where(x => x.PeriodTo <= toDate.Value);

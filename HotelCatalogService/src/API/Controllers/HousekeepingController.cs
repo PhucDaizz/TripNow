@@ -25,6 +25,12 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Lấy danh sách phòng dơ
+        /// </summary>
+        /// <remarks>
+        /// Các role HotelOwner,Housekeeping,SysAdmin được gọi
+        /// </remarks>
         [HttpGet("dirty-rooms")]
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Housekeeping},{AppRoles.SysAdmin}")] 
         public async Task<IActionResult> GetDirtyRooms(Guid hotelId, [FromQuery] Guid? blockId, [FromQuery] Guid? floorId)
@@ -40,6 +46,12 @@ namespace HotelCatalogService.API.Controllers
         }
 
 
+        /// <summary>
+        /// Chuyển phòng sang trạng thái đang dọn
+        /// </summary>
+        /// <remarks>
+        /// Các role HotelOwner,Housekeeping được gọi
+        /// </remarks>
         [HttpPost("rooms/{roomId}/start")]
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Housekeeping}")]
         public async Task<IActionResult> StartCleaning(Guid hotelId, Guid roomId, [FromBody] RoomLocationRequest request)
@@ -62,6 +74,12 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Chuyển phòng sang trang thái đã dọn có thể tiếp nhận khách mới
+        /// </summary>
+        /// <remarks>
+        /// Các role HotelOwner,Housekeeping,SysAdmin được gọi
+        /// </remarks>
         [HttpPost("rooms/{roomId}/finish")]
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Housekeeping}")]
         public async Task<IActionResult> FinishCleaning(Guid hotelId, Guid roomId, [FromBody] RoomLocationRequest request)

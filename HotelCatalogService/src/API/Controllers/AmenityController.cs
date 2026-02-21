@@ -22,6 +22,11 @@ namespace HotelCatalogService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Xem danh sách các tiện ích
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -33,6 +38,11 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<List<AmenityDto>>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Admin tạo tiện ích
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> Create([FromBody] CreateAmenityCommand command)
@@ -47,6 +57,11 @@ namespace HotelCatalogService.API.Controllers
             return CreatedAtAction(nameof(GetAll), new { id = result.Value }, response);
         }
 
+        /// <summary>
+        /// Admin cập nhật tiện ích
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPut("{id}")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAmenityCommand command)
@@ -65,6 +80,11 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(null, "Update successful"));
         }
 
+        /// <summary>
+        /// Admin xoá tiện ích
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> Delete(Guid id)

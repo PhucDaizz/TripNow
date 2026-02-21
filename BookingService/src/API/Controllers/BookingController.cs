@@ -32,6 +32,9 @@ namespace BookingService.API.Controllers
         /// <summary>
         /// Tạo mới đơn đặt phòng
         /// </summary>
+        /// <remarks>
+        /// Tất cả role được gọi
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.Customer}, {AppRoles.Receptionist}, {AppRoles.HotelOwner}, {AppRoles.SysAdmin}")]
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingCommand command, CancellationToken cancellationToken)
@@ -84,6 +87,11 @@ namespace BookingService.API.Controllers
         }
 
 
+        /// <summary>
+        /// Xem chi tiết đơn đặt phòng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("{id}")]
         [ActionName(nameof(GetBookingById))]
         public async Task<IActionResult> GetBookingById(Guid id)
@@ -103,7 +111,7 @@ namespace BookingService.API.Controllers
         }
 
         /// <summary>
-        /// Lấy danh sách đơn hàng (Filter, Paging, Sort)
+        /// Lấy danh sách đơn đặt phòng (Filter, Paging, Sort)
         /// </summary>
         /// <remarks>
         /// API này tự động nhận diện Role của user (Admin, Owner, Customer) để trả về dữ liệu tương ứng.
@@ -133,8 +141,13 @@ namespace BookingService.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Kiểm tra loại phòng có được book trong tương lại hay không (không map ra gateway)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [AllowAnonymous]
-        [HttpGet("check-room-usage/{roomTypeId}")] // không map ra gateway
+        [HttpGet("check-room-usage/{roomTypeId}")] 
         public async Task<IActionResult> CheckRoomUsage(Guid roomTypeId)
         {
             var result = await _mediator.Send(new CheckRoomUsageQuery { RoomTypeId = roomTypeId });
@@ -144,9 +157,13 @@ namespace BookingService.API.Controllers
             }
             return BadRequest(ApiResponse<bool>.SuccessResponse(result));
         }
-
+        /// <summary>
+        /// Kiểm ta người dùng đã từng ở đây chưa ( không map ra gateway )
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [AllowAnonymous]
-        [HttpGet("is-existing")] // không map ra gateway (kiểm ta người dùng đã từng ở đây chưa)
+        [HttpGet("is-existing")] 
         public async Task<IActionResult> IsBookingExisting([FromQuery]Guid bookingId, [FromQuery]Guid userId)
         {
             var result = await _mediator.Send(new IsBookingExistingQuery { BookingId = bookingId });

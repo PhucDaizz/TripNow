@@ -12,7 +12,7 @@ namespace SocialService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = AppRoles.Customer)]
+    [Authorize]
     public class SavedPostController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -22,6 +22,12 @@ namespace SocialService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Lưu bài viết
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpPost]
         public async Task<IActionResult> SavePost([FromBody] SavePostCommand command)
         {
@@ -33,6 +39,12 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Xoá lưu bài viết
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpDelete("{postId}")]
         public async Task<IActionResult> UnsavePost(Guid postId)
         {
@@ -45,6 +57,12 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Lấy danh sách bài viết đã lưu
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpGet]
         public async Task<IActionResult> GetMySavedPosts([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {

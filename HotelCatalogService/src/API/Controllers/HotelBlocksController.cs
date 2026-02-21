@@ -25,7 +25,13 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Xem danh sách các dãy phòng của khách sạn (khách hàng không được xem)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet]
+        [Authorize(Roles = $"{AppRoles.SysAdmin}, {AppRoles.Receptionist}, {AppRoles.HotelOwner}, {AppRoles.Housekeeping}")]
         public async Task<IActionResult> GetBlocks(Guid hotelId)
         {
             var result = await _mediator.Send(new GetBlocksByHotelQuery { HotelId = hotelId });
@@ -34,6 +40,13 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// 2.2 Tạo dãy phòng mới (chủ khách sạn mới được tạo)
+        /// </summary>
+        /// <remarks>
+        /// - Không khuyến khích tạo dãy phòng lần đầu tiên ở API này 
+        /// - Vui long gọi 2.1 create-structure để tạo dãy phòng lần đầu tiên sau đấy có thể dùng 2.2 như bình thường
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create(Guid hotelId, [FromBody] CreateBlockRequest request)
@@ -52,6 +65,11 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Câp nhật dãy phòng mới (chủ khách sạn mới được quyền)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPut("{blockId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Update(Guid hotelId, Guid blockId, [FromBody] UpdateBlockRequest request)
@@ -71,6 +89,11 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xoá dãy phòng (chủ khách sạn mới được quyền)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpDelete("{blockId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid blockId)

@@ -44,7 +44,7 @@ namespace HotelCatalogService.API.Controllers
 
 
         /// <summary>
-        /// Lấy danh sách giá phòng ngày đặt biệt kể thường trong một khoảng thời gian. (ưu tiên đặc biệt)
+        /// Lấy danh sách giá phòng ngày đặt biệt kể cả thường trong một khoảng thời gian. (ưu tiên đặc biệt)
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetPrices(Guid hotelId, Guid roomTypeId, [FromQuery] DateTime from, [FromQuery] DateTime to)
@@ -102,8 +102,11 @@ namespace HotelCatalogService.API.Controllers
         }
 
         /// <summary>
-        /// Thiết lập giá phòng hàng loạt cho một khoảng thời gian (Yêu cầu quyền chủ khách sạn).
+        /// Thiết lập giá phòng đặt biệt hàng loạt cho một khoảng thời gian (Yêu cầu quyền chủ khách sạn).
         /// </summary>
+        /// <remarks>
+        /// Dòng trong trường hợp các ngày lễ
+        /// </remarks>
         [HttpPost("bulk")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> BulkSetPrice(Guid hotelId, Guid roomTypeId, [FromBody] BulkSetPriceRequest request)

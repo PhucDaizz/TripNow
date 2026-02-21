@@ -22,6 +22,12 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Đăng tải nhiều ảnh về 1 loại phòng
+        /// </summary>
+        /// <remarks>
+        /// Role HotelOwnerđược gọi
+        /// </remarks>
         [HttpPost("bulk")]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> Upload(Guid hotelId, Guid roomTypeId, [FromForm] List<IFormFile> files)
@@ -39,6 +45,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Đặt ảnh thành ảnh chính của loại phòng
+        /// </summary>
+        /// <remarks>
+        /// Role HotelOwner được gọi
+        /// </remarks>
         [HttpPut("{imageId}/main")]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> SetMain(Guid hotelId, Guid roomTypeId, Guid imageId)
@@ -56,6 +68,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xoá 1 ảnh loại phòng
+        /// </summary>
+        /// <remarks>
+        /// Role HotelOwner được gọi
+        /// </remarks>
         [HttpDelete("{imageId}")]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid roomTypeId, Guid imageId)

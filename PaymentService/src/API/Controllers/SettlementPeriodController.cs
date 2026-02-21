@@ -20,6 +20,12 @@ namespace PaymentService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Admin thử lại kỳ đối soát cho chủ khách sạn khi trường hơp hệt thống bị lỗi
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin dùng
+        /// </remarks>
         [HttpPost("retry")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> RetrySettlement([FromBody] RetrySettlementCommand command)
@@ -29,14 +35,28 @@ namespace PaymentService.API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse("Reconciliation has been successfully reactivated."));
         }
 
+        /// <summary>
+        /// Xem danh sách kỳ đối soát
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin, và chủ khách sạn dùng
+        /// - Admin xem tất cả, chủ khách san chỉ xem của họ
+        /// </remarks>
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = $"{AppRoles.SysAdmin}, {AppRoles.HotelOwner}")]
         public async Task<IActionResult> GetList([FromQuery] GetMySettlementsQuery query)
         {
             var result = await _mediator.Send(query);
             return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
+        /// <summary>
+        /// Xem chi tiết kỳ đối soát
+        /// </summary>
+        /// <remarks>
+        /// Chỉ admin, và chủ khách sạn dùng
+        /// - Admin xem tất cả, chủ khách sạn chỉ xem của họ
+        /// </remarks>
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetDetail(Guid id)

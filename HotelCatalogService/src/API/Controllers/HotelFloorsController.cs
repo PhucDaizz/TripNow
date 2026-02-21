@@ -24,6 +24,11 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Xem dãy phòng của khách sạn có bao nhiêu tầng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet]
         public async Task<IActionResult> GetFloors(Guid hotelId, Guid blockId)
         {
@@ -33,6 +38,14 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Tạo tầng của khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Lưu ý:
+        /// - Tạo dãy trước rồi mới đến tầng
+        /// - Nên ưu tiên gọi api 2.1 ở lần đầu tiên
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> Create(Guid hotelId, Guid blockId, [FromBody] CreateFloorRequest request)
@@ -50,7 +63,11 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
-        // PUT
+        /// <summary>
+        /// Cập nhật thông tin tầng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPut("{floorId}")]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> Update(Guid hotelId, Guid blockId, Guid floorId, [FromBody] UpdateFloorRequest request)
@@ -69,7 +86,11 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
-        // DELETE
+        /// <summary>
+        /// Xoá tầng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpDelete("{floorId}")]
         [Authorize(Roles = "HotelOwner")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid blockId, Guid floorId)

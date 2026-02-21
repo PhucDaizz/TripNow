@@ -30,6 +30,12 @@ namespace SocialService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Tạo 1 bài post thông thường
+        /// </summary>
+        /// <remarks>
+        /// - Ví dụ có thể là 1 bài post "hằng ngày, vui chơi,..."
+        /// </remarks>
         [HttpPost("normal")]
         [Authorize]
         public async Task<IActionResult> CreateNormalPost([FromForm] CreateNormalPostRequest request)
@@ -64,6 +70,12 @@ namespace SocialService.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Tạo 1 bài post review
+        /// </summary>
+        /// <remarks>
+        /// - Ví dụ có thể là 1 bài post sau khi trải nghiệm xong 1 dịch vụ khách sạn hoặc trải nghiệm tại 1 địa điểm được đê xuất trên Location
+        /// </remarks>
         [HttpPost("review")]
         [Authorize(Roles = AppRoles.Customer)] 
         public async Task<IActionResult> CreateReviewPost([FromForm] CreateReviewPostRequest request)
@@ -108,6 +120,13 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<Guid>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Tạo 1 bài post sự kiên cho khách sạn
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ chủ khách sạn được tạo
+        /// - Post này có thê post nhằm mục đích giảm giá hoặc thông báo nghĩ lễ ,....
+        /// </remarks>
         [HttpPost("event")]
         [Authorize(Roles = AppRoles.HotelOwner)] 
         public async Task<IActionResult> CreateEventPost([FromForm] CreateEventPostRequest request)
@@ -143,6 +162,12 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<Guid>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Sửa lại 1 bài post
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả người đăng nhập đều có thể sửa miễn là bài viết của họ
+        /// </remarks>
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> UpdatePost(Guid id, [FromForm] UpdatePostRequest request)
@@ -179,6 +204,13 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(true));
         }
 
+        /// <summary>
+        /// Xoá lại 1 bài post
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả người đăng nhập đều có thể xoá miễn là bài viết của họ
+        /// - Admin được quyền xoá tất cả
+        /// </remarks>
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeletePost(Guid id)
@@ -189,8 +221,14 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(true));
         }
 
+        /// <summary>
+        /// Lất 1 bài post
+        /// </summary>
+        /// <remarks>
+        /// - Khi người dùng bấm vào một thông báo, hoặc copy link bài viết gửi cho người khác
+        /// </remarks>
         [HttpGet("{id}")]
-        [AllowAnonymous]  // Khi người dùng bấm vào một thông báo, hoặc copy link bài viết gửi cho người khác
+        [AllowAnonymous]  
         public async Task<IActionResult> GetPostById(Guid id)
         {
             var query = new GetPostByIdQuery { PostId = id };
@@ -200,7 +238,12 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<PostDto>.SuccessResponse(result.Value));
         }
 
-        [HttpGet] // Load danh sách bài viết ở màn hình chính, có phân trang, sắp xếp bài mới nhất lên đầu, và có thể filter (chỉ xem bài Review, hoặc xem tất cả).
+        /// <summary>
+        /// Load danh sách bài viết ở màn hình chính, có phân trang, sắp xếp bài mới nhất lên đầu, và có thể filter (chỉ xem bài Review, hoặc xem tất cả).
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        [HttpGet] // 
         public async Task<IActionResult> GetPostsFeed([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10, [FromQuery] PostType? type = null)
         {
             var query = new GetPostsFeedQuery
@@ -213,7 +256,13 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<Domain.Common.Models.PagedResult<PostDto>>.SuccessResponse(result.Value));
         }
 
-        [HttpGet("hotel/{hotelId}")] // Khi user bấm vào trang Profile của 1 khách sạn, họ sẽ muốn xem tất cả các bài Post (Event, Review, Normal check-in) thuộc về khách sạn đó.
+        /// <summary>
+        /// Load danh sách bài viết (Event, Review, Normal check-in) thuộc về khách sạn đó.
+        /// </summary>
+        /// <remarks>
+        /// - Khi user bấm vào trang Profile của 1 khách sạn, họ sẽ muốn xem tất cả các bài Post (Event, Review, Normal check-in) thuộc về khách sạn đó.
+        /// </remarks>
+        [HttpGet("hotel/{hotelId}")] 
         public async Task<IActionResult> GetPostsByHotel(Guid hotelId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
             var query = new GetPostsByHotelQuery
@@ -226,7 +275,13 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<Domain.Common.Models.PagedResult<PostDto>>.SuccessResponse(result.Value));
         }
 
-        [HttpGet("user/{userId}")] // Vào trang cá nhân của 1 người dùng (Profile), tải danh sách các bài họ đã đăng.
+        /// <summary>
+        ///  Load danh sách bài viết (Event, Review, Normal check-in) thuộc về người dùng đó
+        /// </summary>
+        /// <remarks>
+        /// // Vào trang cá nhân của 1 người dùng (Profile), tải danh sách các bài họ đã đăng.
+        /// </remarks>
+        [HttpGet("user/{userId}")] 
         public async Task<IActionResult> GetPostsByUser(Guid userId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
             var query = new GetPostsByUserQuery

@@ -29,6 +29,12 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Lấy danh sách mã giảm
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpGet("manage")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> GetAll(
@@ -51,7 +57,7 @@ namespace HotelCatalogService.API.Controllers
         }
 
         /// <summary>
-        /// Dánh cho người dùng kiểm tra các mã khuyến mãi khả dụng
+        /// Dành cho người dùng kiểm tra các mã khuyến mãi có thể dùng của khách sạn
         /// </summary>
         [HttpGet("available")]
         [AllowAnonymous] 
@@ -122,6 +128,12 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Tạo mã giảm
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create(Guid hotelId, [FromBody] CreatePromotionRequest req)
@@ -144,6 +156,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Cập nhật mã giảm
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPut("{promoId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Update(Guid hotelId, Guid promoId, [FromBody] UpdatePromotionRequest req)
@@ -167,6 +185,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Sửa mã giảm
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpPatch("{promoId}/status")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> ChangeStatus(Guid hotelId, Guid promoId, [FromBody] ChangeStatusRequest req)
@@ -184,6 +208,12 @@ namespace HotelCatalogService.API.Controllers
                 : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xoá mã giảm
+        /// </summary>
+        /// <remarks>
+        /// Cần quyền chủ khách sạn
+        /// </remarks>
         [HttpDelete("{promoId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Delete(Guid hotelId, Guid promoId)

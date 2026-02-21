@@ -40,6 +40,13 @@ namespace HotelCatalogService.API.Controllers
             _currentUserService = currentUserService;
         }
 
+        /// <summary>
+        /// Tạo khách sạn mới
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ HotelOwner được phép gọi
+        /// - Mỗi HotelOwner có thể tạo nhiều khách sạn
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create([FromBody] CreateHotelRequest request)
@@ -69,6 +76,12 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(new { id = result.Value }));
         }
 
+        /// <summary>
+        /// Câp nhật thông tin khách sạn
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ HotelOwner được phép gọi
+        /// </remarks>
         [HttpPut("{id}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateHotelRequest request)
@@ -103,7 +116,12 @@ namespace HotelCatalogService.API.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Xoá khách sạn
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ HotelOwner được phép gọi
+        /// </remarks>
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Delete(Guid id)
@@ -130,7 +148,11 @@ namespace HotelCatalogService.API.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Admin phê duyệt khách sạn khi chủ khách sạn setup hoàn tất chuẩn bị vận hành
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost("{id}/status/approve")]
         [Authorize(Roles = $"{AppRoles.SysAdmin}")]
         public async Task<IActionResult> Approve(Guid id)
@@ -150,6 +172,13 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse(null, "Hotel approved successfully and notification sent."));
         }
 
+        /// <summary>
+        /// Xem danh sách khách sạn
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ Admin và chủ khách sạn được phép gọi
+        /// - Admin xem được tất cả, chủ khách sạn chỉ xem của họ
+        /// </remarks>
         [HttpGet]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
         public async Task<IActionResult> GetHotels([FromQuery] GetHotelsWithPaginationQuery query)
@@ -165,7 +194,13 @@ namespace HotelCatalogService.API.Controllers
             return Ok(result);
         }
 
-
+        /// <summary>
+        /// 2.1 Tạo cấu trúc khách sạn nhanh 
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ HotelOwner được phép gọi
+        /// - Tạo nhanh dãy phòng, lầu, phòng
+        /// </remarks>
         [HttpPost("create-structure")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> CreateHotelStructure([FromBody] AddHotelStructure request)
@@ -188,7 +223,11 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(null, "Hotel structure created successfully."));
         }
 
-
+        /// <summary>
+        /// Tìm kiếm khách sạn (không cần đăng nhập)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("search")]
         [AllowAnonymous]
         public async Task<IActionResult> SearchHotels([FromQuery] GetHotelsWithPaginationQuery query)
@@ -428,6 +467,11 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse("Rollback room success"));
         }
 
+        /// <summary>
+        /// Kiểm tra khách sạn có tồn tại hay không (không map ra gateway)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("hotel-existing")]
         public async Task<IActionResult> IsHotelExisting([FromQuery]Guid hotelId)
         {
@@ -441,6 +485,11 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// xem thông tin chi tiết của 1 khách sạn (không cần đăng nhập)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("detail")]
         public async Task<IActionResult> GetHotelDetail([FromQuery]Guid hotelId)
         {

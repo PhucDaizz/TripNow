@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using PaymentService.Application.Features.OwnerWallet.Queries.GetMyWallet;
 using PaymentService.Application.Features.OwnerWallet.Queries.GetWalletTransactions;
+using PaymentService.Domain.Common;
 
 namespace PaymentService.API.Controllers
 {
@@ -17,7 +18,13 @@ namespace PaymentService.API.Controllers
             _mediator = mediator;
         }
 
-        [Authorize]
+        /// <summary>
+        /// Chủ khách sạn kiểm tra số dư của họ
+        /// </summary>
+        /// <remarks>
+        /// Chỉ chủ khách sạn dùng
+        /// </remarks>
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         [HttpGet("summary")]
         public async Task<IActionResult> GetSummary()
         {
@@ -25,7 +32,13 @@ namespace PaymentService.API.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
-        [Authorize]
+        /// <summary>
+        /// Chủ khách sạn xem danh sách biến động số dư
+        /// </summary>
+        /// <remarks>
+        /// Chỉ khách sạn dùng
+        /// </remarks>
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         [HttpGet("transactions")]
         public async Task<IActionResult> GetTransactions([FromQuery] GetWalletTransactionsQuery query)
         {

@@ -24,6 +24,11 @@ namespace HotelCatalogService.API.Controllers
             _currentUser = currentUser;
         }
 
+        /// <summary>
+        /// Chủ khách sạn gắn tiện ích vào khách sạn của họ
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> AddAmenityToHotel(Guid hotelId, [FromBody]AddHotelAmenityRequest request)
@@ -48,6 +53,11 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Chủ khách sạn cập nhật tiện ích khách sạn của họ
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPut("{amenityId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> UpdateAmenity(Guid hotelId, Guid amenityId, [FromBody] UpdateHotelAmenityRequest request)
@@ -69,6 +79,11 @@ namespace HotelCatalogService.API.Controllers
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Chủ khách sạn xoá tiện ích khách sạn của họ
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpDelete("{amenityId}")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> RemoveAmenity(Guid hotelId, Guid amenityId)

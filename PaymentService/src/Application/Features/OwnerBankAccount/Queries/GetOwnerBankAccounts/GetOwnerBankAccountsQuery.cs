@@ -6,5 +6,6 @@ namespace PaymentService.Application.Features.OwnerBankAccount.Queries.GetOwnerB
 {
     public class GetOwnerBankAccountsQuery: IRequest<Result<List<OwnerBankAccountDto?>>>
     {
+        public Guid? OwnerId { get; set; }
     }
 }

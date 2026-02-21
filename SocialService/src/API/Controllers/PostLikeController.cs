@@ -22,8 +22,14 @@ namespace SocialService.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Thích bài viết
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpPost("{postId}/like")]
-        [Authorize(Roles = AppRoles.Customer)]
+        [Authorize]
         public async Task<IActionResult> LikePost(Guid postId)
         {
             var result = await _mediator.Send(new LikePostCommand { PostId = postId });
@@ -31,8 +37,14 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(true));
         }
 
+        /// <summary>
+        /// Bỏ thích bài viết
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpDelete("{postId}/like")]
-        [Authorize(Roles = AppRoles.Customer)]
+        [Authorize]
         public async Task<IActionResult> UnlikePost(Guid postId)
         {
             var result = await _mediator.Send(new UnlikePostCommand { PostId = postId });
@@ -40,6 +52,12 @@ namespace SocialService.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(true));
         }
 
+        /// <summary>
+        /// Xem danh sách người thích bài viết
+        /// </summary>
+        /// <remarks>
+        /// - Tất cả role đều dùng được
+        /// </remarks>
         [HttpGet("{postId}/likes")]
         public async Task<IActionResult> GetLikes(Guid postId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20)
         {

@@ -24,7 +24,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
 using System.Security.Claims;
-using System.Threading;
 
 namespace API.Controllers
 {
@@ -41,6 +40,11 @@ namespace API.Controllers
             _currentUserService = currentUserService;
         }
 
+        /// <summary>
+        /// Đăng ký người dùng thông thường
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost]
         [Route("register-customer")]
         public async Task<IActionResult> Register([FromBody]RegisterCommand command, CancellationToken cancellationToken)
@@ -63,7 +67,11 @@ namespace API.Controllers
             ));
         }
 
-
+        /// <summary>
+        /// Đăng ký làm chủ khách sạn (phải liên hệ qua hotline hay gì đó xin admin cấp acc)
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [Authorize(Roles = AppRoles.SysAdmin)]
         [HttpPost("register-hotel-owner")]
         public async Task<IActionResult> RegisterHotelOwner(
@@ -87,7 +95,11 @@ namespace API.Controllers
             ));
         }
 
-
+        /// <summary>
+        /// Đăng nhập dành cho tất cả role
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
@@ -100,6 +112,11 @@ namespace API.Controllers
             return Unauthorized(ApiResponse<LoginResponseDto>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Refreshtoken cấp lại token mà không cần đăng nhập lại
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [Route("Refreshtoken")]
         [HttpPost]
         public async Task<IActionResult> RefreshToken(RefreshTokenCommand refreshTokenModel)
@@ -114,6 +131,11 @@ namespace API.Controllers
             return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Xem thông tin của bản thân
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> GetInfo()
@@ -140,7 +162,17 @@ namespace API.Controllers
             ));
         }
 
-
+        /// <summary>
+        /// 1.1 Gửi email xác nhận tài khoản
+        /// </summary>
+        /// <remarks>
+        /// Mục đích
+        /// 1. có thể lấy lại tài khoản đã đăng ký nếu bị quên
+        /// Thứ tự gọi 
+        /// 1. Goi đến api này khi khách muốn nhận mã xác nhận email
+        /// 2. Sau đấy khi khách ấn vào link đã gửi đến trong mail chuyên nó về link giao diện xác nhận thành công
+        /// 3. Sau khi chuyển về giao diện FE gọi api 1.2 email-confirmation đê hệ thống đánh dấu đã xác nhận
+        /// </remarks>
         [Authorize]
         [HttpPost]
         [Route("send-confirmemail")]
@@ -162,7 +194,11 @@ namespace API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse("Email has been sent"));
         }
 
-        
+        /// <summary>
+        /// 1.2 Xác nhận email gưi đến chính chủ thành công 
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet]
         [Route("email-confirmation")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
@@ -189,7 +225,12 @@ namespace API.Controllers
             ));
         }
 
-
+        /// <summary>
+        /// Đăng nhập google cho người dùng
+        /// </summary>
+        /// <remarks>
+        /// Lưu ý: người dùng có thê không cần đăng ký thường ở trước đó vẫn dùng được 
+        /// </remarks>
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {
@@ -201,7 +242,15 @@ namespace API.Controllers
             return Challenge(properties, "Google");
         }
 
-
+        /// <summary>
+        /// 1.3 Yêu cầu reset mật khẩu (yêu cầu đã xác nhận email trước đó)
+        /// </summary>
+        /// <remarks>
+        /// ClientUrl là link gốc giao diện để đôi mặt khẩu ví dụ (https:localhost:1234/auth/resetpass)
+        /// Trình tự dùng
+        /// 1. Call api hiện tại trước để nhận tin qua mail để hệ thống tạo token tạm thời để đổi mật khẩu
+        /// 2. Sau khi nhận link và chuyên về FE gọi api 1.4 resetpassword để đổi mật khẩu
+        /// </remarks>
         [HttpPost("forgot-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordCommand request)
@@ -222,6 +271,15 @@ namespace API.Controllers
                 ApiResponse<string>.ErrorResponse(result.Error.Code, new List<string> { result.Error.Message }));
         }
 
+        /// <summary>
+        /// 1.4 Đổi mật khẩu đã quên
+        /// </summary>
+        /// <remarks>
+        /// Lưu ý Token trong body lấy từ đường link api 1.3 forgot-password sinh ra đã gửi trong email
+        /// Trình tự dùng
+        /// 1. Call api 1.3 forgot-password trước để nhận tin qua mail để hệ thống tạo token tạm thời để đổi mật khẩu
+        /// 2. Sau khi nhận link và chuyên về FE gọi api hiện tại để đổi mật khẩu
+        /// </remarks>
         [HttpPost("resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody]ResetPasswordCommand command)
         {
@@ -240,6 +298,11 @@ namespace API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Cập nhật thông tin cá nhân
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPut("profile")]
         [Authorize]
         public async Task<IActionResult> UpdateInfor([FromBody]UpdateInforCommand command)
@@ -263,6 +326,11 @@ namespace API.Controllers
 
         }
 
+        /// <summary>
+        /// Tải lên ảnh đại diện lưu ý dùng IFormFile
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpPost("upload-avatar")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
         [RequestFormLimits(MultipartBodyLengthLimit = 5 * 1024 * 1024)]
@@ -291,6 +359,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Admin xem thông tin người dùng
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("{userId}")]
         [Authorize(Roles = AppRoles.SysAdmin)]
         public async Task<IActionResult> GetUserInfo(string userId)
@@ -305,6 +378,16 @@ namespace API.Controllers
                 : NotFound(ApiResponse<InforDto>.ErrorResponse(result.Error.Code));
         }
 
+        /// <summary>
+        /// Xem danh sách người dùng
+        /// </summary>
+        /// <remarks>
+        /// - Admin xem được tất cả 
+        /// - Chủ khách sạn chỉ xem nhân viên của khách sạn đó
+        /// - Lễ tân chỉ xem nhân viên của khách sạn đó
+        /// - Người dùng thông thường không được phép
+        /// Trường Role có các role gồm "SysAdmin", "HotelOwner", "Receptionist", "Housekeeping", "Customer"
+        /// </remarks>
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetUsers([FromQuery] GetUsersWithPaginationQuery query)
@@ -348,7 +431,15 @@ namespace API.Controllers
         }
 
 
-
+        /// <summary>
+        /// Thêm nhân viên vào hệ thống khách sạn 
+        /// </summary>
+        /// <remarks>
+        /// Lưu ý: 1.chỉ admin hoặc chủ khách sạn đó mới được thêm
+        /// 2. Người muốn làm nhân viên phải đăng ký tài khoản khách hàng trước đó
+        /// Email là email của người muốn thêm
+        /// Các vị trí được thêm gồm: "HotelOwner", "Receptionist", "Housekeeping"
+        /// </remarks>
         [HttpPost("staff-profile")]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
         public async Task<IActionResult> CreateStaffProfile(
@@ -380,7 +471,13 @@ namespace API.Controllers
             ));
         }
 
-
+        /// <summary>
+        /// Xoá nhân viên ra khỏi hệ thống khách sạn
+        /// </summary>
+        /// <remarks>
+        /// Sau khi xoá sẽ được trở về role khách hàng thông thường
+        /// Lưu ý chỉ amdin hoặc chủ khách sạn mới được xoá
+        /// </remarks>
         [HttpDelete("staff/{userid}")]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
         public async Task<IActionResult> DeleteStaffProfile(Guid userid)
@@ -399,6 +496,13 @@ namespace API.Controllers
             return BadRequest(result.Error.Message);
         }
 
+        /// <summary>
+        /// Cập nhật lại chức vụ của nhân viên
+        /// </summary>
+        /// <remarks>
+        /// Lưu ý: chỉ admin và chủ khách sạn mới được cập nhật
+        /// Các role mới được cập nhật gồm "HotelOwner", "Receptionist", "Housekeeping"
+        /// </remarks>
         [HttpPut("staff/{userId}")]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
         public async Task<IActionResult> UpdateStaffProfile(
@@ -422,6 +526,11 @@ namespace API.Controllers
             return BadRequest(ApiResponse<StaffProfileDto>.ErrorResponse(result.Error.Message));
         }
 
+        /// <summary>
+        /// Xem thông tin nhân viên xua khách sạn nào role khách hàng không được xem
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("staff-profile")]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner},{AppRoles.Housekeeping},{AppRoles.Receptionist}")]
         public async Task<IActionResult> GetStaffProfile()
@@ -438,6 +547,11 @@ namespace API.Controllers
             return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Không map ra APIGateWay
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
         [HttpGet("user-existing")]
         public async Task<IActionResult> IsUsserExisting([FromQuery]Guid userId)
         {
