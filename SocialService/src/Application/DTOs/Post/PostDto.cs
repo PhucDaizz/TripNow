@@ -5,7 +5,7 @@ namespace SocialService.Application.DTOs.Post
     public class PostDto
     {
         public Guid Id { get; set; }
-        public Guid HotelId { get; set; }
+        public Guid? HotelId { get; set; }
         public string Content { get; set; }
         public string Type { get; set; } // "Normal", "Event", "Review"
 

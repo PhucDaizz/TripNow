@@ -61,7 +61,7 @@ namespace PaymentService.Domain.Entities
             ProcessedAt = DateTime.UtcNow;
 
             // Bắn event: Hoàn tiền thành công (để gửi mail cho khách)
-            AddDomainEvent(new RefundRequestCompletedEvent(this.Id, this.UserId, this.Amount));
+            AddDomainEvent(new RefundRequestCompletedEvent(this.Id, this.BookingId, this.UserId, this.Amount));
         }
 
         // Từ chối hoàn tiền (Nếu phát hiện gian lận hoặc sai sót)

@@ -112,7 +112,7 @@ namespace HotelCatalogService.API.Controllers
 
 
         /// <summary>
-        /// Tạo mới một loại phòng cho khách sạn (Yêu cầu quyền chủ khách sạn).
+        /// 2.3 Tạo mới một loại phòng cho khách sạn (Yêu cầu quyền chủ khách sạn).
         /// </summary>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]

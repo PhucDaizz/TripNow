@@ -10,11 +10,13 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUser;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public CancelBookingCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+        public CancelBookingCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUser, IHotelAuthorizationService hotelAuthService)
         {
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
@@ -27,7 +29,7 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
                     new Error("Booking.NotFound", "Booking not found."));
             }
 
-            if (!CanCancelBooking(booking, request.CancelledBy))
+            if (!await CanCancelBooking(booking, request.CancelledBy, cancellationToken))
                 return Result.Failure(
                     new Error("Booking.Forbidden", "You are not allowed to cancel this booking."));
 
@@ -51,20 +53,19 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
 
         }
 
-        private bool CanCancelBooking(Domain.Entities.Booking booking, CancelledBy cancelledBy)
+        private async Task<bool> CanCancelBooking(Domain.Entities.Booking booking, CancelledBy cancelledBy, CancellationToken cancellationToken)
         {
             if (cancelledBy == CancelledBy.System)
                 return true;
 
-            if (!_currentUser.IsAuthenticated)
+            if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
                 return false;
 
             return _currentUser.Role switch
             {
                 AppRoles.SysAdmin => true,
 
-                AppRoles.HotelOwner =>
-                    _currentUser.HotelId == booking.HotelId,
+                AppRoles.HotelOwner => await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken),
 
                 AppRoles.Receptionist =>
                     _currentUser.HotelId == booking.HotelId,

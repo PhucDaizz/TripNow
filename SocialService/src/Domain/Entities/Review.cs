@@ -52,7 +52,7 @@ namespace SocialService.Domain.Entities
         private void ValidateBookingLogic(TargetTypeReview type, Guid? bookingId)
         {
             // Rule: Nếu review Hotel thì BẮT BUỘC phải có BookingId
-            if (type == TargetTypeReview.Hotel && !bookingId.HasValue)
+            if (type == TargetTypeReview.Hotel && (bookingId == null || bookingId == Guid.Empty))
             {
                 throw new DomainException("Review khách sạn bắt buộc phải có mã đặt phòng (BookingId) để xác thực.");
             }

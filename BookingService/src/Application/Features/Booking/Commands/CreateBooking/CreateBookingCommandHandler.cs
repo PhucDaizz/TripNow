@@ -37,6 +37,11 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw new UnauthorizedAccessException("User is not authenticated or invalid user ID.");
         }
 
+        decimal tempBaseTotal = 0;
+        int totalNights = request.CheckOutDate.DayNumber - request.CheckInDate.DayNumber;
+
+        if (totalNights <= 0) throw new DomainException("The check-out date must be after the check-in date.");
+
         var hotel = await _hotelCatalogService.GetHotelSummary(request.HotelId, cancellationToken);
         if (hotel == null)
         {
@@ -56,9 +61,11 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             .ToDictionary(k => new { k.RoomTypeId, k.Date }, v => v);
 
         int nights = request.CheckOutDate.DayNumber - request.CheckInDate.DayNumber;
-        if (inventoryList.Count < nights)
+        var expectedInventoryCount = nights * listRoomTypeIds.Count;
+
+        if (inventoryList.Count < expectedInventoryCount)
         {
-            throw new DomainException("There is no room schedule for this time period yet..");
+            throw new DomainException("Inventory is not fully initialized for the requested dates.");
         }
 
         foreach (var item in request.Items)
@@ -106,11 +113,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         var roomDataLookup = allRoomPrices.ToDictionary(k => k.RoomTypeId, v => v);
 
-        decimal tempBaseTotal = 0;
-        int totalNights = request.CheckOutDate.DayNumber - request.CheckInDate.DayNumber;
-
-        if (totalNights <= 0) throw new DomainException("The check-out date must be after the check-in date.");
-
         foreach (var item in request.Items)
         {
             if (!roomDataLookup.TryGetValue(item.RoomTypeId, out var roomPriceData))
@@ -130,9 +132,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 totalRoomCost += priceForNight;
             }
 
-            decimal avgUnitPrice = totalRoomCost / totalNights;
-
-            var bookingItem = booking.AddItem(item.RoomTypeId, item.Quantity, avgUnitPrice);
+            var bookingItem = booking.AddItem(item.RoomTypeId, item.Quantity, totalRoomCost);
 
             if (roomPriceData.CancellationPolicy != null)
             {
@@ -171,7 +171,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             );
         }
 
-        var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, userId, request.paymentProvider, cancellationToken);
+        booking.FinalizeCreation();
 
         try
         {
@@ -180,7 +180,9 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         }
         catch (Exception)
         {
-            await _integrationEventService.PublishAsync<BookingCancelledEvent>(
+            if (!string.IsNullOrWhiteSpace(request.PromotionCode))
+            {
+                await _integrationEventService.PublishAsync<BookingCancelledEvent>(
                 new BookingCancelledEvent
                 {
                     HotelId = request.HotelId,
@@ -190,10 +192,12 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 "booking.events",
                  "topic",
                  "booking.cancelled",
-                 cancellationToken
-            );
+                 cancellationToken);
+            }
             throw; 
         }
+
+        var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, request.paymentProvider, cancellationToken);
 
         return Result.Success(new CreateBookingResponse
         {

@@ -10,7 +10,7 @@ namespace BookingService.Domain.Entities
         public Guid BookingId { get; private set; }
         public Guid RoomTypeId { get; private set; }
         public int Quantity { get; private set; }
-        public decimal Price { get; private set; } // Giá gốc tại thời điểm đặt
+        public decimal Price { get; private set; } // Giá gốc của mỗi phòng đã tính thuế (đã tính tiền số ngày ở) price = số tiền 1 ngày * số ngày ở
         public string CancellationPolicyName { get; private set; }
         public string CancellationPolicyData { get; private set; }
 
@@ -32,15 +32,22 @@ namespace BookingService.Domain.Entities
             CancellationPolicyData = JsonSerializer.Serialize(rules);
         }
 
-        public decimal CalculateRefund(DateTime cancelTime, DateTime checkInDate)
+        public decimal CalculateRefund(DateTime cancelTimeUtc, DateTime checkInDate)
         {
             if (string.IsNullOrEmpty(CancellationPolicyData)) return 0;
 
             var rules = JsonSerializer.Deserialize<List<PolicyRuleSnapshot>>(CancellationPolicyData);
             if (rules == null || !rules.Any()) return 0;
 
-            var checkInDateTime = checkInDate.Date.AddHours(14);
-            var hoursRemaining = (checkInDateTime - cancelTime).TotalHours;
+            // CHUẨN HÓA MÚI GIỜ (Fix lỗi hoàn 100%)
+            // 1. Lấy mốc 14:00 của ngày Check-in (Giờ địa phương, ví dụ VN)
+            var checkInLocal = checkInDate;
+
+            // 2. Chuyển 14:00 VN sang UTC (Trừ đi 7 tiếng -> Thành 07:00 sáng UTC)
+            // Nếu KS ở quốc gia khác, bác có thể thay số 7 bằng Offset tương ứng của khách sạn
+            var checkInUtc = checkInLocal.AddHours(-7);
+
+            var hoursRemaining = (checkInUtc - cancelTimeUtc).TotalHours;
 
             if (hoursRemaining < 0) return 0;
 

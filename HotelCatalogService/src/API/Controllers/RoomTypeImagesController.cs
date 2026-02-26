@@ -1,7 +1,9 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
+using HotelCatalogService.Application.DTOs.RoomTypeImage;
 using HotelCatalogService.Application.Features.RoomTypeImage.Commands.DeleteRoomTypeImage;
 using HotelCatalogService.Application.Features.RoomTypeImage.Commands.SetMainRoomTypeImage;
 using HotelCatalogService.Application.Features.RoomTypeImage.Commands.UploadRoomTypeImages;
+using HotelCatalogService.Application.Features.RoomTypeImage.Queries.GetRoomTypeImages;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,25 @@ namespace HotelCatalogService.API.Controllers
         {
             _mediator = mediator;
             _currentUser = currentUser;
+        }
+
+        /// <summary>
+        /// Lấy toàn bộ danh sách hình ảnh của một loại phòng (không yêu cầu quyền)
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRoomTypeImages(Guid roomTypeId, CancellationToken cancellationToken)
+        {
+            var query = new GetRoomTypeImagesQuery { RoomTypeId = roomTypeId };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<List<RoomTypeImageDto>>.SuccessResponse(result.Value));
         }
 
         /// <summary>

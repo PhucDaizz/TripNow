@@ -77,7 +77,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsFeed
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
-            var pagedResult = new PagedResult<PostDto>(items, request.PageIndex, request.PageSize, totalCount);
+            var pagedResult = new PagedResult<PostDto>(items, totalCount, request.PageIndex, request.PageSize);
 
             return Result<PagedResult<PostDto>>.Success(pagedResult);
         }

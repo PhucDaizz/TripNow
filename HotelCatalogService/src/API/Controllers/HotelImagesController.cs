@@ -3,6 +3,7 @@ using HotelCatalogService.Application.DTOs.HotelImage;
 using HotelCatalogService.Application.Features.HotelImage.Commands.DeleteHotelImage;
 using HotelCatalogService.Application.Features.HotelImage.Commands.UpdateHotelImage;
 using HotelCatalogService.Application.Features.HotelImage.Commands.UploadImages;
+using HotelCatalogService.Application.Features.HotelImage.Queries;
 using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,26 @@ namespace HotelCatalogService.API.Controllers
             _mediator = mediator;
             _currentUser = currentUser;
         }
+
+        /// <summary>
+        /// Lấy toàn bộ danh sách hình ảnh của một khách sạn (không cần quyền, ai cũng có thể xem được)
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetHotelImages(Guid hotelId, CancellationToken cancellationToken)
+        {
+            var query = new GetHotelImagesQuery { HotelId = hotelId };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<List<HotelImageDto>>.SuccessResponse(result.Value));
+        }
+
 
         /// <summary>
         /// Đăng tải nhiều ảnh về khách sạn (chú ý loại FromForm)

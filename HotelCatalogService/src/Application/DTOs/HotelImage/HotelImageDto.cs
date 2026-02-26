@@ -1,9 +1,10 @@
 ﻿namespace HotelCatalogService.Application.DTOs.HotelImage
 {
-    public record HotelImageDto
+    public class HotelImageDto
     {
-        public string Url { get; init; } = default!;
-        public bool IsThumbnail { get; init; }
-        public string? Caption { get; init; }
+        public Guid Id { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
+        public bool IsThumbnail { get; set; }
+        public string? Caption { get; set; }
     }
 }

@@ -54,7 +54,7 @@ namespace SocialService.Application.Features.UserFollow.Queries.GetFollowers
                 .ToListAsync(cancellationToken);
 
             return Result<PagedResult<FollowerDto>>.Success(
-                new PagedResult<FollowerDto>(items, request.PageIndex, request.PageSize, totalCount));
+                new PagedResult<FollowerDto>(items, totalCount, request.PageIndex, request.PageSize));
         }
     }
 }

@@ -132,7 +132,6 @@ namespace HotelCatalogService.Infrastructure.Migrations
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.CancellationRule", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("CancellationPolicyId")
@@ -142,25 +141,27 @@ namespace HotelCatalogService.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
 
                     b.Property<int>("HoursBeforeCheckIn")
                         .HasColumnType("int");
 
                     b.Property<decimal>("RefundPercentage")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CancellationPolicyId");
 
-                    b.ToTable("CancellationRule");
+                    b.ToTable("CancellationRules", (string)null);
                 });
 
             modelBuilder.Entity("HotelCatalogService.Domain.Entities.Floor", b =>

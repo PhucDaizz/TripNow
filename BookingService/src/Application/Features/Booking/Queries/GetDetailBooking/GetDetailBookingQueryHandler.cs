@@ -9,15 +9,15 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
 {
     public class GetDetailBookingQueryHandler : IRequestHandler<GetDetailBookingQuery, Result<BookingDetailResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public GetDetailBookingQueryHandler(IUnitOfWork unitOfWork, IApplicationDbContext context, ICurrentUserService currentUserService)
+        public GetDetailBookingQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService, IHotelAuthorizationService hotelAuthService)
         {
-            _unitOfWork = unitOfWork;
             _context = context;
             _currentUserService = currentUserService;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result<BookingDetailResponse>> Handle(GetDetailBookingQuery request, CancellationToken cancellationToken)
@@ -35,6 +35,7 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
             {
                 Id = b.Id,
                 HotelId = b.HotelId,
+                UserId = b.UserId,
                 CheckInDate = b.CheckInDate,
                 CheckOutDate = b.CheckOutDate,
                 Status = b.Status.ToString(),
@@ -54,7 +55,7 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
                 return Result.Failure<BookingDetailResponse>(
                     new Error("Booking.NotFound", "Booking not found"));
 
-            if (!CanViewBooking(booking))
+            if (!await CanViewBooking(booking, cancellationToken))
             {
                 return Result.Failure<BookingDetailResponse>(
                     new Error("Booking.AccessDenied", "You do not have permission to view this booking"));
@@ -63,14 +64,13 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
             return Result.Success(booking);
         }
 
-        private bool CanViewBooking(BookingDetailResponse booking)
+        private async Task<bool> CanViewBooking(BookingDetailResponse booking, CancellationToken cancellationToken)
         {
             return _currentUserService.Role switch
             {
                 AppRoles.SysAdmin => true,
 
-                AppRoles.HotelOwner =>
-                    booking.HotelId == _currentUserService.HotelId,
+                AppRoles.HotelOwner => await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken),
 
                 AppRoles.Receptionist =>
                     booking.HotelId == _currentUserService.HotelId,

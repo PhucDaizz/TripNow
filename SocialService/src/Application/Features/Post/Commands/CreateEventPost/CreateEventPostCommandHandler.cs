@@ -10,20 +10,17 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
-        private readonly IImageProcessor _imageProcessor;
         private readonly IHotelCatalogService _hotelCatalogService;
 
         public CreateEventPostCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICloudinaryService cloudinaryService,
-            IImageProcessor imageProcessor, 
             IHotelCatalogService hotelCatalogService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
-            _imageProcessor = imageProcessor;
             _hotelCatalogService = hotelCatalogService;
         }
 
@@ -53,14 +50,16 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
 
                     if (fileDto.Length > 0 && fileDto.Content != null)
                     {
-                        var fileName = $"event_{post.Id}_{Guid.NewGuid()}";
+                        var originalExtension = System.IO.Path.GetExtension(fileDto.FileName) ?? ".jpg";
+                        var fileName = $"event_{post.Id}_{Guid.NewGuid()}{originalExtension}";
+
                         if (fileDto.Content.CanSeek) fileDto.Content.Position = 0;
 
-                        using var processedStream = await _imageProcessor.ResizeAsync(
-                            fileDto.Content, 1920, 1080, "webp", 80, ImageResizeMode.Max, cancellationToken);
-
                         var uploadResult = await _cloudinaryService.UploadAsync(
-                            processedStream, fileName, folder: "social_events", cancellationToken: cancellationToken);
+                            fileDto.Content,
+                            fileName,
+                            folder: "social_events",
+                            cancellationToken: cancellationToken);
 
                         string? caption = (request.ImageCaptions != null && request.ImageCaptions.Count > i)
                                           ? request.ImageCaptions[i]

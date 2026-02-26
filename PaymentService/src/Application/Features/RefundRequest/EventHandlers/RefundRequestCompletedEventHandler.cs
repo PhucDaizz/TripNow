@@ -20,6 +20,7 @@ namespace PaymentService.Application.Features.RefundRequest.EventHandlers
                 new RefundRequestCompleted
                 {
                     RefundId = notification.id,
+                    BookingId = notification.bookingId,
                     UserRefundId = notification.useRefundId,
                     AmountRefund = notification.amountRefund
                 },

@@ -13,6 +13,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace HotelCatalogService.API.Controllers
 {
@@ -133,6 +134,9 @@ namespace HotelCatalogService.API.Controllers
         /// </summary>
         /// <remarks>
         /// Cần quyền chủ khách sạn
+        /// - Loại mã giảm có 2 loại 
+        /// Percent = 1, // Giảm theo % (VD: 10%)
+        /// Amount = 2   // Giảm tiền mặt (VD: 100k)
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]

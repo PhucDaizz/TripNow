@@ -19,7 +19,7 @@ namespace SocialService.Infrastructure.Data.Configurations
 
             builder.Property(x => x.PublicId)
                    .IsRequired()
-                   .HasMaxLength(100);
+                   .HasMaxLength(500);
 
             builder.Property(x => x.Caption)
                    .HasMaxLength(255) 

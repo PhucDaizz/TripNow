@@ -3,6 +3,7 @@ using HotelCatalogService.Application.DTOs.HotelAmenity;
 using HotelCatalogService.Application.Features.HotelAmenity.Commands.AddHotelAmenity;
 using HotelCatalogService.Application.Features.HotelAmenity.Commands.RemoveHotelAmenity;
 using HotelCatalogService.Application.Features.HotelAmenity.Commands.UpdateHotelAmenity;
+using HotelCatalogService.Application.Features.HotelAmenity.Queries.GetHotelAmenities;
 using HotelCatalogService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -101,6 +102,24 @@ namespace HotelCatalogService.API.Controllers
                 return Ok(ApiResponse<object>.SuccessResponse(null, "Amenity removed successfully"));
 
             return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+        }
+
+        /// <summary>
+        /// Lấy danh sách tiện ích của một khách sạn (không cần đăng nhập)
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous] 
+        public async Task<IActionResult> GetAmenities(Guid hotelId, CancellationToken cancellationToken)
+        {
+            var query = new GetHotelAmenitiesQuery { HotelId = hotelId };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<List<HotelAmenityDto>>.SuccessResponse(result.Value));
         }
     }
 }

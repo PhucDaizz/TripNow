@@ -10,5 +10,6 @@ namespace BookingService.Application.Contracts
         Task<HotelSummaryDto?> GetHotelSummary(Guid hotelId, CancellationToken token = default);
         Task<RoomResponse?> CheckInRoom(Guid HotelId, Guid RoomId, Guid CheckInBy, CancellationToken token = default);
         Task RollbackCheckInRoom(Guid hotelId, Guid roomId, CancellationToken token);
+        Task<bool> VerifyHotelOwnershipAsync(Guid hotelId, CancellationToken cancellationToken);
     }
 }

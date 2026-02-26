@@ -1,4 +1,5 @@
 ﻿using BookingService.Application.DTOs.Booking.Event;
+using BookingService.Domain.Events.Booking;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +29,14 @@ namespace BookingService.Infrastructure.BackgroundJobs.Consumer.Booking
                 exchangeType: "topic",
                 routingKey: "payment.success",
                 queueName: "booking-service-success-book",
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            // Cập nhật trạng thái booking khi hoàn tiền thành công
+            await _consumer.Subscribe<RefundRequestCompleteEvent>(
+                exchange: "payment.events",
+                exchangeType: "topic",
+                routingKey: "refundrequest.completed",
+                queueName: "booking-service-refundrequest-completed",
                 handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 

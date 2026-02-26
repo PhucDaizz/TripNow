@@ -25,6 +25,9 @@ namespace PaymentService.Infrastructure
             services.Configure<VNPAYSettings>(
                 configuration.GetSection(VNPAYSettings.SectionName));
 
+            services.Configure<ServiceFeeSettings>(
+                configuration.GetSection(ServiceFeeSettings.SectionName));
+
             services.AddSingleton<IServiceFeeSettings>(sp =>
                 sp.GetRequiredService<IOptions<ServiceFeeSettings>>().Value);
 

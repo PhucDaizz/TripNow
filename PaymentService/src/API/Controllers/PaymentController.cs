@@ -54,6 +54,7 @@ namespace PaymentService.API.Controllers
         /// <remarks>
         /// </remarks>
         [HttpGet("proceed-after-payment")]
+        [AllowAnonymous]
         public async Task<IActionResult> ProceedAfterPayment()
         {
             var rawQuery = Request.Query; 

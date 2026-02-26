@@ -30,11 +30,12 @@ namespace BookingService.Infrastructure.Data.Configurations
 
             builder.Property(b => b.DiscountAmount)
                    .HasColumnType("decimal(18,2)")
-                   .IsRequired();
+                   .IsRequired(false);
 
             // String Length (MySQL varchar)
             builder.Property(b => b.PromotionCode)
-                   .HasMaxLength(50);
+                   .HasMaxLength(50)
+                   .IsRequired(false);
 
             // Enum Conversion (Lưu xuống DB dạng int/tinyint )
             builder.Property(b => b.Status)

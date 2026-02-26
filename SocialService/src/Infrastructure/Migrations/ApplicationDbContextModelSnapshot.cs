@@ -129,11 +129,16 @@ namespace SocialService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("Name")
                         .HasDatabaseName("IX_Locations_Name");
 
                     b.HasIndex("Type")
                         .HasDatabaseName("IX_Locations_Type");
+
+                    b.HasIndex("IsVerify", "CreatedAt")
+                        .HasDatabaseName("IX_Locations_IsVerify_CreatedAt");
 
                     b.ToTable("Locations", (string)null);
                 });
@@ -193,7 +198,7 @@ namespace SocialService.Infrastructure.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("varchar(450)");
 
-                    b.Property<Guid>("HotelId")
+                    b.Property<Guid?>("HotelId")
                         .HasColumnType("char(36)");
 
                     b.Property<bool>("IsDeleted")
@@ -273,8 +278,8 @@ namespace SocialService.Infrastructure.Migrations
 
                     b.Property<string>("PublicId")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<int>("SortOrder")
                         .ValueGeneratedOnAdd()

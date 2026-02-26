@@ -7,7 +7,7 @@ namespace SocialService.Domain.Entities
     public class Post : BaseEntity, AggregateRoot
     {
         public Guid UserId { get; private set; }
-        public Guid HotelId { get; private set; } // HotelId: Đánh dấu post này nằm trên tường của KS nào hoặc thuộc chuyến đi nào
+        public Guid? HotelId { get; private set; } // HotelId: Đánh dấu post này nằm trên tường của KS nào hoặc thuộc chuyến đi nào
 
         public string Content { get; private set; }
         public string? ThumbnailUrl { get; private set; }
@@ -32,7 +32,7 @@ namespace SocialService.Domain.Entities
 
 
         // 1. Tạo Post bình thường (Check-in, Khoe ảnh)
-        public static Post CreateNormalPost(Guid userId, Guid hotelId, string content)
+        public static Post CreateNormalPost(Guid userId, string content, Guid? hotelId = null)
         {
             return new Post(userId, hotelId, content, PostType.Normal);
         }
@@ -44,25 +44,33 @@ namespace SocialService.Domain.Entities
         }
 
         // 3. Tạo Review Post 
-        public static Post CreateReviewPost(Guid userId, Guid hotelId, string content,
+        public static Post CreateReviewPost(Guid userId, Guid? hotelId, string content,
             TargetTypeReview targetType, Guid targetId, decimal rating, Guid? bookingId)
         {
-            var post = new Post(userId, hotelId, content, PostType.Review);
+            if (targetType == TargetTypeReview.Hotel && (hotelId == null || hotelId == Guid.Empty))
+            {
+                throw new DomainException("Review khách sạn bắt buộc phải gắn với một Khách sạn (HotelId không được trống).");
+            }
 
+            var post = new Post(userId, hotelId, content, PostType.Review);
             post.ReviewDetail = new Review(post.Id, targetId, targetType, rating, bookingId);
 
             return post;
         }
 
         // --- CONSTRUCTOR CHUNG ---
-        private Post(Guid userId, Guid hotelId, string content, PostType type)
+        private Post(Guid userId, Guid? hotelId, string content, PostType type)
         {
             if (userId == Guid.Empty) throw new DomainException("UserId không hợp lệ.");
-            if (hotelId == Guid.Empty) throw new DomainException("HotelId không hợp lệ.");
             if (string.IsNullOrWhiteSpace(content)) throw new DomainException("Nội dung không được để trống.");
 
+            if (type == PostType.Event && (hotelId == null || hotelId == Guid.Empty))
+            {
+                throw new DomainException("Bài đăng sự kiện (Event) bắt buộc phải thuộc về một Khách sạn (HotelId).");
+            }
+
             UserId = userId;
-            HotelId = hotelId;
+            HotelId = hotelId == Guid.Empty ? null : hotelId;
             Content = content.Trim();
             Type = type;
 

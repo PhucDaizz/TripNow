@@ -6,7 +6,6 @@ using HotelCatalogService.Domain.Entities;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 
 namespace HotelCatalogService.Infrastructure.Data.Repositories
@@ -285,10 +284,19 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
         public async Task<Hotel?> GetHotelWithSpecificRoomAsync(Guid hotelId, Guid roomId, CancellationToken token = default)
         {
             return await _context.Hotel
+            .Include(h => h.Blocks.Where(b => b.Floors.Any(f => f.Rooms.Any(r => r.Id == roomId))))
+                .ThenInclude(b => b.Floors.Where(f => f.Rooms.Any(r => r.Id == roomId)))
+                    .ThenInclude(f => f.Rooms.Where(r => r.Id == roomId))
+            .FirstOrDefaultAsync(h =>
+                h.Id == hotelId && 
+                h.Blocks.Any(b => b.Floors.Any(f => f.Rooms.Any(r => r.Id == roomId))), 
+                token);
+
+            /*return await _context.Hotel
                 .Include(h => h.Blocks.Where(b => b.Floors.Any(f => f.Rooms.Any(r => r.Id == roomId))))
                     .ThenInclude(b => b.Floors.Where(f => f.Rooms.Any(r => r.Id == roomId)))
                         .ThenInclude(f => f.Rooms.Where(r => r.Id == roomId))
-                .FirstOrDefaultAsync(h => h.Id == hotelId, token);
+                .FirstOrDefaultAsync(h => h.Id == hotelId, token);*/
         }
 
         public async Task<Hotel?> GetHotelWithRoomTypePricesAsync(Guid hotelId, Guid roomTypeId, CancellationToken token)
@@ -364,6 +372,12 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                 "price" => isAsc ? query.OrderBy(h => h.StartingPrice) : query.OrderByDescending(h => h.StartingPrice), // Sort theo giá
                 _ => query.OrderByDescending(h => h.CreatedAt) 
             };
+        }
+
+        public async Task<bool> HasRoomsInFloorAsync(Guid floorId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Room.AsNoTracking()
+                           .AnyAsync(r => r.FloorId == floorId, cancellationToken);
         }
     }
 }

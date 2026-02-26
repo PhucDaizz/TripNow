@@ -142,6 +142,33 @@ services:
     networks:
       - travelnow-network
 
+  social_service:
+    build:
+      context: ./SocialService
+      dockerfile: Dockerfile
+    container_name: travelnow_social_service
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Overrides for Docker Network
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=Social.TravelNow.Service;user=root;password=phucdai011;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=ADMIN
+      - RabbitMQ__Password=ADMIN
+      - ServiceUrls__Auth=http://auth_service:8080
+      - ServiceUrls__HotelCatalog=http://hotel_service:8080
+      - ServiceUrls__Booking=http://booking_service:8080
+    networks:
+      - travelnow-network
+
   api_gateway:
     build:
       context: .
@@ -153,6 +180,7 @@ services:
       - hotel_service
       - booking_service
       - payment_service
+      - social_service
     ports:
       - "7000:8080"
     environment:

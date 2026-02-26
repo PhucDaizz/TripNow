@@ -56,6 +56,7 @@ namespace HotelCatalogService.Application.Features.RoomType.Queries.GetRoomTypes
                     CancellationPolicy = rt.CancellationPolicy == null ? null : new DTOs.CancellationPolicy.CancellationPolicyDto
                     {
                         Id = rt.CancellationPolicy.Id,
+                        HotelId = rt.HotelId,
                         Name = rt.CancellationPolicy.Name,
                         Description = rt.CancellationPolicy.Description,
                         Type = rt.CancellationPolicy.Type.ToString(),

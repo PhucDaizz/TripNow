@@ -30,10 +30,10 @@ namespace SocialService.Application.Features.UserFollow.Commands.UnfollowHotel
                 return Result.Failure<bool>(new Error("NOT.FOLLOWING.YET", "You have never followed this hotel"));
             }
 
-            await _integrationEventService.PublishAsync<UnfollowEvent>(
-                new UnfollowEvent
+            await _integrationEventService.PublishAsync<UnfollowHotelEvent>(
+                new UnfollowHotelEvent
                 {
-                    UserId = userId
+                    HotelId = notification.HotelId
                 },
                 "social.events",
                 "topic",

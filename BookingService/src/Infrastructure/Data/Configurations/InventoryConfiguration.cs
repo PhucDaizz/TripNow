@@ -25,10 +25,9 @@ namespace BookingService.Infrastructure.Data.Configurations
             builder.HasIndex(i => new { i.RoomTypeId, i.Date })
                    .IsUnique();
 
-            // 3. CONCURRENCY TOKEN (Chống Overbooking)
-            // Với MySQL, RowVersion thường dùng check bằng cột Timestamp hoặc ConcurrencyCheck
-            builder.Property(i => i.RowVersion)
-                   .IsRowVersion();
+            builder.Property(i => i.Version)
+               .IsConcurrencyToken()
+               .HasDefaultValue(0);
 
         }
     }

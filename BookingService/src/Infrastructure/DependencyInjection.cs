@@ -37,6 +37,7 @@ namespace BookingService.Infrastructure
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
+            services.AddScoped<IHotelAuthorizationService, HotelAuthorizationService>();
 
             return services;
         }

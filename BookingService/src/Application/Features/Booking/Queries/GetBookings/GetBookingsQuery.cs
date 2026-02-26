@@ -20,6 +20,10 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
         public Guid? BookingId { get; set; } // Tìm chính xác mã đơn
         public DateOnly? FromDate { get; set; } // Lọc theo ngày CheckIn
         public DateOnly? ToDate { get; set; }
+
+        public DateOnly? FromCheckOutDate { get; set; }
+        public DateOnly? ToCheckOutDate { get; set; }
+
         public string? CustomerEmail { get; set; } // Tìm theo email khách (dành cho Admin/Staff)
         public string? CustomerName { get; set; }
     }

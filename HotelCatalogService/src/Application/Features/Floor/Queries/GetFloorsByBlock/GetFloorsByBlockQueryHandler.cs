@@ -2,16 +2,19 @@
 using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.Floor;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelCatalogService.Application.Features.Floor.Queries.GetFloorsByBlock
 {
     public class GetFloorsByBlockQueryHandler : IRequestHandler<GetFloorsByBlockQuery, Result<List<FloorDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IApplicationDbContext _context;
 
-        public GetFloorsByBlockQueryHandler(IUnitOfWork unitOfWork)
+        public GetFloorsByBlockQueryHandler(IUnitOfWork unitOfWork, IApplicationDbContext context)
         {
             _unitOfWork = unitOfWork;
+            _context = context;
         }
 
 
@@ -24,13 +27,21 @@ namespace HotelCatalogService.Application.Features.Floor.Queries.GetFloorsByBloc
             var block = hotel.Blocks.FirstOrDefault(b => b.Id == request.BlockId);
             if (block == null) return Result.Failure<List<FloorDto>>(new Error("Block.NotFound", "Not found"));
 
+            var floorIds = block.Floors.Select(f => f.Id).ToList();
+
+            var roomCounts = await _context.Room.AsNoTracking()
+                .Where(r => floorIds.Contains(r.FloorId))
+                .GroupBy(r => r.FloorId)
+                .Select(g => new { FloorId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(k => k.FloorId, v => v.Count, token);
+
             var dtos = block.Floors
                 .OrderBy(f => f.FloorNumber)
                 .Select(f => new FloorDto
                 {
                     Id = f.Id,
                     FloorNumber = f.FloorNumber,
-                    RoomCount = f.Rooms?.Count ?? 0
+                    RoomCount = roomCounts.GetValueOrDefault(f.Id, 0)
                 }).ToList();
 
             return Result.Success(dtos);

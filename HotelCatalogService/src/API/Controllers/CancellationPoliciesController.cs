@@ -49,8 +49,17 @@ namespace HotelCatalogService.API.Controllers
         }
 
         /// <summary>
+        /// </summary>
+        /// <summary>
         /// Tạo mới chính sách hủy cho khách sạn (Cần quyền HotelOwner).
         /// </summary>
+        /// <remarks>
+        /// Loại chính sách gồm 
+        /// Flexible = 0,       // Linh hoạt
+        /// Moderate = 1,       // Trung bình
+        /// Strict = 2,         // Nghiêm ngặt
+        /// NonRefundable = 3   // Không hoàn hủy
+        /// </remarks>
         [HttpPost("api/Hotel/{hotelId}/cancellation-policies")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]
         public async Task<IActionResult> Create(Guid hotelId, [FromBody] CreateCancellationPolicyCommand command)

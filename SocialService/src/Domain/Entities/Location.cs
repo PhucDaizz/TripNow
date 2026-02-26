@@ -34,6 +34,7 @@ namespace SocialService.Domain.Entities
             Type = type;
             AvgRating = 0;
             IsVerify = false;
+            CreatedByUserId = createdByUserId;
         }
 
         public void Verify()

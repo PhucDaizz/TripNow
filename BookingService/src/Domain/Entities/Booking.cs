@@ -56,6 +56,12 @@ namespace BookingService.Domain.Entities
 
             Status = BookingStatus.Pending;
             PaymentStatus = PaymentStatus.Unpaid;
+        }
+
+        public void FinalizeCreation()
+        {
+            if (!_items.Any())
+                throw new DomainException("Cannot create a booking without any rooms.");
 
             AddDomainEvent(new BookingCreatedDomainEvent(this));
         }
@@ -110,6 +116,11 @@ namespace BookingService.Domain.Entities
             // AddDomainEvent(new BookingCompletedEvent(this.Id));
         }
 
+        public void CancelCompletely()
+        {
+            PaymentStatus = PaymentStatus.Refunded;
+        }
+
         public void Cancel(CancelledBy who, string reason, decimal refundAmount)
         {
             if (Status == BookingStatus.Completed)
@@ -158,6 +169,16 @@ namespace BookingService.Domain.Entities
                 Items = this.Items.ToList()
             });
 
+            if(this.PromotionCode != null && this.PromotionId != null)
+            {
+                AddDomainEvent(new RestorePromotionDomainEvent
+                {
+                    BookingId = this.Id,
+                    HotelId = this.HotelId,
+                    PromotionCode = this.PromotionCode,
+                });
+            }
+
             if (refundAmount > 0)
             {
                 AddDomainEvent(new BookingRefundInitiatedDomainEvent
@@ -188,17 +209,16 @@ namespace BookingService.Domain.Entities
         {
             _priceDetails.Clear();
 
-            // Tính số đêm lưu trú
+            decimal totalRoomCharge = _items.Sum(i => i.Quantity * i.Price);
+
             int nights = CheckOutDate.DayNumber - CheckInDate.DayNumber;
             if (nights <= 0) nights = 1;
-
-            decimal totalRoomCharge = _items.Sum(i => i.Quantity * i.Price * nights);
 
             _priceDetails.Add(new BookingPriceDetail(
                 Id,
                 PriceType.RoomCharge,
                 totalRoomCharge,
-                $"Room charge ({nights} nights))"
+                $"Room charge {nights} nights (Total)"
             ));
 
             decimal actualDiscount = (DiscountAmount.HasValue && DiscountAmount.Value > totalRoomCharge)
@@ -210,35 +230,47 @@ namespace BookingService.Domain.Entities
                 _priceDetails.Add(new BookingPriceDetail(
                     Id,
                     PriceType.Promotion,
-                    -actualDiscount, 
+                    -actualDiscount,
                     $"Discount voucher: {PromotionCode}"
                 ));
             }
 
-            decimal taxableAmount = totalRoomCharge - actualDiscount;
+            decimal totalPayable = totalRoomCharge - actualDiscount;
 
-            decimal vatRate = 0.10m; 
-            decimal vatAmount = taxableAmount * vatRate;
-
+            decimal vatRate = 0.10m;
+            decimal taxableAmount = totalPayable / (1 + vatRate); 
+            decimal vatAmount = totalPayable - taxableAmount;
 
             _priceDetails.Add(new BookingPriceDetail(
                 Id,
                 PriceType.VAT,
                 vatAmount,
-                "VAT (10%)"
+                "VAT (10% Included)"
             ));
 
-            TotalAmount = taxableAmount + vatAmount;
+            TotalAmount = totalPayable;
         }
 
-        public decimal CalculateTotalRefundAmount(DateTime cancelTime)
+        public decimal CalculateTotalRefundAmount(DateTime cancelTimeUtc)
         {
-            decimal totalRefund = 0;
+            decimal totalGrossRefund = 0;
+
+            decimal totalRoomCharge = _items.Sum(i => i.Price * i.Quantity);
+
+            if (totalRoomCharge == 0) return 0;
+
             foreach (var item in _items)
             {
-                totalRefund += item.CalculateRefund(cancelTime, this.CheckInDate.ToDateTime(new TimeOnly(14, 0)));
+                totalGrossRefund += item.CalculateRefund(cancelTimeUtc, this.CheckInDate.ToDateTime(new TimeOnly(14, 0)));
             }
-            return totalRefund;
+
+            decimal refundRatio = totalGrossRefund / totalRoomCharge;
+
+            decimal actualDiscount = DiscountAmount ?? 0;
+
+            decimal netRefund = totalGrossRefund - (actualDiscount * refundRatio);
+
+            return Math.Clamp(netRefund, 0, this.TotalAmount);
         }
 
         public void CheckOutRoom(Guid roomId)

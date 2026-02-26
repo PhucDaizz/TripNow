@@ -2,7 +2,6 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
-using SocialService.Application.DTOs.Common;
 
 namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
 {
@@ -11,25 +10,22 @@ namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
-        private readonly IImageProcessor _imageProcessor;
 
         public CreateNormalPostCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
-            ICloudinaryService cloudinaryService,
-            IImageProcessor imageProcessor)
+            ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
-            _imageProcessor = imageProcessor;
         }
 
         public async Task<Result<Guid>> Handle(CreateNormalPostCommand request, CancellationToken cancellationToken)
         {
             var userId = Guid.Parse(_currentUserService.UserId);
 
-            var post = Domain.Entities.Post.CreateNormalPost(userId, request.HotelId, request.Content);
+            var post = Domain.Entities.Post.CreateNormalPost(userId, request.Content, request.HotelId);
 
             if (request.Images != null && request.Images.Any())
             {
@@ -41,22 +37,13 @@ namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
                     var file = request.Images[i];
                     if (file.Length > 0)
                     {
-                        var fileName = $"post_{post.Id}_{Guid.NewGuid()}";
+                        var originalExtension = Path.GetExtension(file.FileName) ?? ".jpg";
+                        var fileName = $"post_{post.Id}_{Guid.NewGuid()}{originalExtension}";
 
                         if (file.Content.CanSeek) file.Content.Position = 0;
 
-                        var processedStream = await _imageProcessor.ResizeAsync(
-                            imageStream: file.Content,
-                            width: 1920,
-                            height: 1080,
-                            format: "webp",
-                            quality: 80,
-                            mode: ImageResizeMode.Max, 
-                            cancellationToken: cancellationToken
-                        );
-
                         var uploadResult = await _cloudinaryService.UploadAsync(
-                            processedStream,
+                            file.Content,
                             fileName,
                             folder: "social_posts", 
                             cancellationToken: cancellationToken

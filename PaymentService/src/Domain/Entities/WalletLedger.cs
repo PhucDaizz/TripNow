@@ -33,6 +33,8 @@ namespace PaymentService.Domain.Entities
             ReferenceId = referenceId;
             BalanceAfter = balanceAfter;
             Description = description;
+            TransactionGrossAmount = transactionGrossAmount;
+            TransactionFee = transactionFee;
         }
 
         public void MarkAsSettled(Guid settlementPeriodId)

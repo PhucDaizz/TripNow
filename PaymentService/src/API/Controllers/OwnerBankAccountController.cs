@@ -52,7 +52,7 @@ namespace PaymentService.API.Controllers
         public async Task<IActionResult> Create([FromBody] CreateBankAccountCommand command)
         {
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result.Value)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace PaymentService.API.Controllers
         {
             if (id != command.Id) return BadRequest(ApiResponse<object>.ErrorResponse("ID mismatch"));
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse("Update successfully")) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace PaymentService.API.Controllers
         public async Task<IActionResult> SetDefault(Guid id)
         {
             var result = await _mediator.Send(new SetDefaultBankAccountCommand { Id = id });
-            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse("Set as default successfully")) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace PaymentService.API.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _mediator.Send(new DeleteBankAccountCommand { Id = id });
-            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse(result)) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
+            return result.IsSuccess ? Ok(ApiResponse<object>.SuccessResponse("Remove successfully")) : BadRequest(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
     }
 }

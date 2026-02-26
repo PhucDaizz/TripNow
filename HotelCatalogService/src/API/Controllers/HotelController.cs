@@ -12,9 +12,11 @@ using HotelCatalogService.Application.Features.Hotel.Commands.SubmitForApprovalH
 using HotelCatalogService.Application.Features.Hotel.Commands.SuspendHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailBySlug;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
 using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting;
+using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelOwner;
 using HotelCatalogService.Application.Features.Room.Commands.CheckInHotelRoom;
 using HotelCatalogService.Application.Features.Room.Commands.RollbackCheckInRoom;
 using HotelCatalogService.Domain.Common;
@@ -178,6 +180,14 @@ namespace HotelCatalogService.API.Controllers
         /// <remarks>
         /// - Chỉ Admin và chủ khách sạn được phép gọi
         /// - Admin xem được tất cả, chủ khách sạn chỉ xem của họ
+        /// 
+        /// - status khách sạn để lọc
+        /// Draft = 0,              - Nháp: Chủ khách sạn đang tạo, chưa xong, chưa muốn ai thấy.
+        /// PendingApproval = 1,    - Chờ duyệt: Đã điền xong thông tin, gửi cho Admin duyệt (KYB).
+        /// Active = 2,             - Hoạt động: Admin đã duyệt, khách có thể đặt phòng.
+        /// Rejected = 3,           - Từ chối: Admin từ chối (do giấy tờ sai, v.v.).
+        /// Suspended = 4,          - Bị đình chỉ: Admin khóa do vi phạm chính sách.
+        /// TemporarilyClosed = 5   - Tạm đóng: Chủ khách sạn tự ẩn (sửa chữa, nghỉ đông, v.v.).
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
@@ -198,6 +208,7 @@ namespace HotelCatalogService.API.Controllers
         /// 2.1 Tạo cấu trúc khách sạn nhanh 
         /// </summary>
         /// <remarks>
+        /// - Lưu cần tạo loại phòng ( 2.3 ) trước khi tạo cấu trúc khách sạn
         /// - Chỉ HotelOwner được phép gọi
         /// - Tạo nhanh dãy phòng, lầu, phòng
         /// </remarks>
@@ -446,7 +457,7 @@ namespace HotelCatalogService.API.Controllers
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
         [Route("rooms/rollback-check-in")]
-        public async Task<IActionResult> RollbackCheckInRoom([FromBody]RollbackCheckInRoomRequest rollback, CancellationToken token)
+        public async Task<IActionResult> RollbackCheckInRoom([FromBody] RollbackCheckInRoomRequest rollback, CancellationToken token)
         {
             var command = new RollbackCheckInRoomCommand
             {
@@ -473,7 +484,7 @@ namespace HotelCatalogService.API.Controllers
         /// <remarks>
         /// </remarks>
         [HttpGet("hotel-existing")]
-        public async Task<IActionResult> IsHotelExisting([FromQuery]Guid hotelId)
+        public async Task<IActionResult> IsHotelExisting([FromQuery] Guid hotelId)
         {
             var request = new IsHotelExistingQuery
             {
@@ -491,7 +502,7 @@ namespace HotelCatalogService.API.Controllers
         /// <remarks>
         /// </remarks>
         [HttpGet("detail")]
-        public async Task<IActionResult> GetHotelDetail([FromQuery]Guid hotelId)
+        public async Task<IActionResult> GetHotelDetail([FromQuery] Guid hotelId)
         {
             var request = new GetHotelDetailQuery
             {
@@ -504,6 +515,44 @@ namespace HotelCatalogService.API.Controllers
                 return Ok(ApiResponse<HotelDetailDto>.SuccessResponse(result.Value));
             }
             return NotFound(ApiResponse<HotelDetailDto>.ErrorResponse(result.Error.Message.ToString()));
+        }
+
+        /// <summary>
+        /// Xem thông tin chi tiết của 1 khách sạn theo Slug (chuẩn SEO, không cần đăng nhập)
+        /// </summary>
+        [HttpGet("detail/{slug}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetHotelDetailBySlug(string slug)
+        {
+            var request = new GetHotelDetailBySlugQuery
+            {
+                Slug = slug
+            };
+
+            var result = await _mediator.Send(request);
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<HotelDetailDto>.SuccessResponse(result.Value));
+            }
+            return NotFound(ApiResponse<HotelDetailDto>.ErrorResponse(result.Error.Message.ToString()));
+        }
+
+        /// <summary>
+        /// Xem người dùng có phải là người sở hữu khách sạn hay không - yêu cầu đăng nhập (không map ra gateway)
+        /// </summary>
+        [HttpGet("is-hotel-owner")]
+        [Authorize]
+        public async Task<IActionResult> IsHotelOwner([FromQuery] Guid hotelId)
+        {
+            var userId = _currentUserService.UserId;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var request = new IsHotelOwnerQuery
+            {
+                HotelId = hotelId,
+                UserId = Guid.Parse(userId)
+            };
+            var result = await _mediator.Send(request);
+            return Ok(ApiResponse<bool>.SuccessResponse(result));
         }
     }
 }

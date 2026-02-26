@@ -47,12 +47,16 @@ namespace SocialService.Infrastructure.Data.Configurations
                  .HasDatabaseName("IX_Locations_Coordinates");
             });
 
+            builder.HasIndex(x => x.CreatedByUserId);
 
             builder.HasIndex(x => x.Type)
                    .HasDatabaseName("IX_Locations_Type");
 
             builder.HasIndex(x => x.Name)
                    .HasDatabaseName("IX_Locations_Name");
+
+            builder.HasIndex(x => new { x.IsVerify, x.CreatedAt })
+                   .HasDatabaseName("IX_Locations_IsVerify_CreatedAt");
         }
     }
 }

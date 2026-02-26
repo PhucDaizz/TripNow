@@ -18,13 +18,12 @@ namespace BookingService.Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> CreatePaymentLinkAsync(Guid bookingId, decimal amount, Guid? payerUserId, PaymentProvider paymentProvider, CancellationToken token)
+        public async Task<string> CreatePaymentLinkAsync(Guid bookingId, decimal amount, PaymentProvider paymentProvider, CancellationToken token)
         {
             var requestBody = new CreatePaymentLinkRequest
             {
                 BookingId = bookingId.ToString(),
                 MoneyToPay = (double)amount,
-                PayerUserId = payerUserId,
                 providerBank = paymentProvider
             };
 

@@ -21,9 +21,16 @@ namespace SocialService.Application.Features.SavedPost.Commands.SavePost
         {
             var userId = Guid.Parse(_currentUserService.UserId);
 
+
+            var isPostExists = await _unitOfWork.postRepository.IsPostExisting(request.PostId, cancellationToken);
+            if (!isPostExists)
+            {
+                return Result.Failure<bool>(new Error("POST.NOT_FOUND", "Bài viết không tồn tại hoặc đã bị xóa."));
+            }
+
             var existingSave = await _unitOfWork.savedPostRepository.IsUserSavePost(userId, request.PostId, cancellationToken);
 
-            if (existingSave != null)
+            if (existingSave != null) 
             {
                 return Result<bool>.Success(true);
             }
@@ -34,6 +41,7 @@ namespace SocialService.Application.Features.SavedPost.Commands.SavePost
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result<bool>.Success(true);
+
         }
     }
 }

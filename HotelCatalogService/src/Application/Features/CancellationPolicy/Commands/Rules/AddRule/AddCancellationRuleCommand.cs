@@ -32,7 +32,6 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Commands.R
             try
             {
                 policy.AddRule(request.HoursBeforeCheckIn, request.RefundPercentage);
-                await _unitOfWork.CancellationPolicy.UpdateAsync(policy, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result<object>.Success(Unit.Value);
             }

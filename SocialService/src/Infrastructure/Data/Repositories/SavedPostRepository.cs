@@ -19,9 +19,10 @@ namespace SocialService.Infrastructure.Data.Repositories
             await _context.SavedPosts.AddAsync(savedPost, token);
         }
 
-        public async Task DeleteAsync(SavedPost savedPost, CancellationToken token = default)
+        public Task DeleteAsync(SavedPost savedPost, CancellationToken token = default)
         {
-            await _context.SavedPosts.AddAsync(savedPost, token);
+            _context.SavedPosts.Remove(savedPost);
+            return Task.CompletedTask;
         }
 
         public async Task<SavedPost?> GetByIdAsync(Guid id, CancellationToken token = default)

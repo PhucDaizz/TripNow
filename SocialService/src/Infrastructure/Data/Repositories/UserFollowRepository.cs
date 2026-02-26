@@ -20,9 +20,10 @@ namespace SocialService.Infrastructure.Data.Repositories
             await _context.UserFollows.AddAsync(userFollow, token);
         }
 
-        public async Task DeleteAsync(UserFollow userFollow, CancellationToken token = default)
+        public Task DeleteAsync(UserFollow userFollow, CancellationToken token = default)
         {
-            await _context.UserFollows.AddAsync(userFollow, token);
+            _context.UserFollows.Remove(userFollow);
+            return Task.CompletedTask;
         }
 
         public async Task<UserFollow?> GetByIdAsync(Guid id, CancellationToken token = default)

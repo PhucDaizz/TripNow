@@ -6,6 +6,7 @@ using CarbonTC.API.Extensions;
 using DotNetEnv;
 using Infrastructure;
 using Infrastructure.BackgroundJobs.Consumer.Hotel;
+using Infrastructure.BackgroundJobs.Consumer.Payment;
 using Infrastructure.BackgroundJobs.Consumer.User;
 using Infrastructure.Persistence.SeedData;
 using Infrastructure.Settings;
@@ -72,6 +73,7 @@ namespace API
 
             builder.Services.AddHostedService<UserEventsConsumer>();
             builder.Services.AddHostedService<HotelEventConsumer>();
+            builder.Services.AddHostedService<PaymentEventConsumer>();
 
 
             var app = builder.Build();

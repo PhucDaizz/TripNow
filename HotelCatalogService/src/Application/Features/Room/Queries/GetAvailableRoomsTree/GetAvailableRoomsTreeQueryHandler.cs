@@ -59,6 +59,7 @@ namespace HotelCatalogService.Application.Features.Room.Queries.GetAvailableRoom
                                 .Select(r => new RoomResponse
                                 {
                                     RoomId = r.Id,
+                                    RoomTypeId = r.RoomTypeId,
                                     RoomName = r.RoomName,
                                     Status = r.Status.ToString()
                                 })

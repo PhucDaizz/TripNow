@@ -307,6 +307,21 @@
             "SwaggerKey": "booking"
         },
         {
+            "DownstreamPathTemplate": "/api/Statistics/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7003
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Statistics/{everything}",
+            "UpstreamHttpMethod": [
+                "GET"
+            ],
+            "SwaggerKey": "booking"
+        },
+        {
             "DownstreamPathTemplate": "/api/Escrow/{everything}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -431,6 +446,114 @@
                 "DELETE"
             ],
             "SwaggerKey": "payment"
+        },
+        {
+            "DownstreamPathTemplate": "/api/Comment/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Comment/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
+        },
+        {
+            "DownstreamPathTemplate": "/api/Location/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Location/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
+        },
+        {
+            "DownstreamPathTemplate": "/api/Post/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Post/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
+        },
+        {
+            "DownstreamPathTemplate": "/api/PostLike/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/PostLike/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
+        },
+        {
+            "DownstreamPathTemplate": "/api/SavedPost/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/SavedPost/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
+        },
+        {
+            "DownstreamPathTemplate": "/api/UserFollow/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7005
+                }
+            ],
+            "UpstreamPathTemplate": "/api/UserFollow/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ],
+            "SwaggerKey": "social"
         }
     ],
     "SwaggerEndPoints": [
@@ -471,6 +594,16 @@
                     "Name": "Payment API",
                     "Version": "v1",
                     "Url": "https://localhost:7004/swagger/v1/swagger.json"
+                }
+            ]
+        },
+        {
+            "Key": "social",
+            "Config": [
+                {
+                    "Name": "Social API",
+                    "Version": "v1",
+                    "Url": "https://localhost:7005/swagger/v1/swagger.json"
                 }
             ]
         }

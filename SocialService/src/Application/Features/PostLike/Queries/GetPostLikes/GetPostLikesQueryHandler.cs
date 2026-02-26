@@ -37,7 +37,7 @@ namespace SocialService.Application.Features.PostLike.Queries.GetPostLikes
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
-            var pagedResult = new PagedResult<PostLikerDto>(items, request.PageIndex, request.PageSize, totalCount);
+            var pagedResult = new PagedResult<PostLikerDto>(items, totalCount, request.PageIndex, request.PageSize);
 
             return Result<PagedResult<PostLikerDto>>.Success(pagedResult);
         }

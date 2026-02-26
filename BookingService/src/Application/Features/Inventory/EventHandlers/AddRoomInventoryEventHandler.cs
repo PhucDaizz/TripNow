@@ -20,9 +20,19 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
 
         public async Task Handle(AddRoomInventoryEvent notification, CancellationToken cancellationToken)
         {
+            var roomTypeId = notification.RoomtypeId;
+
+            var config = await _unitOfWork.InventoryConfiguration.GetByRoomTypeIdAsync(roomTypeId, cancellationToken);
+            if (config == null)
+            {
+                _logger.LogWarning("Inventory configuration not found for RoomTypeId: {RoomTypeId}", roomTypeId);
+            }
+
+            int currentDefaultStock = config?.DefaultStock ?? 0;
+            int newTotalStock = currentDefaultStock + 1;
+
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var endDate = today.AddDays(_inventorySettings.LookAheadDays);
-            var roomTypeId = notification.RoomtypeId;
 
             var existingDates = await _unitOfWork.Inventory.GetExistingDatesAsync(
                 roomTypeId,
@@ -34,6 +44,10 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
             var existingDatesSet = new HashSet<DateOnly>(existingDates);
 
             var newInventories = new List<Domain.Entities.Inventory>();
+            var maxGeneratedDate =
+                config?.LastGeneratedDate != null
+                    ? DateOnly.FromDateTime(config.LastGeneratedDate.Value)
+                    : today.AddDays(-1);
 
             for (int i = 0; i <= _inventorySettings.LookAheadDays; i++)
             {
@@ -41,8 +55,13 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
 
                 if (!existingDatesSet.Contains(currentDate))
                 {
-                    var newInv = Domain.Entities.Inventory.Create(roomTypeId, currentDate, 1);
+                    var newInv = Domain.Entities.Inventory.Create(roomTypeId, currentDate, newTotalStock);
                     newInventories.Add(newInv);
+
+                    if (currentDate > maxGeneratedDate)
+                    {
+                        maxGeneratedDate = currentDate;
+                    }
                 }
             }
 
@@ -61,10 +80,14 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
                 );
             }
 
-            var config = await _unitOfWork.InventoryConfiguration.GetByRoomTypeIdAsync(roomTypeId, cancellationToken);
             if (config != null)
             {
-                config.UpdateDefaultStock(config.DefaultStock + 1);
+                config.UpdateDefaultStock(newTotalStock);
+                if (config.LastGeneratedDate == null ||
+                    maxGeneratedDate > DateOnly.FromDateTime(config.LastGeneratedDate.Value))
+                {
+                    config.UpdateLastGeneratedDate(maxGeneratedDate);
+                }
             }
             else
             {

@@ -10,13 +10,11 @@ namespace BookingService.Infrastructure.BackgroundJobs
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<DailyInventoryRolloutJob> _logger;
-        private readonly IInventorySettings _inventorySettings;
 
-        public DailyInventoryRolloutJob(IServiceScopeFactory scopeFactory, ILogger<DailyInventoryRolloutJob> logger, IInventorySettings inventorySettings)
+        public DailyInventoryRolloutJob(IServiceScopeFactory scopeFactory, ILogger<DailyInventoryRolloutJob> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
-            _inventorySettings = inventorySettings;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,8 +52,10 @@ namespace BookingService.Infrastructure.BackgroundJobs
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+            var inventorySettings = scope.ServiceProvider.GetRequiredService<IInventorySettings>();
+
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var maxTargetDate = today.AddDays(_inventorySettings.LookAheadDays); // Ngày thứ ... cần tạo
+            var maxTargetDate = today.AddDays(inventorySettings.LookAheadDays); // Ngày thứ ... cần tạo
 
             // 1. Lấy danh sách các RoomType ĐANG HOẠT ĐỘNG (IsActive = true)
             var activeConfigs = await dbContext.InventoryConfiguration

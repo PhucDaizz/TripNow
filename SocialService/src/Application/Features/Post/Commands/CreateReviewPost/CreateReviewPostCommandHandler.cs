@@ -11,7 +11,6 @@ namespace SocialService.Application.Features.Post.Commands.CreateReviewPost
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
-        private readonly IImageProcessor _imageProcessor;
         private readonly IBookingService _bookingService;
 
 
@@ -19,13 +18,11 @@ namespace SocialService.Application.Features.Post.Commands.CreateReviewPost
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICloudinaryService cloudinaryService,
-            IImageProcessor imageProcessor,
             IBookingService bookingService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
-            _imageProcessor = imageProcessor;
             _bookingService = bookingService;
         }
 
@@ -57,22 +54,13 @@ namespace SocialService.Application.Features.Post.Commands.CreateReviewPost
                         var file = request.Images[i];
                         if (file.Length > 0)
                         {
-                            var fileName = $"review_{post.Id}_{Guid.NewGuid()}";
+                            var originalExtension = Path.GetExtension(file.FileName) ?? ".jpg";
+                            var fileName = $"review_{post.Id}_{Guid.NewGuid()}{originalExtension}";
 
                             if (file.Content.CanSeek) file.Content.Position = 0;
 
-                            var processedStream = await _imageProcessor.ResizeAsync(
-                                imageStream: file.Content,
-                                width: 1920,
-                                height: 1080,
-                                format: "webp",
-                                quality: 80,
-                                mode: ImageResizeMode.Max,
-                                cancellationToken: cancellationToken
-                            );
-
                             var uploadResult = await _cloudinaryService.UploadAsync(
-                                processedStream,
+                                file.Content,
                                 fileName,
                                 folder: "social_reviews",
                                 cancellationToken: cancellationToken
@@ -99,7 +87,10 @@ namespace SocialService.Application.Features.Post.Commands.CreateReviewPost
             }
             catch (Exception ex)
             {
-                return Result.Failure<Guid>(new Error("ERROR", ex.Message));
+                var realError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+
+                // Trả về lỗi thật để Frontend/Postman hiển thị ra
+                return Result.Failure<Guid>(new Error("DB_ERROR", realError));
             }
         }
     }

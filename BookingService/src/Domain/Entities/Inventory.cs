@@ -11,7 +11,7 @@ namespace BookingService.Domain.Entities
         public int TotalStock { get; private set; }
         public int SoldStock { get; private set; }
         public int BlockedStock { get; private set; } // Phòng hỏng, sửa chữa
-        public byte[] RowVersion { get; private set; }
+        public int Version { get; private set; }
         public int AvailableStock => TotalStock - SoldStock - BlockedStock;
         private Inventory() { }
 
@@ -21,7 +21,6 @@ namespace BookingService.Domain.Entities
             Date = date;
             TotalStock = totalStock;
             SoldStock = 0;
-            RowVersion = new byte[8];
         }
 
         public static Inventory Create(Guid roomTypeId, DateOnly date, int totalStock)

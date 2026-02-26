@@ -29,8 +29,20 @@ namespace SocialService.Application.Features.Comment.Commands.CreateComment
 
             if (request.ParentCommentId.HasValue)
             {
-                var parentExists = await _unitOfWork.commentRepository.IsParentCommentExistingAsync(request.ParentCommentId.Value, cancellationToken);
-                if (!parentExists) return Result.Failure<Guid>(new Error("COMMENT.NOTFOUD", "The original comment does not exist."));
+                var parentComment = await _unitOfWork.commentRepository.GetByIdAsync(request.ParentCommentId.Value);
+
+                if (parentComment == null || parentComment.IsDeleted)
+                    return Result.Failure<Guid>(new Error("COMMENT.NOTFOUND", "The original comment does not exist."));
+
+                if (parentComment.PostId != request.PostId)
+                {
+                    return Result.Failure<Guid>(new Error("COMMENT.INVALID", "The reply does not belong to the requested post."));
+                }
+
+                if (parentComment.ParentCommentId.HasValue)
+                {
+                    request.ParentCommentId = parentComment.ParentCommentId; 
+                }
             }
 
             var comment = new Domain.Entities.Comment(request.PostId, userId, request.Content, request.ParentCommentId);

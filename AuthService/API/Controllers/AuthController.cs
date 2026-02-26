@@ -12,6 +12,7 @@ using Application.Features.User.Commands.RefreshToken;
 using Application.Features.User.Commands.Register;
 using Application.Features.User.Commands.RegisterHotelOwner;
 using Application.Features.User.Commands.ResetPasswordCommand;
+using Application.Features.User.Commands.SendEmailConfim;
 using Application.Features.User.Commands.UpdateInfor;
 using Application.Features.User.Commands.UploadAvatar;
 using Application.Features.User.Queries.GetInfoDetail;
@@ -181,7 +182,7 @@ namespace API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var result = await _mediator.Send(
-                new GetInfoDetailQuery
+                new SendEmailConfimCommand
                 {
                     UserId = userId
                 });
@@ -191,7 +192,7 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.ErrorResponse(result.Error.Code, new List<string> { result.Error.Message }));
             }
 
-            return Ok(ApiResponse<string>.SuccessResponse("Email has been sent"));
+            return Ok(ApiResponse<string>.SuccessResponse(result.Value.ToString()));
         }
 
         /// <summary>

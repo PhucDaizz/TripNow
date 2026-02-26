@@ -1,6 +1,7 @@
 ﻿using BookingService.Application.DTOs.RoomAssignment;
 using BookingService.Application.Features.RoomAssignment.Commands.CheckInRoom;
 using BookingService.Application.Features.RoomAssignment.Commands.CheckOutRoom;
+using BookingService.Application.Features.RoomAssignment.Queries.GetAssignedRooms;
 using BookingService.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,33 @@ namespace BookingService.API.Controllers
         public RoomAssignmentController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Lấy danh sách các phòng đã được gán (Assigned) cho một Booking
+        /// </summary>
+        /// <param name="bookingId">ID của đơn đặt phòng (BookingId)</param>
+        [HttpGet("{bookingId:guid}/assigned-rooms")]
+        public async Task<IActionResult> GetAssignedRooms(Guid bookingId, CancellationToken cancellationToken)
+        {
+            var query = new GetAssignedRoomsQuery
+            {
+                BookingId = bookingId
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+            }
+
+            if (result.Error.Code == "Booking.NotFound")
+            {
+                return NotFound(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
+            }
+
+            return NotFound(ApiResponse<object>.ErrorResponse(result.Error.ToString()));
         }
 
         /// <summary>

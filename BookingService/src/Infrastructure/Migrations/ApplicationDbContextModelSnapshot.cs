@@ -51,7 +51,6 @@ namespace BookingService.Infrastructure.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<decimal?>("DiscountAmount")
-                        .IsRequired()
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("HotelId")
@@ -296,10 +295,6 @@ namespace BookingService.Infrastructure.Migrations
                     b.Property<Guid>("RoomTypeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
                     b.Property<int>("SoldStock")
                         .HasColumnType("int");
 
@@ -312,6 +307,9 @@ namespace BookingService.Infrastructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(450)
                         .HasColumnType("varchar(450)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

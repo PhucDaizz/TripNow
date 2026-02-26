@@ -2,6 +2,7 @@
 {
     public class OwnerBankAccountDto
     {
+        public Guid Id { get; set; }
         public Guid OwnerId { get; set; }
         public string BankName { get; set; }      // VCB, TCB...
         public string BankAccountNumber { get; set; }

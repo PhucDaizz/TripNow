@@ -33,7 +33,7 @@ namespace SocialService.API.Controllers
         /// - Chỉ người dùng sử dụng được
         /// </remarks>
         [HttpPost("user")]
-        [Authorize($"{AppRoles.Customer}")]
+        [Authorize(Roles = $"{AppRoles.Customer}")]
         public async Task<IActionResult> FollowUser([FromBody] FollowUserCommand command)
         {
             var result = await _mediator.Send(command);
@@ -51,7 +51,7 @@ namespace SocialService.API.Controllers
         /// - Chỉ người dùng sử dụng được
         /// </remarks>
         [HttpPost("hotel")]
-        [Authorize($"{AppRoles.Customer}")]
+        [Authorize(Roles = $"{AppRoles.Customer}")]
         public async Task<IActionResult> FollowHotel([FromBody] FollowHotelCommand command)
         {
             var result = await _mediator.Send(command);

@@ -27,7 +27,7 @@ namespace SocialService.Application.Features.Locations.Commands.DeleteLocation
                 return Result.Failure<bool>(new Error("LOCATION.NOTFOUND","Location not existing"));
             }
 
-            if (location.CreatedByUserId != currentUserId || role != AppRoles.SysAdmin)
+            if (location.CreatedByUserId != currentUserId && role != AppRoles.SysAdmin)
                 return Result.Failure<bool>(new Error("NOT.PERMIT","You are not permit"));
 
             await _unitOfWork.locationRepository.DeleteAsync(location, cancellationToken);

@@ -47,7 +47,7 @@ namespace SocialService.Application.Features.SavedPost.Queries.GetSavedPosts
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
-            var pagedResponse = new PagedResult<SavedPostDto>(items, request.PageIndex, request.PageSize, totalCount);
+            var pagedResponse = new PagedResult<SavedPostDto>(items, totalCount, request.PageIndex, request.PageSize);
 
             return Result<PagedResult<SavedPostDto>>.Success(pagedResponse);
         }

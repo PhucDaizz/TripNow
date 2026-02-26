@@ -33,7 +33,7 @@ namespace BookingService.API.Controllers
         /// Tạo mới đơn đặt phòng
         /// </summary>
         /// <remarks>
-        /// Tất cả role được gọi
+        /// Tất cả role được gọi - tốt nhất nên dùng role khách hàng 
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = $"{AppRoles.Customer}, {AppRoles.Receptionist}, {AppRoles.HotelOwner}, {AppRoles.SysAdmin}")]

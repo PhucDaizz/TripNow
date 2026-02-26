@@ -12,11 +12,13 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public GetBookingsQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        public GetBookingsQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService, IHotelAuthorizationService hotelAuthService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result<PagedResult<BookingSummaryDto>>> Handle(GetBookingsQuery request, CancellationToken cancellationToken)
@@ -36,6 +38,20 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
                     break;
 
                 case AppRoles.HotelOwner:
+                    Guid? targetHotelId = _currentUserService.HotelId ?? request.HotelId;
+                    if (targetHotelId == null)
+                    {
+                        return Result.Failure<PagedResult<BookingSummaryDto>>(
+                            new Error("Auth.NoHotel", "Please provide the HotelId to view the booking list."));
+                    }
+                    bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(targetHotelId.Value, cancellationToken);
+                    if (!hasAccess)
+                    {
+                        return Result.Failure<PagedResult<BookingSummaryDto>>(
+                            new Error("Auth.Forbidden", "You do not have permission to access this hotel's order data."));
+                    }
+                    query = query.Where(b => b.HotelId == targetHotelId.Value);
+                    break;
                 case AppRoles.Receptionist:
                     var staffHotelId = _currentUserService.HotelId;
                     if (staffHotelId == null)
@@ -77,6 +93,16 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
             if (request.ToDate.HasValue)
             {
                 query = query.Where(b => b.CheckInDate <= request.ToDate.Value);
+            }
+            
+            if (request.FromCheckOutDate.HasValue)
+            {
+                query = query.Where(b => b.CheckOutDate >= request.FromCheckOutDate.Value);
+            }
+
+            if (request.ToCheckOutDate.HasValue)
+            {
+                query = query.Where(b => b.CheckOutDate <= request.ToCheckOutDate.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(request.CustomerEmail))

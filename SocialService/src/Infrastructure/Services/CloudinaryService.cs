@@ -44,6 +44,7 @@ namespace SocialService.Infrastructure.Services
             Dictionary<string, string> tags = null,
             CancellationToken cancellationToken = default)
         {
+            Stream processedStream = null;
             try
             {
                 // Validate file stream
@@ -62,7 +63,6 @@ namespace SocialService.Infrastructure.Services
                 int targetHeight = height ?? 1080;
 
                 // Process image if processor is available (resize, compress, convert to webp)
-                Stream processedStream = fileStream;
                 if (_imageProcessor != null)
                 {
                     try
@@ -82,7 +82,12 @@ namespace SocialService.Infrastructure.Services
                     {
                         _logger.LogWarning(ex, "Image processing failed, uploading original");
                         fileStream.Position = 0;
+                        processedStream = fileStream;
                     }
+                }
+                else
+                {
+                    processedStream = fileStream;
                 }
 
                 var transformation = new Transformation()
@@ -121,7 +126,10 @@ namespace SocialService.Infrastructure.Services
             }
             finally
             {
-                fileStream?.Dispose();
+                if (processedStream != null && processedStream != fileStream)
+                {
+                    processedStream.Dispose();
+                }
             }
         }
 

@@ -45,6 +45,7 @@ namespace PaymentService.Application.Features.OwnerBankAccount.Queries.GetOwnerB
 
             var ownerBankAccountDtos = ownerBankAccounts.Select(oba => new OwnerBankAccountDto
             {
+                Id = oba.Id,
                 OwnerId = oba.OwnerId,
                 BankName = oba.BankName,
                 BankAccountNumber = oba.BankAccountNumber,

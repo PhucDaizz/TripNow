@@ -39,6 +39,8 @@ namespace SocialService.Infrastructure.Data.Configurations
 
             builder.Property(x => x.IsDeleted).HasDefaultValue(false);
 
+            builder.Property(x => x.HotelId)
+                   .IsRequired(false);
 
             var navigation = builder.Metadata.FindNavigation(nameof(Post.Images));
             if (navigation != null)

@@ -23,6 +23,13 @@ namespace HotelCatalogService.Application.Features.Floor.Commands.DeleteFloor
             var block = hotel.Blocks.FirstOrDefault(b => b.Id == request.BlockId);
             if (block == null) return Result.Failure(new Error("Block.NotFound", "Block not found"));
 
+            bool hasRooms = await _unitOfWork.Hotel.HasRoomsInFloorAsync(request.FloorId, token);
+
+            if (hasRooms)
+            {
+                return Result.Failure(new Error("Floor.HasRooms", "Không thể xoá tầng này vì vẫn còn phòng bên trong. Vui lòng xoá hoặc chuyển các phòng sang tầng khác trước."));
+            }
+
             try
             {
                 block.RemoveFloor(request.FloorId);

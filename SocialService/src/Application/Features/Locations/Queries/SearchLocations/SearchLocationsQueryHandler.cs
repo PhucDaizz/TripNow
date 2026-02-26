@@ -52,7 +52,7 @@ namespace SocialService.Application.Features.Locations.Queries.SearchLocations
                                 .ToListAsync(cancellationToken);
 
             return Result<PagedResult<LocationDto>>.Success(
-                new PagedResult<LocationDto>(items, request.PageIndex, request.PageSize, totalCount));
+                new PagedResult<LocationDto>(items, totalCount, request.PageIndex, request.PageSize));
         }
     }
 }

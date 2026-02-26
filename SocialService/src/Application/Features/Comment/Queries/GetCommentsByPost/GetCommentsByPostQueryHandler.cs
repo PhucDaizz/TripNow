@@ -43,7 +43,11 @@ namespace SocialService.Application.Features.Comment.Queries.GetCommentsByPost
                                   Content = c.Content,
                                   ParentCommentId = c.ParentCommentId,
                                   CreatedAt = c.CreatedAt,
-                                  UpdatedAt = c.UpdatedAt
+                                  UpdatedAt = c.UpdatedAt,
+                                  ReplyCount = _context.Comments.Count(reply =>
+                                      reply.ParentCommentId == c.Id &&
+                                      !reply.IsDeleted &&
+                                      !reply.IsHidden)
                               };
 
             var totalCount = await resultQuery.CountAsync(cancellationToken);
@@ -53,7 +57,7 @@ namespace SocialService.Application.Features.Comment.Queries.GetCommentsByPost
                 .ToListAsync(cancellationToken);
 
             return Result<PagedResult<CommentDto>>.Success(
-                new PagedResult<CommentDto>(items, request.PageIndex, request.PageSize, totalCount));
+                new PagedResult<CommentDto>(items, totalCount, request.PageIndex, request.PageSize));
         }
     }
 }

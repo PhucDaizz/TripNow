@@ -106,6 +106,14 @@ namespace HotelCatalogService.API.Controllers
         /// </summary>
         /// <remarks>
         /// Dòng trong trường hợp các ngày lễ
+        /// Ngày đặc biệt nếu để trống thì là full cả ngày
+        /// Sunday = 0
+        /// Monday = 1
+        /// Tuesday = 2
+        /// Wednesday = 3
+        /// Thursday = 4
+        /// Friday = 5
+        /// Saturday = 6
         /// </remarks>
         [HttpPost("bulk")]
         [Authorize(Roles = $"{AppRoles.HotelOwner}")]

@@ -22,12 +22,17 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByHotel
             var baseQuery = _context.Posts.AsNoTracking()
                 .Where(p => p.HotelId == request.HotelId && !p.IsDeleted);
 
+            if (request.Type.HasValue)
+            {
+                baseQuery = baseQuery.Where(p => p.Type == request.Type.Value);
+            }
+
             var totalCount = await baseQuery.CountAsync(cancellationToken);
 
             if (totalCount == 0)
             {
                 return Result<PagedResult<PostDto>>.Success(
-                    new PagedResult<PostDto>(new List<PostDto>(), request.PageIndex, request.PageSize, 0));
+                    new PagedResult<PostDto>(new List<PostDto>(), totalCount, request.PageIndex, request.PageSize));
             }
 
             var query = from p in baseQuery
@@ -74,7 +79,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByHotel
                 .ToListAsync(cancellationToken);
 
             return Result<PagedResult<PostDto>>.Success(
-                new PagedResult<PostDto>(items, request.PageIndex, request.PageSize, totalCount));
+                new PagedResult<PostDto>(items, totalCount, request.PageIndex, request.PageSize));
         }
     }
 }

@@ -5,6 +5,8 @@ using BookingService.API.StartUp;
 using BookingService.Application;
 using BookingService.Application.Contracts;
 using BookingService.Infrastructure;
+using BookingService.Infrastructure.BackgroundJobs;
+using BookingService.Infrastructure.BackgroundJobs.Consumer.Booking;
 using BookingService.Infrastructure.BackgroundJobs.Consumer.Inventory;
 using BookingService.Infrastructure.Services;
 using BookingService.Infrastructure.Settings;
@@ -54,6 +56,9 @@ namespace BookingService.API
             builder.Services.AddApplication();
 
             builder.Services.AddHostedService<InventoryEventsConsumer>();
+            builder.Services.AddHostedService<BookingEventsConsumer>();
+            builder.Services.AddHostedService<BookingCleanupWorker>();
+            builder.Services.AddHostedService<DailyInventoryRolloutJob>();
 
             builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
                 (sp, client) =>

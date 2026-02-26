@@ -7,7 +7,7 @@ namespace SocialService.Application.Features.Post.Commands.CreateReviewPost
 {
     public class CreateReviewPostCommand : IRequest<Result<Guid>>
     {
-        public Guid HotelId { get; set; }
+        public Guid? HotelId { get; set; }
         public string Content { get; set; }
 
         public TargetTypeReview TargetType { get; set; }

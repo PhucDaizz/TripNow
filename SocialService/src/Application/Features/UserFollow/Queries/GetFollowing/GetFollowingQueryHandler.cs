@@ -88,7 +88,7 @@ namespace SocialService.Application.Features.UserFollow.Queries.GetFollowing
             }).ToList();
 
             return Result<PagedResult<FollowItemDto>>.Success(
-                new PagedResult<FollowItemDto>(resultItems, request.PageIndex, request.PageSize, totalCount));
+                new PagedResult<FollowItemDto>(resultItems, totalCount, request.PageIndex, request.PageSize));
         }
     }
 }

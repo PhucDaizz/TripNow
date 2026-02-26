@@ -15,17 +15,30 @@ namespace BookingService.Application.Features.RoomAssignment.Commands.CheckInRoo
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CheckInRoomCommandHandler> _logger;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public CheckInRoomCommandHandler(IHotelCatalogService hotelCatalogService, ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ILogger<CheckInRoomCommandHandler> logger)
+        public CheckInRoomCommandHandler(
+            IHotelCatalogService hotelCatalogService, 
+            ICurrentUserService currentUserService, 
+            IUnitOfWork unitOfWork, 
+            ILogger<CheckInRoomCommandHandler> logger,
+            IHotelAuthorizationService hotelAuthService)
         {
             _hotelCatalogService = hotelCatalogService;
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result> Handle(CheckInRoomCommand request, CancellationToken cancellationToken)
         {
+            bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(request.HotelId, cancellationToken);
+            if (!hasAccess)
+            {
+                return Result.Failure(new Error("Auth.Forbidden", "You do not have permission to perform check-in for this hotel."));
+            }
+
             var checkInBy = Guid.Parse(_currentUserService.UserId);
 
             var roomInfo = await _hotelCatalogService.CheckInRoom(request.HotelId, request.RoomId, checkInBy, cancellationToken);
