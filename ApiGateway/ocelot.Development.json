@@ -32,7 +32,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "hotel"
         },
@@ -55,7 +56,7 @@
             "SwaggerKey": "hotel"
         },
         {
-            "DownstreamPathTemplate": "/api/CancellationPolicies/{everything}",
+            "DownstreamPathTemplate": "/api/cancellation-policies/{everything}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -63,7 +64,7 @@
                     "Port": 7002
                 }
             ],
-            "UpstreamPathTemplate": "/api/CancellationPolicies/{everything}",
+            "UpstreamPathTemplate": "/api/cancellation-policies/{everything}",
             "UpstreamHttpMethod": [
                 "GET",
                 "POST",
@@ -155,10 +156,11 @@
             ],
             "UpstreamPathTemplate": "/api/HotelPromotions/{everything}",
             "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE",
+              "PATCH"
             ],
             "SwaggerKey": "hotel"
         },
@@ -297,7 +299,7 @@
                     "Port": 7003
                 }
             ],
-            "UpstreamPathTemplate": "/api/room-assignments/{everything}",
+            "UpstreamPathTemplate": "/api/Room-assignments/{everything}",
             "UpstreamHttpMethod": [
                 "GET",
                 "POST",
@@ -353,7 +355,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "payment"
         },
@@ -407,7 +410,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "payment"
         },
@@ -461,7 +465,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "social"
         },
@@ -479,7 +484,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "social"
         },
@@ -497,7 +503,8 @@
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "PATCH"
             ],
             "SwaggerKey": "social"
         },
@@ -563,7 +570,7 @@
                 {
                     "Name": "Auth API",
                     "Version": "v1",
-                    "Url": "https://localhost:7001/swagger/v1/swagger.json"
+                    "Url": "http://localhost:7001/swagger/v1/swagger.json"
                 }
             ]
         },
@@ -573,7 +580,7 @@
                 {
                     "Name": "HotelCatalog API",
                     "Version": "v1",
-                    "Url": "https://localhost:7002/swagger/v1/swagger.json"
+                    "Url": "http://localhost:7002/swagger/v1/swagger.json"
                 }
             ]
         },
@@ -583,7 +590,7 @@
                 {
                     "Name": "Booking API",
                     "Version": "v1",
-                    "Url": "https://localhost:7003/swagger/v1/swagger.json"
+                    "Url": "http://localhost:7003/swagger/v1/swagger.json"
                 }
             ]
         },
@@ -593,7 +600,7 @@
                 {
                     "Name": "Payment API",
                     "Version": "v1",
-                    "Url": "https://localhost:7004/swagger/v1/swagger.json"
+                    "Url": "http://localhost:7004/swagger/v1/swagger.json"
                 }
             ]
         },
@@ -603,12 +610,12 @@
                 {
                     "Name": "Social API",
                     "Version": "v1",
-                    "Url": "https://localhost:7005/swagger/v1/swagger.json"
+                    "Url": "http://localhost:7005/swagger/v1/swagger.json"
                 }
             ]
         }
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "http://localhost:5000"
+        "BaseUrl": "http://localhost:7000"
     }
 }
