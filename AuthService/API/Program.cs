@@ -11,6 +11,7 @@ using Infrastructure.BackgroundJobs.Consumer.User;
 using Infrastructure.Persistence.SeedData;
 using Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Nexus.BuildingBlocks.Extensions;
 using System.Diagnostics;
@@ -47,6 +48,16 @@ namespace API
             builder.Services.Configure<FrontendSettings>(
                 builder.Configuration.GetSection(FrontendSettings.SectionName)
             );
+
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                           ForwardedHeaders.XForwardedProto |
+                                           ForwardedHeaders.XForwardedHost;
+
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
 
             builder.AddDependencies();
 
@@ -99,13 +110,24 @@ namespace API
                 }
             }
             app.UseExceptionHandler();
-
+            app.UseForwardedHeaders();
             app.UseSwaggerConfiguration();
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
+
+            app.Use((context, next) =>
+            {
+                context.Request.Scheme = "http";
+                // Đổi thành "localhost" và "7000" (Cổng của Ocelot)
+                // Lưu ý: Đang test local thì để localhost:7000. 
+                // Mốt deploy lên server thật thì đổi chỗ này thành Domain của server nhé!
+                context.Request.Host = new HostString("localhost", 7000); 
+                return next();
+            });
 
             app.MapHealthChecks("/health"); 
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

@@ -1,568 +1,583 @@
 {
-    "Routes": [
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/signin-google",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
         {
-            "DownstreamPathTemplate": "/api/Auth/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "auth_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Auth/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "auth"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Hotel/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Hotel/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Amenity/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Amenity/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/cancellation-policies/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/cancellation-policies/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelAmenity/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelAmenity/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelBlocks/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelBlocks/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelFloors/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelFloors/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelImages/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelImages/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelPromotions/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelPromotions/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelRooms/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelRooms/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/HotelRoomTypes/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/HotelRoomTypes/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Housekeeping/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Housekeeping/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/RoomPrices/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/RoomPrices/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/RoomTypeImages/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "hotel_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/RoomTypeImages/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "hotel"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Booking/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "booking_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Booking/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "booking"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Inventory/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "booking_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Inventory/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "booking"
-        },
-        {
-            "DownstreamPathTemplate": "/api/room-assignments/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "booking_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Room-assignments/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "booking"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Statistics/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "booking_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Statistics/{everything}",
-            "UpstreamHttpMethod": [
-                "GET"
-            ],
-            "SwaggerKey": "booking"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Escrow/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Escrow/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/OwnerBankAccount/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/OwnerBankAccount/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Payment/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Payment/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Payout/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Payout/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Refund/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Refund/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/SettlementPeriod/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/SettlementPeriod/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Wallet/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "payment_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Wallet/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "payment"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Comment/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Comment/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "social"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Location/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Location/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "social"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Post/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/Post/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-            ],
-            "SwaggerKey": "social"
-        },
-        {
-            "DownstreamPathTemplate": "/api/PostLike/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/PostLike/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "social"
-        },
-        {
-            "DownstreamPathTemplate": "/api/SavedPost/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/SavedPost/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "social"
-        },
-        {
-            "DownstreamPathTemplate": "/api/UserFollow/{everything}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "social_service",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/api/UserFollow/{everything}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE"
-            ],
-            "SwaggerKey": "social"
+          "Host": "auth_service",
+          "Port": 8080
         }
-    ],
+      ],
+      "UpstreamPathTemplate": "/signin-google",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Auth/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "auth"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Hotel/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Hotel/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Amenity/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Amenity/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/cancellation-policies/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cancellation-policies/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelAmenity/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelAmenity/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelBlocks/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelBlocks/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelFloors/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelFloors/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelImages/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelImages/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelPromotions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelPromotions/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelRooms/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelRooms/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/HotelRoomTypes/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/HotelRoomTypes/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Housekeeping/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Housekeeping/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/RoomPrices/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/RoomPrices/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/RoomTypeImages/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "hotel_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/RoomTypeImages/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "hotel"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Booking/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Booking/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "booking"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Inventory/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Inventory/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "booking"
+    },
+    {
+      "DownstreamPathTemplate": "/api/room-assignments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Room-assignments/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "booking"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Statistics/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Statistics/{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "SwaggerKey": "booking"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Escrow/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Escrow/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/OwnerBankAccount/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/OwnerBankAccount/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Payment/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Payment/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Payout/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Payout/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Refund/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Refund/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/SettlementPeriod/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/SettlementPeriod/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Wallet/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "payment_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Wallet/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Comment/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Comment/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "social"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Location/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Location/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "social"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Post/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Post/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "SwaggerKey": "social"
+    },
+    {
+      "DownstreamPathTemplate": "/api/PostLike/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/PostLike/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "social"
+    },
+    {
+      "DownstreamPathTemplate": "/api/SavedPost/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/SavedPost/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "social"
+    },
+    {
+      "DownstreamPathTemplate": "/api/UserFollow/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "social_service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/UserFollow/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "SwaggerKey": "social"
+    }
+  ],
     "SwaggerEndPoints": [
         {
             "Key": "auth",

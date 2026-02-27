@@ -164,14 +164,14 @@ namespace CarbonTC.API.Extensions
                         }
                     }
                 };
-            }) 
+            })
             .AddGoogle("Google", options =>
             {
                 options.ClientId = configuration["Google:ClientId"] ?? throw new InvalidOperationException("Google ClientId not configured");
                 options.ClientSecret = configuration["Google:ClientSecret"] ?? throw new InvalidOperationException("Google ClientSecret not configured");
+
                 options.CallbackPath = "/signin-google";
                 options.SaveTokens = true;
-
 
                 options.Scope.Add("profile");
                 options.Scope.Add("email");
@@ -184,76 +184,16 @@ namespace CarbonTC.API.Extensions
 
                 options.Events = new OAuthEvents
                 {
-                    OnCreatingTicket = async context =>
-                    {
-                        
-                        var externalAuthService = context.HttpContext.RequestServices
-                               .GetRequiredService<IExternalAuthService>();
-                        
-
-                        var email = context.Principal?.FindFirstValue(ClaimTypes.Email);
-                        var givenName = context.Principal?.FindFirstValue(ClaimTypes.GivenName);
-                        var surname = context.Principal?.FindFirstValue(ClaimTypes.Surname);
-                        var providerKey = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
-                        var picture = context.Principal?.FindFirstValue("picture");
-
-                        if (string.IsNullOrEmpty(email))
-                        {
-                            context.Fail("Không tìm thấy Email từ Google.");
-                            return;
-                        }
-                        
-                        var authResult = await externalAuthService.AuthenticateAsync(new ExternalAuthCommand
-                        { 
-                            Email = email, 
-                            Provider = "Google", 
-                            ProviderKey = providerKey,
-                            FirstName = givenName,
-                            LastName = surname,
-                            AvatarUrl = picture
-                        });
-
-                        if (!authResult.IsSuccess)
-                        {
-                            context.Fail($"Authentication failed: {authResult.ErrorMessage}");
-                            return;
-                        }
-
-                        var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.NameIdentifier, authResult.UserId),
-                            new Claim(ClaimTypes.Email, email),
-                            new Claim("AccessToken", authResult.AccessToken),
-                            new Claim("RefreshToken", authResult.RefreshToken ?? string.Empty),
-                            new Claim("Provider", "Google")
-                        };
-
-                        if (!string.IsNullOrEmpty(authResult.FullName))
-                        {
-                            claims.Add(new Claim(ClaimTypes.Name, authResult.FullName));
-                        }
-
-                        var appIdentity = new ClaimsIdentity(claims,
-                            CookieAuthenticationDefaults.AuthenticationScheme);
-
-                        context.Principal.AddIdentity(appIdentity);
-
-                        var frontendUrl = configuration["Frontend:Url"] ?? "http://localhost:5173";
-                        var redirectUrl = $"{frontendUrl}/oauth-callback?token={Uri.EscapeDataString(authResult.AccessToken)}";
-
-                        context.Properties.RedirectUri = redirectUrl;
-                    },
                     OnRemoteFailure = context =>
                     {
-                        var logger = context.HttpContext.RequestServices
-                            .GetRequiredService<ILogger<Program>>();
-
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                         logger.LogError(context.Failure, "Google OAuth failed");
 
-                        var frontendUrl = configuration["Frontend:Url"] ?? "http://localhost:5173";
+                        var frontendUrl = configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
                         var errorMessage = Uri.EscapeDataString(context.Failure?.Message ?? "Google authentication failed");
 
-                        context.Response.Redirect($"{frontendUrl}/login?error={errorMessage}&provider=google");
+                        context.Response.Redirect($"{frontendUrl}/login-failed?error={errorMessage}");
+                        context.HandleResponse();
 
                         return Task.CompletedTask;
                     }

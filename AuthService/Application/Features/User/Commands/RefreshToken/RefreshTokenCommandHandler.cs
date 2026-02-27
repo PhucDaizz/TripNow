@@ -27,7 +27,7 @@ namespace Application.Features.User.Commands.RefreshToken
 
             if (string.IsNullOrEmpty(email))
             {
-                return Result.Failure<LoginResponseDto>(new Error("Invalid token", "Email is empty"));
+                return Result.Failure<LoginResponseDto>(new Error("Invalid token", "The refresh token is invalid or has expired."));
             }
 
             var user = await _identityService.GetUserByEmailAndValidateRefreshTokenAsync(email, request.RefreshToken);

@@ -6,6 +6,7 @@ using Application.Features.StaffProfile.Commands.DeleteStaffProfile;
 using Application.Features.StaffProfile.Commands.UpdateStaffProfile;
 using Application.Features.StaffProfile.Queries.GetStaffProfile;
 using Application.Features.User.Commands.ConfirmEmail;
+using Application.Features.User.Commands.ExternalLogin;
 using Application.Features.User.Commands.ForgotPassword;
 using Application.Features.User.Commands.Login;
 using Application.Features.User.Commands.RefreshToken;
@@ -21,6 +22,7 @@ using Application.Features.User.Queries.IsUserExisting;
 using Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
@@ -34,11 +36,13 @@ namespace API.Controllers
     {
         private readonly IMediator _mediator;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IMediator mediator, ICurrentUserService currentUserService)
+        public AuthController(IMediator mediator, ICurrentUserService currentUserService, IConfiguration configuration)
         {
             _mediator = mediator;
             _currentUserService = currentUserService;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -227,20 +231,73 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Đăng nhập google cho người dùng
+        /// Bước 1: Gọi lên Google để xin quyền
         /// </summary>
-        /// <remarks>
-        /// Lưu ý: người dùng có thê không cần đăng ký thường ở trước đó vẫn dùng được 
-        /// </remarks>
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {
             var properties = new AuthenticationProperties
             {
-                RedirectUri = "/"
+                // Bảo Google sau khi xong thì quay về hàm Callback bên dưới
+                RedirectUri = Url.Action(nameof(GoogleSignInCallbackHandler))
             };
 
             return Challenge(properties, "Google");
+        }
+
+        /// <summary>
+        /// Bước 2: Hứng data từ Google, tạo Token hệ thống và đá về Frontend
+        /// </summary>
+        [HttpGet("google-callback-handler")]
+        public async Task<IActionResult> GoogleSignInCallbackHandler()
+        {
+            var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+
+            try
+            {
+                var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                if (!authenticateResult.Succeeded)
+                {
+                    return Redirect($"{frontendUrl}/login-failed?error=Google_Authentication_Failed");
+                }
+
+                var principal = authenticateResult.Principal;
+                var email = principal.FindFirstValue(ClaimTypes.Email);
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Redirect($"{frontendUrl}/login-failed?error=Email_Not_Found");
+                }
+
+                var command = new ExternalLoginCommand
+                {
+                    Email = email,
+                    Provider = "Google",
+                    ProviderKey = principal.FindFirstValue(ClaimTypes.NameIdentifier),
+                    FirstName = principal.FindFirstValue(ClaimTypes.GivenName),
+                    LastName = principal.FindFirstValue(ClaimTypes.Surname),
+                    AvatarUrl = principal.FindFirstValue("picture")
+                };
+
+                var result = await _mediator.Send(command);
+
+                if (result.IsFailure)
+                {
+                    return Redirect($"{frontendUrl}/login-failed?error={Uri.EscapeDataString(result.Error.Message)}");
+                }
+
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var loginData = result.Value;
+                return Redirect($"{frontendUrl}/oauth-callback?" +
+                    $"token={Uri.EscapeDataString(loginData.Token)}" +
+                    $"&refreshToken={Uri.EscapeDataString(loginData.RefreshToken ?? "")}");
+            }
+            catch (Exception ex)
+            {
+                return Redirect($"{frontendUrl}/login-failed?error={Uri.EscapeDataString(ex.Message)}");
+            }
         }
 
         /// <summary>

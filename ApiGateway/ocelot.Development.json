@@ -1,6 +1,21 @@
 {
     "Routes": [
         {
+            "DownstreamPathTemplate": "/signin-google",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7001 
+                }
+            ],
+            "UpstreamPathTemplate": "/signin-google",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST"
+            ]
+        },
+        {
             "DownstreamPathTemplate": "/api/Auth/{everything}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
