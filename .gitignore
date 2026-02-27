@@ -8,6 +8,11 @@
 .env
 .env.*
 
+.env.auth
+.env.hotel
+.env.booking
+.env.payment
+.env.social
 
 # User-specific files
 *.rsuser

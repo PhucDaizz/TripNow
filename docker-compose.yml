@@ -53,7 +53,7 @@ services:
     ports:
       - "7001:8080"
     env_file:
-      - ./AuthService/Config/.env
+      - .env.auth
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Overrides for Docker Network
@@ -62,6 +62,11 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
+      - Jwt__Issuer=http://localhost:7001
+      - Jwt__Audience=http://localhost:7001
+      - Frontend__BaseUrl=http://localhost:5173
+      - Frontend__ResetPasswordUrl=http://localhost:5173/reset-password
+      - FrontendUrl=http://localhost:5173
     networks:
       - travelnow-network
 
@@ -79,7 +84,7 @@ services:
     ports:
       - "7002:8080"
     env_file:
-      - ./HotelCatalogService/src/Config/.env
+      - .env.hotel
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Overrides for Docker Network
@@ -88,6 +93,10 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
+      - Jwt__Issuer=http://localhost:7001
+      - Jwt__Audience=http://localhost:7001
+      - ServiceUrls__Auth=http://auth_service:8080
+      - ServiceUrls__Booking=http://booking_service:8080
     networks:
       - travelnow-network
 
@@ -104,6 +113,8 @@ services:
         condition: service_healthy
     ports:
       - "7003:8080"
+    env_file:
+      - .env.booking
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Overrides for Docker Network
@@ -112,6 +123,9 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
+      - RabbitMQ__VirtualHost=/
+      - Jwt__Issuer=http://localhost:7001
+      - Jwt__Audience=http://localhost:7001
       - ServiceUrls__HotelCatalog=http://hotel_service:8080
       - ServiceUrls__Payment=http://payment_service:8080
     networks:
@@ -130,6 +144,8 @@ services:
         condition: service_healthy
     ports:
       - "7004:8080"
+    env_file:
+      - .env.payment
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Overrides for Docker Network
@@ -138,6 +154,9 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
+      - RabbitMQ__VirtualHost=/
+      - Jwt__Issuer=http://localhost:7001
+      - Jwt__Audience=http://localhost:7001
       - ServiceUrls__HotelCatalog=http://hotel_service:8080
     networks:
       - travelnow-network
@@ -155,6 +174,8 @@ services:
         condition: service_healthy
     ports:
       - "7005:8080"
+    env_file:
+      - .env.social
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Overrides for Docker Network
@@ -163,6 +184,9 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=ADMIN
       - RabbitMQ__Password=ADMIN
+      - RabbitMQ__VirtualHost=/
+      - Jwt__Issuer=http://localhost:7001
+      - Jwt__Audience=http://localhost:7001
       - ServiceUrls__Auth=http://auth_service:8080
       - ServiceUrls__HotelCatalog=http://hotel_service:8080
       - ServiceUrls__Booking=http://booking_service:8080
