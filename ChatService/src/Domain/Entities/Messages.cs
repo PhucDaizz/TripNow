@@ -1,5 +1,6 @@
 ﻿using ChatService.Domain.Common;
 using ChatService.Domain.Enum;
+using ChatService.Domain.Exceptions;
 
 namespace ChatService.Domain.Entities
 {
@@ -26,6 +27,9 @@ namespace ChatService.Domain.Entities
 
         public static Messages CreateMessage(Guid conversationId, Guid senderId, SenderType senderType, string content, MessageType messageType)
         {
+            if(content == null) 
+                throw new DomainException("Không được để tin nhắn rỗng");
+
             return new Messages(conversationId, senderId, senderType, content, messageType);
         }
 

@@ -1,4 +1,5 @@
 ﻿using ChatService.Application.Common.Interfaces;
+using ChatService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ChatService.Infrastructure
@@ -7,11 +8,15 @@ namespace ChatService.Infrastructure
     {
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
+        public IConversationRepository Conversation { get;}
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context, IConversationRepository conversationRepository)
         {
             _context = context;
+            Conversation = conversationRepository;
         }
+
+
         public async Task BeginTransactionAsync()
         {
             _transaction = await _context.Database.BeginTransactionAsync();

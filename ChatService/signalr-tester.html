@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignalR Chat Tester — TripUp ChatService</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+  <style>
+    :root {
+      --bg0: #0d1117;
+      --bg1: #161b22;
+      --bg2: #1c2230;
+      --bg3: #21262d;
+      --bd: #30363d;
+      --bd2: #484f58;
+      --blue: #388bfd;
+      --blue2: #58a6ff;
+      --purple: #bc8cff;
+      --cyan: #39d353;
+      --orange: #f78166;
+      --txt: #e6edf3;
+      --txt2: #8b949e;
+      --txt3: #484f58;
+      --ok: #3fb950;
+      --err: #f85149;
+      --warn: #d29922;
+      --cb: #1a3a5e;
+      --rb: #2a1a4e;
+      --cc: #58a6ff;
+      --rc: #bc8cff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg0);
+      color: var(--txt);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    /* ── HEADER ── */
+    .hdr {
+      background: var(--bg1);
+      border-bottom: 1px solid var(--bd);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0
+    }
+
+    .hdr-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px
+    }
+
+    .hdr h1 {
+      font-size: 15px;
+      font-weight: 600
+    }
+
+    .hdr small {
+      color: var(--txt2);
+      font-size: 12px;
+      margin-left: 4px
+    }
+
+    .hdr-spacer {
+      flex: 1
+    }
+
+    .conn-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--txt3);
+      transition: .3s
+    }
+
+    .dot.ok {
+      background: var(--ok);
+      box-shadow: 0 0 6px var(--ok)
+    }
+
+    .dot.spin {
+      background: var(--warn);
+      animation: blink 1s infinite
+    }
+
+    .dot.err {
+      background: var(--err)
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    /* ── LAYOUT ── */
+    .body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 260px 1fr;
+      overflow: hidden
+    }
+
+    /* ── PANEL BASE ── */
+    .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .panel-hdr {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--bd);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--txt2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px
+    }
+
+    .panel-body::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .panel-body::-webkit-scrollbar-thumb {
+      background: var(--bd);
+      border-radius: 4px
+    }
+
+    /* ── CONFIG PANEL ── */
+    .cfg-panel {
+      background: var(--bg1);
+      border-right: 1px solid var(--bd)
+    }
+
+    .field {
+      margin-bottom: 10px
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--txt2);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      background: var(--bg0);
+      border: 1px solid var(--bd);
+      border-radius: 6px;
+      color: var(--txt);
+      font-family: inherit;
+      font-size: 12.5px;
+      padding: 7px 9px;
+      outline: none;
+      transition: border-color .2s
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--blue)
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 56px
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-bottom: 10px
+    }
+
+    .role-btn {
+      padding: 7px 6px;
+      border-radius: 6px;
+      border: 2px solid var(--bd);
+      background: transparent;
+      color: var(--txt2);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: .2s;
+      font-family: inherit
+    }
+
+    .role-btn .ri {
+      font-size: 18px
+    }
+
+    .role-btn.on[data-r="c"] {
+      border-color: var(--cc);
+      color: var(--cc);
+      background: rgba(88, 166, 255, .08)
+    }
+
+    .role-btn.on[data-r="r"] {
+      border-color: var(--rc);
+      color: var(--rc);
+      background: rgba(188, 140, 255, .08)
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s;
+      font-family: inherit
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: var(--blue2)
+    }
+
+    .btn-danger {
+      background: rgba(248, 81, 73, .12);
+      color: var(--err);
+      border: 1px solid rgba(248, 81, 73, .25)
+    }
+
+    .btn-danger:hover {
+      background: rgba(248, 81, 73, .22)
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--txt2);
+      border: 1px solid var(--bd)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 5px
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px
+    }
+
+    .btn-row .btn {
+      flex: 1
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--bd);
+      margin: 10px 0
+    }
+
+    /* ── ACTIONS SECTION ── */
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px
+    }
+
+    .action-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--bd);
+      background: var(--bg0);
+      cursor: pointer;
+      transition: .2s;
+      font-size: 12px;
+      color: var(--txt2)
+    }
+
+    .action-item:hover {
+      border-color: var(--blue);
+      color: var(--txt)
+    }
+
+    .action-item .ai {
+      font-size: 14px
+    }
+
+    .action-item.disabled {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    /* ── LOG ── */
+    .log-box {
+      background: var(--bg0);
+      border: 1px solid var(--bd);
+      border-radius: 6px;
+      padding: 7px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 10.5px;
+      height: 140px;
+      overflow-y: auto;
+      margin-top: 4px;
+      line-height: 1.5
+    }
+
+    .log-box::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .log-box::-webkit-scrollbar-thumb {
+      background: var(--bd2);
+      border-radius: 3px
+    }
+
+    .le {
+      padding: 1px 0
+    }
+
+    .le .ts {
+      color: var(--txt3);
+      margin-right: 5px
+    }
+
+    .le.info .m {
+      color: var(--txt2)
+    }
+
+    .le.ok .m {
+      color: var(--ok)
+    }
+
+    .le.err .m {
+      color: var(--err)
+    }
+
+    .le.warn .m {
+      color: var(--warn)
+    }
+
+    .le.recv .m {
+      color: var(--purple)
+    }
+
+    .le.send .m {
+      color: var(--cyan)
+    }
+
+    /* ── CONVERSATIONS PANEL ── */
+    .conv-panel {
+      background: var(--bg1);
+      border-right: 1px solid var(--bd)
+    }
+
+    .conv-panel .panel-hdr {
+      justify-content: space-between
+    }
+
+    .conv-search {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--bd);
+      flex-shrink: 0
+    }
+
+    .conv-search input {
+      background: var(--bg0);
+      font-size: 12px;
+      padding: 6px 8px
+    }
+
+    .conv-list {
+      flex: 1;
+      overflow-y: auto
+    }
+
+    .conv-list::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .conv-list::-webkit-scrollbar-thumb {
+      background: var(--bd);
+      border-radius: 4px
+    }
+
+    .conv-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--bd);
+      cursor: pointer;
+      transition: .15s;
+      position: relative
+    }
+
+    .conv-item:hover {
+      background: var(--bg2)
+    }
+
+    .conv-item.active {
+      background: var(--bg2);
+      border-left: 3px solid var(--blue)
+    }
+
+    .conv-item.active {
+      padding-left: 9px
+    }
+
+    .conv-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3px
+    }
+
+    .conv-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--txt);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px
+    }
+
+    .conv-time {
+      font-size: 10px;
+      color: var(--txt3);
+      flex-shrink: 0
+    }
+
+    .conv-last {
+      font-size: 11.5px;
+      color: var(--txt2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px
+    }
+
+    .conv-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 99px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 700
+    }
+
+    .conv-id-chip {
+      font-size: 9px;
+      color: var(--txt3);
+      font-family: monospace;
+      margin-top: 2px
+    }
+
+    .conv-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 32px 16px;
+      color: var(--txt3);
+      text-align: center;
+      font-size: 12px
+    }
+
+    .conv-empty .ei {
+      font-size: 32px
+    }
+
+    .conv-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--bd);
+      flex-shrink: 0
+    }
+
+    /* ── CHAT PANEL ── */
+    .chat-panel {
+      background: var(--bg0);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .chat-hdr {
+      padding: 10px 16px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--bd);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0
+    }
+
+    .chat-hdr-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .chat-hdr-info h2 {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .chat-hdr-info p {
+      font-size: 11px;
+      color: var(--txt2)
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 700
+    }
+
+    .badge-c {
+      background: rgba(88, 166, 255, .15);
+      color: var(--cc)
+    }
+
+    .badge-r {
+      background: rgba(188, 140, 255, .15);
+      color: var(--rc)
+    }
+
+    .msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .msgs::-webkit-scrollbar {
+      width: 5px
+    }
+
+    .msgs::-webkit-scrollbar-thumb {
+      background: var(--bd);
+      border-radius: 4px
+    }
+
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .msg-row.sent {
+      align-items: flex-end
+    }
+
+    .msg-row.recv {
+      align-items: flex-start
+    }
+
+    .msg-bubble {
+      max-width: 65%;
+      padding: 9px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+      animation: pop .15s ease
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(.95);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .msg-row.sent .msg-bubble {
+      background: linear-gradient(135deg, #1a4575, #1a3060);
+      border-bottom-right-radius: 3px;
+      border: 1px solid rgba(88, 166, 255, .18)
+    }
+
+    .msg-row.recv .msg-bubble {
+      background: var(--bg2);
+      border-bottom-left-radius: 3px;
+      border: 1px solid var(--bd)
+    }
+
+    .msg-meta {
+      font-size: 10px;
+      color: var(--txt3);
+      display: flex;
+      gap: 5px;
+      align-items: center
+    }
+
+    .meta-name {
+      font-weight: 600;
+      color: var(--txt2)
+    }
+
+    .meta-role {
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 9px
+    }
+
+    .mr-c {
+      background: rgba(88, 166, 255, .12);
+      color: var(--cc)
+    }
+
+    .mr-r {
+      background: rgba(188, 140, 255, .12);
+      color: var(--rc)
+    }
+
+    .read-tick {
+      color: var(--ok)
+    }
+
+    .typing-row {
+      padding: 0 16px 6px;
+      display: none
+    }
+
+    .typing-row.show {
+      display: flex
+    }
+
+    .typing-bubble {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 14px;
+      border-bottom-left-radius: 3px;
+      background: var(--bg2);
+      border: 1px solid var(--bd);
+      font-size: 11px;
+      color: var(--txt2)
+    }
+
+    .dots span {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--txt2);
+      margin: 0 1px;
+      animation: bounce 1.2s infinite
+    }
+
+    .dots span:nth-child(2) {
+      animation-delay: .2s
+    }
+
+    .dots span:nth-child(3) {
+      animation-delay: .4s
+    }
+
+    @keyframes bounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0)
+      }
+
+      30% {
+        transform: translateY(-5px)
+      }
+    }
+
+    .empty-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--txt3);
+      text-align: center
+    }
+
+    .empty-chat .ei {
+      font-size: 40px
+    }
+
+    .empty-chat p {
+      font-size: 12.5px;
+      line-height: 1.6
+    }
+
+    .chat-input-bar {
+      padding: 10px 12px;
+      background: var(--bg1);
+      border-top: 1px solid var(--bd);
+      display: flex;
+      gap: 7px;
+      align-items: flex-end;
+      flex-shrink: 0
+    }
+
+    .chat-input-bar textarea {
+      flex: 1;
+      resize: none;
+      min-height: 38px;
+      max-height: 90px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px
+    }
+
+    .send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--blue);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      transition: .2s;
+      flex-shrink: 0
+    }
+
+    .send-btn:hover {
+      background: var(--blue2);
+      transform: scale(1.05)
+    }
+
+    .send-btn:disabled {
+      opacity: .3;
+      transform: none;
+      cursor: not-allowed
+    }
+
+    /* ── TOAST ── */
+    #toasts {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 999
+    }
+
+    .toast {
+      background: var(--bg2);
+      border: 1px solid var(--bd);
+      border-left: 3px solid var(--purple);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      max-width: 300px;
+      animation: tin .25s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .4)
+    }
+
+    .toast .tt {
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--purple);
+      margin-bottom: 2px
+    }
+
+    @keyframes tin {
+      from {
+        opacity: 0;
+        transform: translateX(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      display: none
+    }
+
+    .modal-overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--bg1);
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      padding: 20px;
+      width: 380px;
+      max-width: 95vw
+    }
+
+    .modal h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px
+    }
+
+    .modal .field {
+      margin-bottom: 12px
+    }
+
+    .modal-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+      margin-top: 16px
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-logo">💬</div>
+    <h1>SignalR Chat Tester</h1>
+    <small>TripUp — ChatService</small>
+    <div class="hdr-spacer"></div>
+    <div class="conn-status">
+      <div class="dot" id="dot"></div>
+      <span id="connLabel">Chưa kết nối</span>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- ══════════ CỘT 1: CẤU HÌNH ══════════ -->
+    <div class="panel cfg-panel">
+      <div class="panel-hdr">⚙️ Kết nối &amp; Cấu hình</div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label>API Base URL</label>
+          <input id="baseUrl" value="https://localhost:7006" placeholder="https://localhost:7006" />
+        </div>
+
+        <div class="field">
+          <label>JWT Token <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(không
+              cần "Bearer ")</span></label>
+          <textarea id="token" rows="3" placeholder="Paste token từ AuthService vào đây..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Vai trò của bạn</label>
+          <div class="role-grid">
+            <button class="role-btn on" data-r="c" id="btnC" onclick="setRole('c')">
+              <span class="ri">🧳</span>Khách hàng
+            </button>
+            <button class="role-btn" data-r="r" id="btnR" onclick="setRole('r')">
+              <span class="ri">🏨</span>Lễ tân
+            </button>
+          </div>
+        </div>
+
+        <!-- Hotel ID — chỉ hiện khi role = Lễ tân -->
+        <div class="field" id="hotelIdWrap" style="display:none">
+          <label>Hotel ID <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(khách
+              sạn của bạn)</span></label>
+          <input id="hotelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+          <div style="margin-top:4px;font-size:10.5px;color:var(--txt3)">
+            ⚠️ Lễ tân cần cung cấp HotelId để tham gia nhóm <code>Hotel_{id}</code> khi kết nối.
+            Server sẽ đẩy thông báo về cuộc hội thoại mới của khách vào nhóm này.
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-bottom:10px">
+          <button class="btn btn-primary" id="btnConn" onclick="doConnect()">🔌 Kết nối &amp; Tải DS</button>
+          <button class="btn btn-danger" id="btnDisc" onclick="doDisconnect()" disabled>✖ Ngắt</button>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- ACTIONS -->
+        <div
+          style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px">
+          Hành động thủ công
+        </div>
+        <div class="action-list" id="actionList">
+          <div class="action-item disabled" onclick="doMarkAsRead()">
+            <span class="ai">✅</span> <span>MarkAsRead &nbsp;<small style="font-size:10px">(conversation đang
+                chọn)</small></span>
+          </div>
+          <div class="action-item disabled" onclick="doTyping(true)">
+            <span class="ai">⌨️</span> <span>SendTypingIndicator <b style="color:var(--ok)">true</b></span>
+          </div>
+          <div class="action-item disabled" onclick="doTyping(false)">
+            <span class="ai">⏹️</span> <span>SendTypingIndicator <b style="color:var(--err)">false</b></span>
+          </div>
+          <div class="action-item" onclick="showStartModal()" style="border-color:var(--cyan);color:var(--cyan)">
+            <span class="ai">➕</span> <span>Tạo / lấy Conversation mới</span>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <div
+          style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">
+          Log sự kiện
+        </div>
+        <div class="log-box" id="log"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:5px;width:100%"
+          onclick="document.getElementById('log').innerHTML=''">🗑️ Xoá log</button>
+
+      </div>
+    </div>
+
+    <!-- ══════════ CỘT 2: DANH SÁCH HỘI THOẠI ══════════ -->
+    <div class="panel conv-panel">
+      <div class="panel-hdr">
+        💬 Danh sách hội thoại
+        <button class="btn btn-ghost btn-sm" onclick="loadConversations()" title="Tải lại">↺</button>
+      </div>
+
+      <div class="conv-search">
+        <input id="searchBox" placeholder="🔍 Tìm kiếm..." oninput="filterConvs()" />
+      </div>
+
+      <div class="conv-list" id="convList">
+        <div class="conv-empty">
+          <div class="ei">🔌</div>
+          <div>Kết nối trước để<br />xem danh sách hội thoại</div>
+        </div>
+      </div>
+
+      <div class="conv-footer">
+        <div style="font-size:10px;color:var(--txt3);margin-bottom:5px" id="convMeta">—</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="loadConversations()">↺ Tải lại</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="loadMore()">↓ Thêm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CỘT 3: CHAT ══════════ -->
+    <div class="panel chat-panel">
+      <div class="chat-hdr">
+        <div class="chat-hdr-info">
+          <h2 id="chatTitle">Chọn một hội thoại</h2>
+          <p id="chatSub">← Bấm vào danh sách bên trái</p>
+        </div>
+        <span class="badge badge-c" id="roleBadge">🧳 Khách hàng</span>
+        <button class="btn btn-ghost btn-sm" onclick="clearMsgs()" title="Xoá tin">🗑️</button>
+      </div>
+
+      <div class="msgs" id="msgs">
+        <div class="empty-chat" id="emptyChat">
+          <div class="ei">💬</div>
+          <p>Chọn một hội thoại từ danh sách<br />hoặc kết nối để bắt đầu.</p>
+        </div>
+      </div>
+
+      <div class="typing-row" id="typingRow">
+        <div class="typing-bubble">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span id="typingName">Đang nhập...</span>
+        </div>
+      </div>
+
+      <div class="chat-input-bar">
+        <textarea id="msgInput" placeholder="Nhập tin nhắn... (Enter gửi, Shift+Enter xuống dòng)"
+          onkeydown="onKey(event)" oninput="onInputChange()" disabled></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()" disabled title="Gửi (Enter)">➤</button>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- ══ MODAL TẠO CONVERSATION ══ -->
+  <div class="modal-overlay" id="startModal">
+    <div class="modal">
+      <h3>➕ Tạo / lấy Conversation</h3>
+      <div class="field">
+        <label>Hotel ID</label>
+        <input id="modalHotelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+        <div style="margin-top:4px;font-size:10.5px;color:var(--txt3)">
+          Gọi <code>POST /api/conversations/start</code> với HotelId → server trả về ConversationId
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal()">Huỷ</button>
+        <button class="btn btn-primary" onclick="doStartConversation()">Tạo cuộc hội thoại</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script>
+    // ══════════ STATE ══════════
+    let hub = null;
+    let role = 'c';
+    let activeConvId = null;
+    let activeHotelId = null;
+    let convData = [];
+    let page = 1;
+    const PAGE_SIZE = 20;
+
+    // currentUserId được parse từ JWT để tránh echo trùng tin nhắn
+    let currentUserId = null;
+
+    // ══════════ JWT PARSE ══════════
+    function parseJwt(token) {
+      try {
+        const payload = token.split('.')[1];
+        const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+        return JSON.parse(decoded);
+      } catch { return {}; }
+    }
+
+    // Lấy userId từ JWT (claim nameidentifier)
+    function extractUserId(token) {
+      const claims = parseJwt(token);
+      return (
+        claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+        claims['nameid'] ||
+        claims['sub'] ||
+        null
+      );
+    }
+
+    // ══════════ ROLE ══════════
+    function setRole(r) {
+      role = r;
+      document.getElementById('btnC').classList.toggle('on', r === 'c');
+      document.getElementById('btnR').classList.toggle('on', r === 'r');
+      document.getElementById('hotelIdWrap').style.display = r === 'r' ? '' : 'none';
+      updateRoleBadge();
+    }
+
+    function updateRoleBadge() {
+      const b = document.getElementById('roleBadge');
+      if (role === 'c') { b.textContent = '🧳 Khách hàng'; b.className = 'badge badge-c'; }
+      else { b.textContent = '🏨 Lễ tân'; b.className = 'badge badge-r'; }
+    }
+
+    // ══════════ BUILD HUB (dùng chung) ══════════
+    function buildHub(hubUrl, token) {
+      const h = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl, {
+          accessTokenFactory: () => token,
+          skipNegotiation: true,
+          transport: signalR.HttpTransportType.WebSockets
+        })
+        .withAutomaticReconnect([1000, 2000, 5000])
+        .configureLogging(signalR.LogLevel.Warning)
+        .build();
+      return h;
+    }
+
+    function attachHubEvents(h) {
+      // ── FIX TRÙNG TIN NHẮN: bỏ qua echo của chính mình ──
+      // Server gọi SendMessageToConversationAsync cho TẤT CẢ người trong group
+      // kể cả người gửi. Ta đã appendLocalMsg rồi nên bỏ qua echo về.
+      h.on('ReceiveNewMessage', msg => {
+        addLog('recv', `ReceiveNewMessage [${shortId(msg.conversationId)}] ${msg.senderName}: "${trunc(msg.content, 40)}"`);
+
+        // Nếu chính mình gửi (echo từ server) → bỏ qua, bubble đã thêm ở appendLocalMsg
+        const isSelfEcho = currentUserId && msg.senderId &&
+          msg.senderId.toLowerCase() === currentUserId.toLowerCase();
+
+        if (isSelfEcho) {
+          addLog('info', '↩ Bỏ qua echo của chính mình');
+          updateConvLastMsg(msg.conversationId, msg.content);
+          return;
+        }
+
+        if (msg.conversationId === activeConvId) {
+          appendMsg(msg);
+          setTimeout(() => doMarkAsRead(), 800);
+        } else {
+          bumpUnread(msg.conversationId);
+          toast('📩 Tin nhắn mới', `${msg.senderName}: "${trunc(msg.content, 50)}"`, 'notif');
+        }
+        updateConvLastMsg(msg.conversationId, msg.content);
+      });
+
+      h.on('ReceiveChatNotification', msg => {
+        addLog('recv', `ReceiveChatNotification: ${msg.senderName} → "${trunc(msg.content, 40)}"`);
+        // Nếu không phải chính mình mới hiện toast
+        const isSelf = currentUserId && msg.senderId &&
+          msg.senderId.toLowerCase() === currentUserId.toLowerCase();
+        if (!isSelf) {
+          toast('🔔 Thông báo', `${msg.senderName}: "${trunc(msg.content, 60)}"`, 'notif');
+          bumpUnread(msg.conversationId);
+        }
+      });
+
+      h.on('ReceiveTypingIndicator', (convId, userId, userName, isTyp) => {
+        // Bỏ qua typing của chính mình
+        if (currentUserId && userId && userId.toLowerCase() === currentUserId.toLowerCase()) return;
+        addLog('recv', `ReceiveTypingIndicator: ${userName} → ${isTyp}`);
+        if (convId === activeConvId) showTyping(userName, isTyp);
+      });
+
+      h.on('ReceiveReadReceipt', (convId, readerId, readAt) => {
+        addLog('recv', `ReceiveReadReceipt: ${shortId(readerId)} at ${fmtTime(new Date(readAt))}`);
+        markAllRead();
+      });
+
+      h.onreconnecting(() => { setDot('spin', 'Đang kết nối lại...'); addLog('warn', 'Mất kết nối, đang thử lại...'); });
+      h.onreconnected(id => { setDot('ok', 'Đã kết nối'); addLog('ok', `Kết nối lại OK — ${id}`); });
+      h.onclose(e => {
+        // Không disable UI nếu đang tự ngắt để rejoin (cố ý ngắt)
+        if (_rejoining) return;
+        setDot('err', 'Đã ngắt');
+        addLog('err', e ? `Đóng: ${e.message}` : 'Kết nối đóng');
+        setConnUI(false);
+      });
+    }
+
+    // ══════════ CONNECT ══════════
+    async function doConnect() {
+      const base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+      const token = document.getElementById('token').value.trim();
+      const hId = document.getElementById('hotelId').value.trim();
+
+      if (!base) { toast('Thiếu URL', 'Nhập API Base URL', 'err'); return; }
+      if (!token) { toast('Thiếu Token', 'Paste JWT token vào', 'err'); return; }
+      if (role === 'r' && !hId) { toast('Thiếu Hotel ID', 'Lễ tân cần HotelId', 'err'); return; }
+
+      // Parse JWT lấy userId để lọc echo
+      currentUserId = extractUserId(token);
+      addLog('info', `userId từ JWT: ${currentUserId ?? '(không tìm thấy)'}`);
+
+      activeHotelId = hId || null;
+
+      setDot('spin', 'Đang kết nối...');
+
+      // Build hub URL ban đầu (chưa có conversationId vì chưa chọn)
+      const qp = [];
+      if (activeHotelId) qp.push(`hotelId=${encodeURIComponent(activeHotelId)}`);
+      const hubUrl = `${base}/chathub${qp.length ? '?' + qp.join('&') : ''}`;
+      addLog('info', `Hub URL: ${hubUrl}`);
+
+      hub = buildHub(hubUrl, token);
+      attachHubEvents(hub);
+
+      try {
+        await hub.start();
+        setDot('ok', 'Đã kết nối');
+        addLog('ok', `Kết nối thành công! connId=${hub.connectionId}`);
+        setConnUI(true);
+        await loadConversations();
+      } catch (e) {
+        setDot('err', 'Lỗi kết nối');
+        addLog('err', `Lỗi: ${e.message}`);
+        toast('❌ Lỗi kết nối', e.message, 'err');
+      }
+    }
+
+    async function doDisconnect() {
+      if (hub) { await hub.stop(); hub = null; }
+      setDot('', 'Chưa kết nối');
+      setConnUI(false);
+      addLog('warn', 'Đã ngắt kết nối.');
+    }
+
+    function setConnUI(on) {
+      document.getElementById('btnConn').disabled = on;
+      document.getElementById('btnDisc').disabled = !on;
+      const hasConv = !!activeConvId;
+      document.getElementById('msgInput').disabled = !on || !hasConv;
+      document.getElementById('sendBtn').disabled = !on || !hasConv;
+      document.querySelectorAll('.action-list .action-item:not(:last-child)')
+        .forEach(el => el.classList.toggle('disabled', !on || !hasConv));
+    }
+
+    // ══════════ LOAD CONVERSATIONS ══════════
+    async function loadConversations(reset = true) {
+      const base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+      const token = document.getElementById('token').value.trim();
+      if (!token) return;
+
+      if (reset) { page = 1; convData = []; }
+
+      try {
+        const res = await fetch(`${base}/api/conversations/all?pageIndex=${page}&pageSize=${PAGE_SIZE}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+
+        // Tuỳ cấu trúc ApiResponse wrapper
+        const list = json.data?.items ?? json.data ?? json.items ?? json ?? [];
+        const total = json.data?.totalCount ?? list.length;
+
+        if (reset) convData = list;
+        else convData = [...convData, ...list];
+
+        renderConvList();
+        document.getElementById('convMeta').textContent =
+          `Hiển thị ${convData.length} / ${total} hội thoại`;
+        addLog('ok', `Tải ${list.length} hội thoại (trang ${page})`);
+      } catch (e) {
+        addLog('err', `LoadConversations: ${e.message}`);
+        toast('❌ Tải danh sách thất bại', e.message, 'err');
+        document.getElementById('convList').innerHTML = `
+      <div class="conv-empty"><div class="ei">⚠️</div><div>Không tải được danh sách<br><small>${esc(e.message)}</small></div></div>`;
+      }
+    }
+
+    async function loadMore() {
+      page++;
+      await loadConversations(false);
+    }
+
+    function renderConvList() {
+      const q = document.getElementById('searchBox').value.toLowerCase();
+      const filtered = convData.filter(c =>
+        (c.displayName ?? '').toLowerCase().includes(q) ||
+        (c.lastMessage ?? '').toLowerCase().includes(q) ||
+        (c.id ?? '').toLowerCase().includes(q)
+      );
+
+      const list = document.getElementById('convList');
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="conv-empty"><div class="ei">🗒️</div><div>Không có hội thoại nào</div></div>`;
+        return;
+      }
+
+      // Dùng data-attribute + event delegation để tránh vấn đề dấu nháy đôi trong onclick
+      list.innerHTML = filtered.map(c => {
+        const isActive = c.id === activeConvId;
+        const t = c.updatedAt ? fmtTime(new Date(c.updatedAt)) : '';
+        return `
+    <div class="conv-item ${isActive ? 'active' : ''}" data-conv-id="${c.id}" data-hotel-id="${c.hotelId ?? ''}">
+      <div class="conv-item-top">
+        <div class="conv-name">${esc(c.displayName ?? 'Cuộc hội thoại')}</div>
+        <div class="conv-time">${t}</div>
+      </div>
+      <div class="conv-last">${esc(c.lastMessage ?? '(Chưa có tin nhắn)')}</div>
+      <div class="conv-id-chip">ID: ${c.id}</div>
+      ${c.unreadCount > 0 ? `<div class="conv-badge">${c.unreadCount}</div>` : ''}
+    </div>`;
+      }).join('');
+
+      // Gắn event listener lên từng item ngay sau khi render
+      list.querySelectorAll('.conv-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const cId = el.dataset.convId;
+          const hId = el.dataset.hotelId;
+          if (cId) selectConv(cId, hId);
+        });
+      });
+    }
+
+    function filterConvs() { renderConvList(); }
+
+    // ══════════ SELECT CONVERSATION ══════════
+    // Chiến lược đơn giản hơn:
+    // 1. Cập nhật activeConvId ngay
+    // 2. Load history qua REST (không cần reconnect hub)
+    // 3. Chỉ reconnect hub khi cần join SignalR group của conv mới
+    // Flag: đang cố ý ngắt hub để rejoin — không trigger disable UI
+    let _rejoining = false;
+    let _selecting = false;
+    async function selectConv(convId, hotelId) {
+      if (_selecting || !convId) return;
+      if (convId === activeConvId) return; // đã đang ở conv này rồi
+      _selecting = true;
+
+      try {
+        activeConvId = convId;
+        if (hotelId) activeHotelId = hotelId;
+
+        // Cập nhật UI ngay
+        renderConvList();
+        clearMsgs();
+        updateChatHeader(convId);
+        setConnUI(!!hub);
+        addLog('info', `Chọn conversation: ${shortId(convId)}`);
+
+        // Bước 1: Load lịch sử qua REST API (nhanh, không cần hub)
+        await loadHistory(convId);
+
+        // Bước 2: Reconnect hub với conversationId mới để nhận realtime
+        if (hub) {
+          await rejoinHub(convId);
+        }
+
+      } finally {
+        _selecting = false;
+      }
+    }
+
+    // Reconnect hub với conversationId + hotelId mới
+    async function rejoinHub(convId) {
+      const base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+      const token = document.getElementById('token').value.trim();
+
+      // Đặt flag trước khi stop — onclose sẽ không disable UI
+      _rejoining = true;
+      setDot('spin', 'Tham gia nhóm chat...');
+      try { await hub.stop(); } catch (_) { }
+
+      const qp = [`conversationId=${encodeURIComponent(convId)}`];
+      if (activeHotelId) qp.push(`hotelId=${encodeURIComponent(activeHotelId)}`);
+      const hubUrl = `${base}/chathub?${qp.join('&')}`;
+
+      hub = buildHub(hubUrl, token);
+      attachHubEvents(hub);
+
+      try {
+        await hub.start();
+        setDot('ok', 'Đã kết nối');
+        addLog('ok', `Đã vào nhóm Conversation_${shortId(convId)} ✓`);
+        // Bật lại input sau khi rejoin thành công
+        setConnUI(true);
+      } catch (e) {
+        setDot('err', 'Lỗi SignalR');
+        addLog('err', `rejoinHub lỗi: ${e.message}`);
+        toast('❌ Không vào được nhóm chat', e.message, 'err');
+      } finally {
+        // Tắt flag sau khi xong dù thành công hay thất bại
+        _rejoining = false;
+      }
+    }
+
+    async function loadHistory(convId) {
+      const base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+      const token = document.getElementById('token').value.trim();
+      try {
+        const res = await fetch(`${base}/api/conversations/${convId}/messages?size=50`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const msgs = json.data ?? json ?? [];
+
+        const container = document.getElementById('msgs');
+        container.innerHTML = '';
+
+        if (msgs.length === 0) {
+          container.innerHTML = `<div class="empty-chat" id="emptyChat"><div class="ei">💬</div><p>Chưa có tin nhắn nào</p></div>`;
+          return;
+        }
+
+        // Render lịch sử — phân biệt sent/recv dựa trên senderId vs currentUserId
+        msgs.forEach(m => {
+          const isMine = currentUserId && m.senderId &&
+            m.senderId.toLowerCase() === currentUserId.toLowerCase();
+          appendMsg(m, isMine);
+        });
+        scrollBottom();
+        addLog('ok', `Tải ${msgs.length} tin nhắn lịch sử`);
+      } catch (e) {
+        addLog('err', `LoadHistory: ${e.message}`);
+        toast('❌ Tải lịch sử thất bại', e.message, 'err');
+      }
+    }
+
+    function updateChatHeader(convId) {
+      const c = convData.find(x => x.id === convId);
+      document.getElementById('chatTitle').textContent = c?.displayName ?? `Hội thoại ${shortId(convId)}`;
+      document.getElementById('chatSub').textContent = `ID: ${convId}`;
+    }
+
+    // ══════════ SEND / ACTIONS ══════════
+    async function sendMsg() {
+      if (!hub || !activeConvId) return;
+      const content = document.getElementById('msgInput').value.trim();
+      if (!content) return;
+
+      const cmd = {
+        conversationId: activeConvId,
+        hotelId: activeHotelId || null,
+        content: content,
+        messageType: 0  // Text
+      };
+
+      try {
+        await hub.invoke('SendMessage', cmd);
+        addLog('send', `SendMessage → "${content}"`);
+        appendLocalMsg(content);
+        document.getElementById('msgInput').value = '';
+        autoResize(document.getElementById('msgInput'));
+      } catch (e) {
+        addLog('err', `SendMessage: ${e.message}`);
+        toast('❌ Gửi thất bại', e.message, 'err');
+      }
+    }
+
+    async function doMarkAsRead() {
+      if (!hub || !activeConvId) return;
+      try {
+        await hub.invoke('MarkAsRead', activeConvId);
+        addLog('send', `MarkAsRead(${shortId(activeConvId)})`);
+        // clear unread badge
+        const c = convData.find(x => x.id === activeConvId);
+        if (c) { c.unreadCount = 0; renderConvList(); }
+      } catch (e) { addLog('err', `MarkAsRead: ${e.message}`); }
+    }
+
+    let _isTyping = false, _typTimer = null;
+    async function doTyping(val) {
+      if (!hub || !activeConvId) return;
+      try {
+        await hub.invoke('SendTypingIndicator', activeConvId, val);
+        addLog('send', `SendTypingIndicator(${val})`);
+      } catch (e) { addLog('err', `Typing: ${e.message}`); }
+    }
+
+    // ══════════ START CONVERSATION MODAL ══════════
+    function showStartModal() { document.getElementById('startModal').classList.add('show'); }
+    function closeModal() { document.getElementById('startModal').classList.remove('show'); }
+
+    async function doStartConversation() {
+      const base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+      const token = document.getElementById('token').value.trim();
+      const hotelId = document.getElementById('modalHotelId').value.trim();
+      if (!hotelId) { toast('Thiếu', 'Nhập Hotel ID', 'err'); return; }
+
+      try {
+        const res = await fetch(`${base}/api/conversations/start`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hotelId })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const newId = json.data ?? json;
+        closeModal();
+        toast('✅ Thành công', `ConversationId: ${newId}`, 'ok');
+        addLog('ok', `StartConversation → ${newId}`);
+        // Tải lại danh sách và chọn conv mới
+        await loadConversations();
+        if (newId) selectConv(newId, hotelId);
+      } catch (e) {
+        addLog('err', `StartConversation: ${e.message}`);
+        toast('❌ Thất bại', e.message, 'err');
+      }
+    }
+
+    // ══════════ CHAT UI ══════════
+    // isSelf=true → hiện bên phải (sent), false → bên trái (recv)
+    function appendMsg(msg, isSelf = false) {
+      const c = document.getElementById('msgs');
+      // Xoá emptyChat placeholder nếu còn
+      const ec = c.querySelector('.empty-chat');
+      if (ec) ec.remove();
+
+      const st = msg.senderType === 0 ? 'c' : 'r';
+      const rl = msg.senderType === 0 ? 'Khách hàng' : 'Lễ tân';
+      const t = msg.createdAt ? fmtTime(new Date(msg.createdAt)) : fmtTime(new Date());
+
+      const row = document.createElement('div');
+      row.className = `msg-row ${isSelf ? 'sent' : 'recv'}`;
+      row.dataset.msgId = msg.id ?? '';
+      row.innerHTML = `
+    <div class="msg-meta">
+      <span class="meta-name">${esc(msg.senderName ?? 'Unknown')}</span>
+      <span class="meta-role mr-${st}">${rl}</span>
+      <span>${t}</span>
+      <span class="read-tick">${msg.isRead ? '✓✓' : '<span style="opacity:.3">✓</span>'}</span>
+    </div>
+    <div class="msg-bubble">${esc(msg.content)}</div>`;
+      c.appendChild(row);
+      scrollBottom();
+    }
+
+    // Thêm tin nhắn tự nhập (hiển thị ngay, trước khi server xác nhận)
+    // Server sẽ echo về qua ReceiveNewMessage nhưng sẽ bị bỏ qua (isSelfEcho)
+    function appendLocalMsg(content) {
+      const c = document.getElementById('msgs');
+      const ec = c.querySelector('.empty-chat');
+      if (ec) ec.remove();
+      const st = role === 'c' ? 'c' : 'r';
+      const rl = role === 'c' ? 'Khách hàng' : 'Lễ tân';
+      const row = document.createElement('div');
+      row.className = 'msg-row sent pending';
+      row.innerHTML = `
+    <div class="msg-meta">
+      <span class="meta-name">Bạn</span>
+      <span class="meta-role mr-${st}">${rl}</span>
+      <span>${fmtTime(new Date())}</span>
+      <span class="read-tick" style="opacity:.4;color:var(--txt2)">⏳</span>
+    </div>
+    <div class="msg-bubble">${esc(content)}</div>`;
+      c.appendChild(row);
+      scrollBottom();
+    }
+
+    function markAllRead() {
+      document.querySelectorAll('.read-tick').forEach(el => {
+        el.innerHTML = '✓✓';
+        el.style.opacity = '1';
+        el.style.color = 'var(--ok)';
+      });
+    }
+
+    function showTyping(name, show) {
+      const r = document.getElementById('typingRow');
+      document.getElementById('typingName').textContent = `${name} đang nhập...`;
+      r.classList.toggle('show', show);
+      if (show) scrollBottom();
+    }
+
+    function bumpUnread(convId) {
+      const c = convData.find(x => x.id === convId);
+      if (c) { c.unreadCount = (c.unreadCount ?? 0) + 1; renderConvList(); }
+    }
+
+    function updateConvLastMsg(convId, content) {
+      const c = convData.find(x => x.id === convId);
+      if (c) { c.lastMessage = content; c.updatedAt = new Date().toISOString(); renderConvList(); }
+    }
+
+    function clearMsgs() {
+      document.getElementById('msgs').innerHTML =
+        `<div class="empty-chat" id="emptyChat"><div class="ei">💬</div><p>Đang tải...</p></div>`;
+    }
+
+    // ══════════ INPUT ══════════
+    function onKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+    }
+
+    function onInputChange() {
+      autoResize(document.getElementById('msgInput'));
+      if (!hub || !activeConvId) return;
+      if (!_isTyping) { _isTyping = true; doTyping(true); }
+      clearTimeout(_typTimer);
+      _typTimer = setTimeout(() => { _isTyping = false; doTyping(false); }, 1500);
+    }
+
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 90) + 'px'; }
+
+    // ══════════ STATUS ══════════
+    function setDot(type, label) {
+      const d = document.getElementById('dot');
+      d.className = 'dot ' + (type === 'ok' ? 'ok' : type === 'spin' ? 'spin' : type === 'err' ? 'err' : '');
+      document.getElementById('connLabel').textContent = label;
+    }
+
+    // ══════════ LOG ══════════
+    function addLog(type, msg) {
+      const a = document.getElementById('log');
+      const t = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const el = document.createElement('div');
+      el.className = `le ${type}`;
+      el.innerHTML = `<span class="ts">${t}</span><span class="m">${esc(msg)}</span>`;
+      a.appendChild(el);
+      a.scrollTop = a.scrollHeight;
+    }
+
+    // ══════════ TOAST ══════════
+    function toast(title, body, type = 'notif') {
+      const c = document.getElementById('toasts');
+      const t = document.createElement('div');
+      const bc = type === 'err' ? 'var(--err)' : type === 'ok' ? 'var(--ok)' : 'var(--purple)';
+      t.className = 'toast'; t.style.borderLeftColor = bc;
+      t.innerHTML = `<div class="tt">${esc(title)}</div><div>${esc(body)}</div>`;
+      c.appendChild(t);
+      setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 4500);
+    }
+
+    // ══════════ UTILS ══════════
+    function scrollBottom() { const m = document.getElementById('msgs'); m.scrollTop = m.scrollHeight; }
+    function shortId(id) { return id ? id.split('-')[0] : '?'; }
+    function trunc(s, n) { return s && s.length > n ? s.slice(0, n) + '...' : (s ?? ''); }
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function fmtTime(d) {
+      return d instanceof Date && !isNaN(d)
+        ? d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+        : '';
+    }
+
+    // ══════════ INIT ══════════
+    addLog('info', 'SignalR Tester sẵn sàng. Điền token → Kết nối.');
+    updateRoleBadge();
+  </script>
+</body>
+
+</html>

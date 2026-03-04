@@ -17,7 +17,7 @@ namespace ChatService.Infrastructure.Data.Configurations
 
             builder.HasIndex(c => new { c.UserId, c.HotelId }).IsUnique();
 
-            builder.Property(c => c.LastMessage).HasMaxLength(500);
+            builder.Property(c => c.LastMessage).HasMaxLength(500).IsRequired(false);
 
             builder.HasMany(c => c.MessageList)
                    .WithOne() 

@@ -7,7 +7,7 @@ namespace ChatService.Domain.Entities
     {
         public Guid UserId { get; private set; }
         public Guid HotelId { get; private set; }
-        public string LastMessage { get; private set; }
+        public string? LastMessage { get; private set; }
         public int CustomerUnreadCount { get; private set; }
         public int HotelUnreadCount { get; private set; }
 
@@ -38,6 +38,11 @@ namespace ChatService.Domain.Entities
                 HotelUnreadCount++;
             else if (senderType == SenderType.Hotel || senderType == SenderType.SystemBot)
                 CustomerUnreadCount++;
+        }
+
+        public void AddMessage(Messages message)
+        {
+            _messages.Add(message);
         }
 
         public void ResetUnreadCount(SenderType readerType)

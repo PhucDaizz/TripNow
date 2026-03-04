@@ -1,8 +1,10 @@
-﻿namespace ChatService.Application.Common.Interfaces
+﻿using ChatService.Domain.Repositories;
+
+namespace ChatService.Application.Common.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-
+        IConversationRepository Conversation { get;}
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
