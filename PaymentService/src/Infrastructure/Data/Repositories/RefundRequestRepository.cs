@@ -26,6 +26,11 @@ namespace PaymentService.Infrastructure.Data.Repositories
             return Task.CompletedTask;
         }
 
+        public async Task<bool> ExistsByBookingIdAsync(Guid bookingId, CancellationToken token = default)
+        {
+            return await _context.RefundRequest.AnyAsync(rr => rr.BookingId == bookingId, token);
+        }
+
         public async Task<RefundRequest?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             return await _context.RefundRequest.FirstOrDefaultAsync(rr => rr.Id == id, token);

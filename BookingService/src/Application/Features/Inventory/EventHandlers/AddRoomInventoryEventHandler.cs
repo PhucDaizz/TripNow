@@ -1,6 +1,7 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.DTOs.Inventory;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace BookingService.Application.Features.Inventory.EventHandlers
@@ -34,20 +35,15 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var endDate = today.AddDays(_inventorySettings.LookAheadDays);
 
-            var existingDates = await _unitOfWork.Inventory.GetExistingDatesAsync(
-                roomTypeId,
-                today,
-                endDate,
-                cancellationToken
-            );
+            var existingInventories = await _unitOfWork.Inventory.GetInventoriesInRangeAsync(
+                new List<Guid> { roomTypeId }, today, endDate, cancellationToken);
 
-            var existingDatesSet = new HashSet<DateOnly>(existingDates);
-
+            var existingDatesSet = existingInventories.Select(i => i.Date).ToHashSet();
             var newInventories = new List<Domain.Entities.Inventory>();
-            var maxGeneratedDate =
-                config?.LastGeneratedDate != null
-                    ? DateOnly.FromDateTime(config.LastGeneratedDate.Value)
-                    : today.AddDays(-1);
+
+            var maxGeneratedDate = config?.LastGeneratedDate != null
+                ? DateOnly.FromDateTime(config.LastGeneratedDate.Value)
+                : today.AddDays(-1);
 
             for (int i = 0; i <= _inventorySettings.LookAheadDays; i++)
             {
@@ -65,36 +61,64 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
                 }
             }
 
-            if (newInventories.Any())
+            foreach (var inv in existingInventories)
             {
-                await _unitOfWork.Inventory.AddRangeAsync(newInventories, cancellationToken);
-            }
-
-            if (existingDates.Any())
-            {
-                await _unitOfWork.Inventory.UpdateTotalStockForDatesAsync(
-                    roomTypeId,
-                    existingDates, 
-                    1,             
-                    cancellationToken
-                );
+                inv.AdjustTotalStock(newTotalStock);
             }
 
             if (config != null)
             {
                 config.UpdateDefaultStock(newTotalStock);
-                if (config.LastGeneratedDate == null ||
-                    maxGeneratedDate > DateOnly.FromDateTime(config.LastGeneratedDate.Value))
+
+                if (config.LastGeneratedDate == null || maxGeneratedDate > DateOnly.FromDateTime(config.LastGeneratedDate.Value))
                 {
                     config.UpdateLastGeneratedDate(maxGeneratedDate);
                 }
             }
-            else
-            {
-                _logger.LogWarning("Inventory configuration not found for RoomTypeId: {RoomTypeId}", roomTypeId);
-            }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            int maxRetries = 3;
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
+            {
+                try
+                {
+                    if (retryCount == 0 && newInventories.Any())
+                    {
+                        await _unitOfWork.Inventory.AddRangeAsync(newInventories, cancellationToken);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    break; 
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    if (retryCount == maxRetries - 1)
+                    {
+                        _logger.LogError("Room synchronization error causes continuous data conflict for RoomTypeId: {RoomTypeId}", roomTypeId);
+                        throw; 
+                    }
+
+                    foreach (var entry in ex.Entries)
+                    {
+                        await entry.ReloadAsync();
+
+                        if (entry.Entity is Domain.Entities.Inventory inv)
+                        {
+                            inv.AdjustTotalStock(newTotalStock);
+                        }
+                        else if (entry.Entity is Domain.Entities.InventoryConfiguration conf)
+                        {
+                            conf.UpdateDefaultStock(newTotalStock);
+                            if (conf.LastGeneratedDate == null || maxGeneratedDate > DateOnly.FromDateTime(conf.LastGeneratedDate.Value))
+                            {
+                                conf.UpdateLastGeneratedDate(maxGeneratedDate);
+                            }
+                        }
+                    }
+
+                    await Task.Delay(Random.Shared.Next(50, 150), cancellationToken);
+                }
+            }
         }
     }
 }

@@ -1,60 +1,77 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.DTOs.Inventory;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BookingService.Application.Features.Inventory.EventHandlers
 {
     public class RoomMaintenanceFinishedEventHandler : INotificationHandler<RoomMaintenanceFinishedEvent>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<RoomMaintenanceFinishedEventHandler> _logger;
 
-        public RoomMaintenanceFinishedEventHandler(IUnitOfWork unitOfWork)
+        public RoomMaintenanceFinishedEventHandler(IUnitOfWork unitOfWork, ILogger<RoomMaintenanceFinishedEventHandler> logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task Handle(RoomMaintenanceFinishedEvent notification, CancellationToken cancellationToken)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // 1. Xác định ngày bắt đầu cần mở khóa (Release)
-            // Nếu lịch bảo trì nằm hoàn toàn trong tương lai (VD: Lên lịch tuần sau nhưng nay hủy):
-            // -> Bắt đầu mở từ ngày OriginalStart.
-            // Nếu đang bảo trì dở dang (VD: Lịch đến ngày 15, nay 12 đã xong):
-            // -> Bắt đầu mở từ ngày Today (12).
-
             DateOnly releaseFromDate = notification.FromDate > today
                 ? notification.FromDate
                 : today;
 
-            // 2. Kiểm tra tính hợp lệ
-            // Nếu ngày bắt đầu mở lại nằm SAU ngày kết thúc dự kiến
-            // => Nghĩa là đã hết hạn bảo trì từ lâu, hoặc xong đúng hạn -> Không có ngày dư để mở.
             if (releaseFromDate > notification.ToDate)
             {
                 return;
             }
 
-            // 3. Tạo danh sách các ngày cần Update
-            var datesToRelease = new List<DateOnly>();
+            var roomTypeId = notification.RoomTypeId;
 
-            // Loop từ ngày bắt đầu mở -> đến ngày kết thúc dự kiến cũ
-            for (var date = releaseFromDate; date <= notification.ToDate; date = date.AddDays(1))
+            var existingInventories = await _unitOfWork.Inventory.GetInventoriesInRangeAsync(
+                new List<Guid> { roomTypeId },
+                releaseFromDate,
+                notification.ToDate,
+                cancellationToken);
+
+            if (!existingInventories.Any())
             {
-                datesToRelease.Add(date);
+                return; 
             }
 
-            // 4. Gọi Repository để trừ BlockedStock
-            if (datesToRelease.Any())
+            int maxRetries = 3;
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
             {
-                // Gọi hàm Bulk Update (Đã viết ở các bước trước)
-                // Tham số -1: Nghĩa là giảm BlockedStock đi 1 đơn vị (Nhả phòng)
-                await _unitOfWork.Inventory.UpdateBlockedStockBulkAsync(
-                    notification.RoomTypeId,
-                    datesToRelease,
-                    -1,
-                    cancellationToken
-                );
+                try
+                {
+                    foreach (var inv in existingInventories)
+                    {
+                        inv.UnblockStock(1);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    break; 
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    if (retryCount == maxRetries - 1)
+                    {
+                        _logger.LogError("Continuous data collision error when unlocking the maintenance room for RoomTypeId: {RoomTypeId}", roomTypeId);
+                        throw;
+                    }
+
+                    foreach (var entry in ex.Entries)
+                    {
+                        await entry.ReloadAsync();
+                    }
+
+                    await Task.Delay(Random.Shared.Next(50, 150), cancellationToken);
+                }
             }
         }
     }

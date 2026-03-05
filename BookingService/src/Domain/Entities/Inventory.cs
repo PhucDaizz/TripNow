@@ -37,6 +37,8 @@ namespace BookingService.Domain.Entities
         {
             if (quantity <= 0) return;
             BlockedStock += quantity;
+
+            Version++;
         }
 
         /// <summary>
@@ -47,6 +49,8 @@ namespace BookingService.Domain.Entities
             if (quantity <= 0) return;
             BlockedStock -= quantity;
             if (BlockedStock < 0) BlockedStock = 0;
+
+            Version++;
         }
 
         /// <summary>
@@ -61,6 +65,7 @@ namespace BookingService.Domain.Entities
                 throw new DomainException($"Hết phòng cho ngày {Date}. Chỉ còn {AvailableStock}.");
 
             SoldStock += quantity;
+            Version++;
         }
 
         public bool TryReserve(int quantity)
@@ -87,6 +92,8 @@ namespace BookingService.Domain.Entities
 
             // Safety check: Không bao giờ để sold bị âm
             if (SoldStock < 0) SoldStock = 0;
+
+            Version++;
         }
 
         /// <summary>
@@ -98,6 +105,7 @@ namespace BookingService.Domain.Entities
                 throw new DomainException("Không thể giảm tổng quỹ phòng thấp hơn số lượng đã bán.");
 
             TotalStock = newTotal;
+            Version++;
         }
 
     }

@@ -18,21 +18,39 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
 
         public async Task Handle(RoomMaintenanceScheduledEvent notification, CancellationToken cancellationToken)
         {
-            var inventories = await _context.Inventory.AsQueryable()
-            .Where(x => x.RoomTypeId == notification.RoomTypeId
-                        && x.Date >= notification.FromDate
-                        && x.Date <= notification.ToDate)
-            .ToListAsync(cancellationToken);
+            const int maxRetries = 3;
 
-            foreach (var inv in inventories)
+            for (int retry = 0; retry < maxRetries; retry++)
             {
-                inv.BlockStock(1);
+                try
+                {
+                    var inventories = await _context.Inventory
+                        .Where(x => x.RoomTypeId == notification.RoomTypeId
+                                    && x.Date >= notification.FromDate
+                                    && x.Date <= notification.ToDate)
+                        .ToListAsync(cancellationToken);
+
+                    foreach (var inv in inventories)
+                    {
+                        inv.BlockStock(1);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    break; 
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    if (retry == maxRetries - 1)
+                        throw;
+
+                    foreach (var entry in ex.Entries)
+                    {
+                        await entry.ReloadAsync(cancellationToken);
+                    }
+
+                    await Task.Delay(Random.Shared.Next(50, 150), cancellationToken);
+                }
             }
-
-            // Lưu ý: Nếu ngày đó chưa có Inventory thì có thể bỏ qua 
-            // hoặc logic Create nếu cần (tùy chiến lược của bạn, thường bảo trì tương lai thì inventory đã có rồi)
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

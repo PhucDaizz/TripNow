@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PaymentService.Application.Common.Interfaces;
 using PaymentService.Application.Contracts;
@@ -35,87 +36,109 @@ namespace PaymentService.Infrastructure.Services
 
             foreach (var ownerId in ownerIds)
             {
-                var result = await ProcessSettlementForOwnerAsync(ownerId, token);
-                if (result) success++;
+                try
+                {
+                    var result = await ProcessSettlementForOwnerAsync(ownerId, token);
+                    if (result) success++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Serious unrecoverable error for Owner: {OwnerId}", ownerId);
+                }
             }
 
-            _logger.LogInformation("Settlement Job completed. Success: {Count}/ {countOwner}", success, countOwner);
+            _logger.LogInformation("Settlement Job completed. Success: {Count}/{Total}", success, countOwner);
         }
 
         public async Task<bool> ProcessSettlementForOwnerAsync(Guid ownerId, CancellationToken token)
         {
-            try
+            var cutOffDate = DateTime.UtcNow.AddDays(-_config.HoldDays);
+
+            int maxRetries = 3;
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
             {
-                var cutOffDate = DateTime.UtcNow.AddDays(-_config.HoldDays);
-
-                var unsetledLedgers = await _unitOfWork.OwnerWallets
-                    .GetPendingLedgersForSettlementAsync(ownerId, cutOffDate, token);
-
-                if (!unsetledLedgers.Any())
+                try
                 {
-                    return false;
-                }
+                    var wallet = await _unitOfWork.OwnerWallets.GetWalletWithPendingLedgersAsync(ownerId, cutOffDate, token);
 
-                await _unitOfWork.BeginTransactionAsync();
+                    if (wallet == null) return false;
 
-                var period = new SettlementPeriod(
-                    ownerId,
-                    unsetledLedgers.Min(x => x.CreatedAt),
-                    unsetledLedgers.Max(x => x.CreatedAt)
-                );
-                await _unitOfWork.SettlementPeriods.AddAsync(period);
+                    var unsetledLedgers = wallet.WalletLedgers.ToList();
 
-                foreach (var ledger in unsetledLedgers)
-                {
-                    period.AddSettlementItem(
-                        ledger.ReferenceId,
-                        ledger.TransactionGrossAmount,
-                        ledger.TransactionFee,
-                        SettlementItemType.Booking
-                    );
-                    ledger.MarkAsSettled(period.Id);
-                }
-
-                var wallet = await _unitOfWork.OwnerWallets.GetByOwnerIdAsync(ownerId, token);
-                var bankAccount = await _unitOfWork.OwnerBankAccounts.GetDefaultByOwnerIdAsync(ownerId);
-
-                wallet.ReleaseSettlement(period.Id, period.TotalNetPayable, period.TotalGross, period.TotalCommission);
-
-                if (bankAccount != null)
-                {
-                    // Lấy TỔNG SỐ DƯ KHẢ DỤNG THỰC TẾ (Bao gồm tiền mới + tiền hoàn cũ)
-                    decimal actualPayoutAmount = wallet.AvailableBalance;
-
-                    if (actualPayoutAmount > 0)
+                    if (!unsetledLedgers.Any())
                     {
-                        var bankInfoJson = JsonSerializer.Serialize(new
-                        {
-                            bankAccount.BankName,
-                            bankAccount.BankAccountNumber,
-                            bankAccount.BankAccountHolder
-                        });
-
-                        var payout = new Payout(period.Id, wallet.Id, actualPayoutAmount, bankInfoJson);
-                        await _unitOfWork.Payouts.AddAsync(payout);
-
-                        wallet.DebitForPayout(payout.Id, actualPayoutAmount, actualPayoutAmount, 0);
+                        return false; 
                     }
+
+                    var period = new SettlementPeriod(
+                        ownerId,
+                        unsetledLedgers.Min(x => x.CreatedAt),
+                        unsetledLedgers.Max(x => x.CreatedAt)
+                    );
+
+                    await _unitOfWork.SettlementPeriods.AddAsync(period);
+
+                    foreach (var ledger in unsetledLedgers)
+                    {
+                        period.AddSettlementItem(
+                            ledger.ReferenceId,
+                            ledger.TransactionGrossAmount,
+                            ledger.TransactionFee,
+                            SettlementItemType.Booking
+                        );
+                        ledger.MarkAsSettled(period.Id);
+                    }
+
+                    wallet.ReleaseSettlement(period.Id, period.TotalNetPayable, period.TotalGross, period.TotalCommission);
+
+                    period.MarkAsOpen();
+
+                    var bankAccount = await _unitOfWork.OwnerBankAccounts.GetDefaultByOwnerIdAsync(ownerId);
+
+                    if (bankAccount != null)
+                    {
+                        decimal actualPayoutAmount = wallet.AvailableBalance;
+
+                        if (actualPayoutAmount > 0)
+                        {
+                            var bankInfoJson = JsonSerializer.Serialize(new
+                            {
+                                bankAccount.BankName,
+                                bankAccount.BankAccountNumber,
+                                bankAccount.BankAccountHolder
+                            });
+
+                            var payout = new Payout(period.Id, wallet.Id, actualPayoutAmount, bankInfoJson);
+                            await _unitOfWork.Payouts.AddAsync(payout);
+
+                            wallet.DebitForPayout(payout.Id, actualPayoutAmount, actualPayoutAmount, 0);
+                        }
+                    }
+
+                    await _unitOfWork.SaveChangesAsync(token);
+
+                    _logger.LogInformation("Successfully processed Settlement for Owner: {Id}. Payout Period: {PeriodId}", ownerId, period.Id);
+
+                    return true; 
                 }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    if (retryCount == maxRetries - 1)
+                    {
+                        _logger.LogError("Continuous data collision error when Settlement for Owner: {OwnerId}. Cancelled.", ownerId);
+                        return false;
+                    }
 
-                period.MarkAsOpen();
+                    foreach (var entry in ex.Entries)
+                    {
+                        await entry.ReloadAsync();
+                    }
 
-                await _unitOfWork.SaveChangesAsync(token);
-                await _unitOfWork.CommitTransactionAsync();
-
-                _logger.LogInformation("[Manual/Auto] Successfully processed for Owner: {Id}", ownerId);
-                return true;
+                    await Task.Delay(Random.Shared.Next(100, 300), token);
+                }
             }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                _logger.LogError(ex, "Processing error for Owner: {Id}", ownerId);
-                return false;
-            }
+
+            return false;
         }
 
         /*public async Task RunSettlementJob(CancellationToken token = default)

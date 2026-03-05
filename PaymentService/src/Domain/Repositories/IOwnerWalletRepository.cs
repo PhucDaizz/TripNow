@@ -1,5 +1,6 @@
 ﻿using PaymentService.Domain.Common.Models;
 using PaymentService.Domain.Entities;
+using PaymentService.Domain.Enum;
 
 namespace PaymentService.Domain.Repositories
 {
@@ -19,6 +20,17 @@ namespace PaymentService.Domain.Repositories
         Task<PagedResult<WalletLedger>> GetPagedListAsync(
             Guid ownerId, int pageNumber, int pageSize,
             DateTime? fromDate, DateTime? toDate, string? type,
+            CancellationToken token);
+
+        Task<bool> HasTransactionAsync(
+            Guid ownerId,
+            Guid referenceId,
+            LedgerReferenceType type,
+            CancellationToken cancellationToken = default);
+
+        Task<OwnerWallet?> GetWalletWithPendingLedgersAsync(
+            Guid ownerId,
+            DateTime cutOffDate,
             CancellationToken token);
     }
 }

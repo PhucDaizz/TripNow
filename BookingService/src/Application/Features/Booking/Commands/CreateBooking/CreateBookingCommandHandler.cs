@@ -6,6 +6,7 @@ using BookingService.Domain.Exceptions;
 using BookingService.Domain.ValueObject;
 using Domain.Common.Response;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookingService.Application.Features.Booking.Commands.CreateBooking;
 
@@ -173,28 +174,53 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         booking.FinalizeCreation();
 
-        try
+        int maxRetries = 3;
+        bool isSaved = false;
+
+        for (int retryCount = 0; retryCount < maxRetries; retryCount++)
         {
-            await _unitOfWork.Booking.AddBookingAsync(booking);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            if (!string.IsNullOrWhiteSpace(request.PromotionCode))
+            try
             {
-                await _integrationEventService.PublishAsync<BookingCancelledEvent>(
-                new BookingCancelledEvent
+                if (retryCount == 0)
                 {
-                    HotelId = request.HotelId,
-                    BookingId = booking.Id,
-                    PromotionCode = request.PromotionCode
-                },
-                "booking.events",
-                 "topic",
-                 "booking.cancelled",
-                 cancellationToken);
+                    await _unitOfWork.Booking.AddBookingAsync(booking);
+                }
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                isSaved = true;
+
+                break;
             }
-            throw; 
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (retryCount == maxRetries - 1)
+                {
+                    await RollbackPromotionAsync(request, booking, cancellationToken);
+                    throw new DomainException("The system is currently overloaded with bookings; please try again later.");
+                }
+
+                foreach (var entry in ex.Entries)
+                {
+                    if (entry.Entity is Domain.Entities.Inventory inv)
+                    {
+                        await entry.ReloadAsync();
+
+                        var requestItem = request.Items.FirstOrDefault(i => i.RoomTypeId == inv.RoomTypeId);
+                        if (requestItem != null && !inv.TryReserve(requestItem.Quantity))
+                        {
+                            await RollbackPromotionAsync(request, booking, cancellationToken);
+                            throw new DomainException($"Unfortunately, the {inv.RoomTypeId} room type was instantly purchased by someone else.");
+                        }
+                    }
+                }
+
+                await Task.Delay(Random.Shared.Next(50, 150), cancellationToken);
+            }
+            catch (Exception)
+            {
+                await RollbackPromotionAsync(request, booking, cancellationToken);
+                throw;
+            }
         }
 
         var paymentResult = await _paymentService.CreatePaymentLinkAsync(booking.Id, booking.TotalAmount, request.paymentProvider, cancellationToken);
@@ -204,5 +230,23 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             BookingId = booking.Id,
             PaymentUrl = paymentResult
         });
+    }
+
+    private async Task RollbackPromotionAsync(CreateBookingCommand request, Domain.Entities.Booking booking, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(request.PromotionCode))
+        {
+            await _integrationEventService.PublishAsync<BookingCancelledEvent>(
+                new BookingCancelledEvent
+                {
+                    HotelId = request.HotelId,
+                    BookingId = booking.Id,
+                    PromotionCode = request.PromotionCode
+                },
+                "booking.events",
+                "topic",
+                "booking.cancelled",
+                cancellationToken);
+        }
     }
 }

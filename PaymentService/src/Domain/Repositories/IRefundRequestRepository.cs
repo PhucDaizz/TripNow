@@ -15,5 +15,7 @@ namespace PaymentService.Domain.Repositories
             RefundStatus? status, string? searchBookingId,
             Guid? userId, string? transactionRef, DateTime? fromDate, DateTime? toDate, 
             CancellationToken token);
+
+        Task<bool> ExistsByBookingIdAsync(Guid bookingId, CancellationToken token = default);
     }
 }

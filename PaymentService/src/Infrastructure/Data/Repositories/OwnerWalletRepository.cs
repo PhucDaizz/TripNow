@@ -80,6 +80,23 @@ namespace PaymentService.Infrastructure.Data.Repositories
                 .ToListAsync(token);
         }
 
+        public Task<OwnerWallet?> GetWalletWithPendingLedgersAsync(Guid ownerId, DateTime cutOffDate, CancellationToken token)
+        {
+            return _context.OwnerWallet
+                .Include(w => w.WalletLedgers.Where(l => l.SettlementPeriodId == null
+                                                        && l.ReferenceType == LedgerReferenceType.Booking
+                                                        && l.CreatedAt <= cutOffDate))
+                .FirstOrDefaultAsync(w => w.OwnerId == ownerId, token);
+        }
+
+        public async Task<bool> HasTransactionAsync(Guid ownerId, Guid referenceId, LedgerReferenceType type, CancellationToken cancellationToken = default)
+        {
+            return await _context.OwnerWallet
+                .Where(w => w.Id == ownerId)
+                .SelectMany(w => w.WalletLedgers)
+                .AnyAsync(l => l.ReferenceId == referenceId && l.ReferenceType == type, cancellationToken);
+        }
+
         public Task UpdateAsync(OwnerWallet ownerWallet, CancellationToken token = default)
         {
             _context.OwnerWallet.Update(ownerWallet);
