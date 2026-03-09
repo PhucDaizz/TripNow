@@ -18,8 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\ChatService.Application.csproj" />
-    <ProjectReference Include="..\Infrastructure\ChatService.Infrastructure.csproj" />
+    <ProjectReference Include="..\Application\NotificationService.Application.csproj" />
+    <ProjectReference Include="..\Infrastructure\NotificationService.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

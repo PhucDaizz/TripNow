@@ -28,6 +28,12 @@ namespace ChatService.API.Controllers
             _currentUserService = currentUserService;
         }
 
+        /// <summary>
+        /// Bắt đầu một cuộc trò chuyện mới hoặc lấy Id cuộc trò chuyện hiện có giữa khách hàng và khách sạn. Nếu cuộc trò chuyện đã tồn tại, nó sẽ được trả về thay vì tạo một cuộc trò chuyện mới.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
         [HttpPost("start")]
         public async Task<IActionResult> StartConversation([FromBody]CreateOrGetConversationDto createOrGetConversationDto)
         {
@@ -54,6 +60,12 @@ namespace ChatService.API.Controllers
             return Ok(ApiResponse<Guid>.SuccessResponse(result.Value));
         }
 
+        /// <summary>
+        /// Lấy tất cả cuộc trò chuyện liên quan đến người dùng hiện tại, bao gồm cả vai trò của họ (khách hàng, nhân viên khách sạn hoặc quản trị hệ thống). Kết quả được phân trang để quản lý hiệu quả số lượng lớn cuộc trò chuyện. Người dùng có thể xem các cuộc trò chuyện mà họ tham gia, với thông tin về vai trò của họ trong mỗi cuộc trò chuyện. Điều này cho phép người dùng dễ dàng theo dõi và quản lý các cuộc trò chuyện của mình dựa trên vai trò và mối quan hệ với khách sạn.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
         [HttpGet("all")]
         public async Task<IActionResult> GetAllConversation(
             [FromQuery] int pageIndex = 1,
@@ -100,6 +112,12 @@ namespace ChatService.API.Controllers
         }
 
 
+        /// <summary>
+        /// Lấy lịch sử trò chuyện cho một cuộc trò chuyện cụ thể, được xác định bởi Id cuộc trò chuyện. Kết quả được phân trang để quản lý hiệu quả số lượng lớn tin nhắn. Người dùng có thể xem các tin nhắn trước đó trong cuộc trò chuyện, với tùy chọn lọc theo thời gian (ví dụ: chỉ lấy tin nhắn trước một thời điểm nhất định) và giới hạn số lượng tin nhắn trả về trong mỗi lần truy vấn. Điều này giúp người dùng dễ dàng theo dõi và quản lý lịch sử trò chuyện của mình, đặc biệt là trong các cuộc trò chuyện dài hoặc có nhiều tin nhắn.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
         [HttpGet("{conversationId}/messages")]
         public async Task<IActionResult> GetChatHistory(
             Guid conversationId,

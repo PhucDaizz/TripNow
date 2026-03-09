@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using System.Reflection;
 
-namespace ChatService.API.StartUp
+namespace NotificationService.API.StartUp
 {
     public static class SwaggerConfig
     {
