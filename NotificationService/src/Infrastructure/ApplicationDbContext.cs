@@ -10,6 +10,7 @@ namespace NotificationService.Infrastructure
         private readonly IDomainEventService _domainEventService;
 
         public DbSet<Notification> Notifications { get ; set; }
+        public DbSet<SocialNotification> SocialNotifications { get ; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDomainEventService domainEventService) : base(options)
         {

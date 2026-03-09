@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotificationService.Infrastructure;
 
@@ -11,9 +12,11 @@ using NotificationService.Infrastructure;
 namespace NotificationService.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309033838_AddSocialNotification")]
+    partial class AddSocialNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,7 +83,7 @@ namespace NotificationService.Infrastructure.Migrations
                     b.HasIndex("UserId", "Type", "ReferenceId")
                         .HasDatabaseName("IX_Notifications_UserId_Type_RefId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("NotificationService.Domain.Entities.SocialNotification", b =>
@@ -145,7 +148,7 @@ namespace NotificationService.Infrastructure.Migrations
                     b.HasIndex("UserId", "ActionType", "ReferenceId", "IsRead")
                         .HasDatabaseName("IX_SocialNotif_Aggregation");
 
-                    b.ToTable("SocialNotifications", (string)null);
+                    b.ToTable("SocialNotifications");
                 });
 #pragma warning restore 612, 618
         }

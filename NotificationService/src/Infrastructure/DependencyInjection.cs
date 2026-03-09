@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Application.Common.Interfaces;
+using NotificationService.Domain.Repositories;
+using NotificationService.Infrastructure.Data.Repositories;
 using NotificationService.Infrastructure.Services;
 
 namespace NotificationService.Infrastructure
@@ -19,7 +21,8 @@ namespace NotificationService.Infrastructure
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<ISocialNotificationRepository, SocialNotificationRepository>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
