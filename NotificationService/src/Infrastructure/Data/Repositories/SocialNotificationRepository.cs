@@ -20,6 +20,11 @@ namespace NotificationService.Infrastructure.Data.Repositories
             await _context.SocialNotifications.AddAsync(socialNotification, token);
         }
 
+        public async Task<int> CountUnreadByUserIdAsync(Guid userId, CancellationToken token = default)
+        {
+            return await _context.SocialNotifications.CountAsync(n => n.UserId == userId && !n.IsRead, token);
+        }
+
         public Task DeleteAsync(SocialNotification socialNotification, CancellationToken token = default)
         {
             _context.SocialNotifications.Remove(socialNotification);
@@ -29,6 +34,16 @@ namespace NotificationService.Infrastructure.Data.Repositories
         public async Task<SocialNotification?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             return await _context.SocialNotifications.FirstOrDefaultAsync(n => n.Id == id, token);
+        }
+
+        public async Task MarkAllAsReadByUserIdAsync(Guid userId, CancellationToken token = default)
+        {
+            await _context.SocialNotifications
+                .Where(n => n.UserId == userId && n.IsRead == false)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.ReadAt, DateTime.UtcNow),
+                    token);
         }
     }
 }
