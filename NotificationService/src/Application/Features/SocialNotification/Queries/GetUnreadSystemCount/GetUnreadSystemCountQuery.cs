@@ -5,4 +5,3 @@ namespace NotificationService.Application.Features.SocialNotification.Queries.Ge
 {
     public record GetUnreadSystemCountQuery(Guid UserId): IRequest<Result<int>>;
 }
-s

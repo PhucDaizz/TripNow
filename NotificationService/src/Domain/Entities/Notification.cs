@@ -6,7 +6,7 @@ namespace NotificationService.Domain.Entities
     public class Notification : BaseEntity, AggregateRoot
     {
         // ID của người nhận (Có thể là CustomerId hoặc HotelOwnerId)
-        public Guid UserId { get; private set; }
+        public Guid OwnerId { get; private set; }
 
         // Tiêu đề ngắn gọn (VD: "Hoàn tiền thành công")
         public string Title { get; private set; }
@@ -28,9 +28,9 @@ namespace NotificationService.Domain.Entities
 
         private Notification() { } 
 
-        public Notification(Guid userId, string title, string message, NotificationType type, string referenceId)
+        public Notification(Guid ownerId, string title, string message, NotificationType type, string referenceId)
         {
-            UserId = userId;
+            OwnerId = ownerId;
             Title = title;
             Message = message;
             Type = type;

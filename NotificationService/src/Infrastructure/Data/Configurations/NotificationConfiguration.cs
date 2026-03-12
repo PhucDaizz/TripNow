@@ -11,7 +11,7 @@ namespace NotificationService.Infrastructure.Data.Configurations
         {
             base.Configure(builder);
 
-            builder.Property(n => n.UserId)
+            builder.Property(n => n.OwnerId)
                 .IsRequired(true);
 
             builder.Property(n => n.Title)
@@ -35,13 +35,13 @@ namespace NotificationService.Infrastructure.Data.Configurations
             builder.Property(n => n.ReadAt)
                 .IsRequired(false);
 
-            builder.HasIndex(n => new { n.UserId, n.CreatedAt })
+            builder.HasIndex(n => new { n.OwnerId, n.CreatedAt })
                 .HasDatabaseName("IX_Notifications_UserId_CreatedAt");
 
-            builder.HasIndex(n => new { n.UserId, n.IsRead })
+            builder.HasIndex(n => new { n.OwnerId, n.IsRead })
                 .HasDatabaseName("IX_Notifications_UserId_IsRead");
 
-            builder.HasIndex(n => new { n.UserId, n.Type, n.ReferenceId })
+            builder.HasIndex(n => new { n.OwnerId, n.Type, n.ReferenceId })
                 .HasDatabaseName("IX_Notifications_UserId_Type_RefId");
 
         }

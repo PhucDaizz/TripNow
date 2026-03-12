@@ -7,6 +7,7 @@ using NotificationService.API.StartUp;
 using NotificationService.Application;
 using NotificationService.Infrastructure;
 using NotificationService.Infrastructure.BackgroundJobs.Consumer;
+using NotificationService.Infrastructure.Hubs;
 using System.Diagnostics;
 
 namespace NotificationService.API
@@ -53,6 +54,7 @@ namespace NotificationService.API
             app.UseHttpsRedirection();
 
             app.MapHealthChecks("/health");
+            app.MapHub<NotificationHub>("/notificationhub");
 
             app.UseAuthorization();
 

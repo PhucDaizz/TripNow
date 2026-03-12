@@ -41,7 +41,7 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
 
             var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(request.HotelId, cancellationToken);
 
-            if (authorType != PostAuthorType.Hotel)
+            if (authorType != AuthorType.Hotel)
             {
                 return Result.Failure<Guid>(new Error("FORBIDDEN", "You don't have permission to create an event for this hotel."));
             }

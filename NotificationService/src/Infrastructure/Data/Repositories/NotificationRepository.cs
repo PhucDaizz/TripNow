@@ -21,7 +21,7 @@ namespace NotificationService.Infrastructure.Data.Repositories
 
         public async Task<int> CountUnreadByUserIdAsync(Guid userId, CancellationToken token = default)
         {
-            return await _context.Notifications.CountAsync(n => n.UserId == userId && !n.IsRead, token);
+            return await _context.Notifications.CountAsync(n => n.OwnerId == userId && !n.IsRead, token);
         }
 
         public Task DeleteAsync(Notification notification, CancellationToken token = default)
@@ -38,7 +38,7 @@ namespace NotificationService.Infrastructure.Data.Repositories
         public async Task MarkAllAsReadByUserIdAsync(Guid userId, CancellationToken token = default)
         {
             await _context.Notifications
-                .Where(n => n.UserId == userId && n.IsRead == false)
+                .Where(n => n.OwnerId == userId && n.IsRead == false)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(n => n.IsRead, true)
                     .SetProperty(n => n.ReadAt, DateTime.UtcNow),

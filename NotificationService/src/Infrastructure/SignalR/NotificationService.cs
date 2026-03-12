@@ -36,5 +36,15 @@ namespace NotificationService.Infrastructure.SignalR
         {
             await _hubContext.Clients.User(userId.ToString()).UpdateSocialBadgeCount(unreadCount);
         }
+
+        public async Task SendHotelSocialNotificationAsync(Guid hotelId, SocialNotificationDto notification)
+        {
+            await _hubContext.Clients.Group($"Hotel_{hotelId}").ReceiveSocialNotification(notification);
+        }
+
+        public async Task UpdateHotelSocialBadgeCountAsync(Guid hotelId, int unreadCount)
+        {
+            await _hubContext.Clients.Group($"Hotel_{hotelId}").UpdateSocialBadgeCount(unreadCount);
+        }
     }
 }

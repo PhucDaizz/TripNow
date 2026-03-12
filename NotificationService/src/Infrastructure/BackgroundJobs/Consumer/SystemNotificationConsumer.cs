@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nexus.BuildingBlocks.Interfaces;
-using NotificationService.Application.DTOs.SocialNotification.Event;
 using NotificationService.Application.DTOs.SystemNotification.Event;
 
 namespace NotificationService.Infrastructure.BackgroundJobs.Consumer

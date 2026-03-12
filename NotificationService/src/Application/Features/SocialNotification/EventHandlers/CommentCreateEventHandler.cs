@@ -50,11 +50,18 @@ namespace NotificationService.Application.Features.SocialNotification.EventHandl
 
             var notifDto = SocialNotificationDto.FromEntity(finalNotif, notification.ActorAvatarUrl ?? notification.LastActorId.ToString());
 
-            await _notificationService.SendSocialNotificationAsync(notification.OwnerId, notifDto);
-
             int unreadCount = await _unitOfWork.SocialNotification.CountUnreadByUserIdAsync(notification.OwnerId, cancellationToken);
 
-            await _notificationService.UpdateSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            if (notification.IsHotelNotification)
+            {
+                await _notificationService.SendHotelSocialNotificationAsync(notification.OwnerId, notifDto);
+                await _notificationService.UpdateHotelSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
+            else
+            {
+                await _notificationService.SendSocialNotificationAsync(notification.OwnerId, notifDto);
+                await _notificationService.UpdateSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
         }
     }
 }

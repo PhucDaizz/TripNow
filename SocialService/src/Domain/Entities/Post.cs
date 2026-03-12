@@ -22,7 +22,7 @@ namespace SocialService.Domain.Entities
         public DateTime? UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        public PostAuthorType AuthorType { get; private set; }
+        public AuthorType AuthorType { get; private set; }
 
         public Review? ReviewDetail { get; private set; }
 
@@ -33,7 +33,7 @@ namespace SocialService.Domain.Entities
 
 
         // 1. Tạo Post bình thường (Check-in, Khoe ảnh)
-        public static Post CreateNormalPost(Guid userId, string content, Guid? hotelId = null, PostAuthorType authorType = PostAuthorType.User)
+        public static Post CreateNormalPost(Guid userId, string content, Guid? hotelId = null, AuthorType authorType = AuthorType.User)
         {
             return new Post(userId, hotelId, content, PostType.Normal, authorType);
         }
@@ -41,7 +41,7 @@ namespace SocialService.Domain.Entities
         // 2. Tạo Post sự kiện (Chỉ chủ khách sạn tạo)
         public static Post CreateEventPost(Guid ownerId, Guid hotelId, string content)
         {
-            return new Post(ownerId, hotelId, content, PostType.Event, PostAuthorType.Hotel);
+            return new Post(ownerId, hotelId, content, PostType.Event, AuthorType.Hotel);
         }
 
         // 3. Tạo Review Post 
@@ -53,14 +53,14 @@ namespace SocialService.Domain.Entities
                 throw new DomainException("Review khách sạn bắt buộc phải gắn với một Khách sạn (HotelId không được trống).");
             }
 
-            var post = new Post(userId, hotelId, content, PostType.Review, PostAuthorType.User);
+            var post = new Post(userId, hotelId, content, PostType.Review, AuthorType.User);
             post.ReviewDetail = new Review(post.Id, targetId, targetType, rating, bookingId);
 
             return post;
         }
 
         // --- CONSTRUCTOR CHUNG ---
-        private Post(Guid userId, Guid? hotelId, string content, PostType type, PostAuthorType authorType)
+        private Post(Guid userId, Guid? hotelId, string content, PostType type, AuthorType authorType)
         {
             if (userId == Guid.Empty) throw new DomainException("UserId không hợp lệ.");
             if (string.IsNullOrWhiteSpace(content)) throw new DomainException("Nội dung không được để trống.");

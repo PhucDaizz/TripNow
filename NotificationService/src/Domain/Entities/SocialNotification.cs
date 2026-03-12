@@ -6,7 +6,7 @@ namespace NotificationService.Domain.Entities
     public class SocialNotification : BaseEntity, AggregateRoot
     {
         // 1. Chủ nhân của thông báo (Người nhận)
-        public Guid UserId { get; private set; }
+        public Guid OwnerId { get; private set; }
 
         // 2. Phân loại MXH
         // (VD: 1 = Like, 2 = Comment, 3 = Mention, 4 = Follow)
@@ -27,9 +27,9 @@ namespace NotificationService.Domain.Entities
 
         private SocialNotification() { }
 
-        public SocialNotification(Guid userId, SocialActionType actionType, string referenceId, Guid actorId, string actorName)
+        public SocialNotification(Guid ownerId, SocialActionType actionType, string referenceId, Guid actorId, string actorName)
         {
-            UserId = userId;
+            OwnerId = ownerId;
             ActionType = actionType;
             ReferenceId = referenceId;
 

@@ -12,5 +12,8 @@ namespace NotificationService.Application.Services
         // MXH
         Task SendSocialNotificationAsync(Guid userId, SocialNotificationDto notification);
         Task UpdateSocialBadgeCountAsync(Guid userId, int unreadCount);
+
+        Task SendHotelSocialNotificationAsync(Guid hotelId, SocialNotificationDto notification);
+        Task UpdateHotelSocialBadgeCountAsync(Guid hotelId, int unreadCount);
     }
 }

@@ -19,6 +19,8 @@ namespace NotificationService.Infrastructure
                    new MySqlServerVersion(new Version(8, 0, 21)),
                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
+            services.AddSignalR();
+
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
             services.AddTransient<INotificationService, SignalR.NotificationService>();

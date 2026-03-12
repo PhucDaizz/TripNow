@@ -1,4 +1,5 @@
 ﻿using SocialService.Domain.Common;
+using SocialService.Domain.Enum;
 using SocialService.Domain.Events.Comment;
 using SocialService.Domain.Exceptions;
 
@@ -16,10 +17,11 @@ namespace SocialService.Domain.Entities
         public string? HiddenReason { get; private set; }
 
         public Guid? ParentCommentId { get; private set; }
+        public AuthorType AuthorType { get; private set; }
 
         private Comment() {}
 
-        public Comment(Guid postId, Guid userId, string content, Guid? parentCommentId = null)
+        public Comment(Guid postId, Guid userId, string content, AuthorType authorType, Guid? parentCommentId = null)
         {
             if (postId == Guid.Empty) throw new DomainException("PostId không hợp lệ.");
             if (userId == Guid.Empty) throw new DomainException("UserId không hợp lệ.");
@@ -33,13 +35,14 @@ namespace SocialService.Domain.Entities
             CreatedAt = DateTime.UtcNow;
             IsDeleted = false;
             IsHidden = false;
+            AuthorType = authorType;
 
             AddDomainEvent(new CommentCreatedEvent(this.Id, this.PostId, this.UserId, this.ParentCommentId));
         }
 
-        public static Comment Create(Guid postId, Guid userId, string content, Guid? parentCommentId = null)
+        public static Comment Create(Guid postId, Guid userId, string content, AuthorType authorType, Guid? parentCommentId = null)
         {
-            return new Comment(postId, userId, content, parentCommentId);
+            return new Comment(postId, userId, content, authorType, parentCommentId);
         }
 
         /// <summary>

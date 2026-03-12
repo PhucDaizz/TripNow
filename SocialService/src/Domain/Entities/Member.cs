@@ -1,4 +1,5 @@
 ﻿using SocialService.Domain.Common;
+using SocialService.Domain.Enum;
 
 namespace SocialService.Domain.Entities
 {

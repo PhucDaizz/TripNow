@@ -22,7 +22,7 @@ namespace NotificationService.Application.Features.SystemNotification.Commands.M
 
             if (notification != null)
             {
-                if (notification.UserId != request.UserId)
+                if (notification.OwnerId != request.UserId)
                 {
                     return Result.Failure(new Error("Unauthorized", "You are not authorized to mark this notification as read."));
                 }

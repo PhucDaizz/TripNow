@@ -16,16 +16,16 @@ namespace SocialService.Infrastructure.Services
             _hotelCatalogService = hotelCatalogService;
         }
 
-        public async Task<PostAuthorType> ResolveAuthorTypeAsync(Guid? requestedHotelId, CancellationToken cancellationToken = default)
+        public async Task<AuthorType> ResolveAuthorTypeAsync(Guid? requestedHotelId, CancellationToken cancellationToken = default)
         {
             if (!requestedHotelId.HasValue)
             {
-                return PostAuthorType.User;
+                return AuthorType.User;
             }
 
             if (_currentUserService.HotelId.HasValue && _currentUserService.HotelId.Value == requestedHotelId.Value)
             {
-                return PostAuthorType.Hotel;
+                return AuthorType.Hotel;
             }
 
             var currentUserId = Guid.Parse(_currentUserService.UserId!);
@@ -37,11 +37,11 @@ namespace SocialService.Infrastructure.Services
 
                 if (hotelDetail != null && hotelDetail.OwnerId == currentUserId)
                 {
-                    return PostAuthorType.Hotel;
+                    return AuthorType.Hotel;
                 }
             }
 
-            return PostAuthorType.User;
+            return AuthorType.User;
         }
     }
 }

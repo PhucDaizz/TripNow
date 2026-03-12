@@ -265,7 +265,7 @@ namespace SocialService.API.Controllers
         /// - Khi user bấm vào trang Profile của 1 khách sạn, họ sẽ muốn xem tất cả các bài Post (Event, Review, Normal check-in) thuộc về khách sạn đó.
         /// </remarks>
         [HttpGet("hotel/{hotelId}")] 
-        public async Task<IActionResult> GetPostsByHotel(Guid hotelId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10, [FromQuery] PostType? type = null, [FromQuery] PostAuthorType? authorType = null)
+        public async Task<IActionResult> GetPostsByHotel(Guid hotelId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10, [FromQuery] PostType? type = null, [FromQuery] AuthorType? authorType = null)
         {
             var query = new GetPostsByHotelQuery
             {

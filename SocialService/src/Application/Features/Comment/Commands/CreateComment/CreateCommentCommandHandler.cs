@@ -1,6 +1,7 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Application.Contracts;
 
 namespace SocialService.Application.Features.Comment.Commands.CreateComment
 {
@@ -8,13 +9,16 @@ namespace SocialService.Application.Features.Comment.Commands.CreateComment
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthorIdentityService _authorIdentityService;
 
         public CreateCommentCommandHandler(
             IUnitOfWork unitOfWork,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService, 
+            IAuthorIdentityService authorIdentityService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _authorIdentityService = authorIdentityService;
         }
 
         public async Task<Result<Guid>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -45,7 +49,11 @@ namespace SocialService.Application.Features.Comment.Commands.CreateComment
                 }
             }
 
-            var comment = new Domain.Entities.Comment(request.PostId, userId, request.Content, request.ParentCommentId);
+            var post = await _unitOfWork.postRepository.GetByIdAsync(request.PostId, cancellationToken);
+
+            var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(post.HotelId, cancellationToken);
+
+            var comment = new Domain.Entities.Comment(request.PostId, userId, request.Content, authorType, request.ParentCommentId);
 
             await _unitOfWork.commentRepository.AddAsync(comment);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

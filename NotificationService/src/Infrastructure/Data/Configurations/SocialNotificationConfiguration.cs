@@ -11,7 +11,7 @@ namespace NotificationService.Infrastructure.Data.Configurations
         {
             base.Configure(builder);
 
-            builder.Property(n => n.UserId)
+            builder.Property(n => n.OwnerId)
                 .IsRequired(true);
 
             builder.Property(n => n.ActionType)
@@ -40,13 +40,13 @@ namespace NotificationService.Infrastructure.Data.Configurations
                 .IsRequired(false);
 
            
-            builder.HasIndex(n => new { n.UserId, n.CreatedAt })
+            builder.HasIndex(n => new { n.OwnerId, n.CreatedAt })
                 .HasDatabaseName("IX_SocialNotif_UserId_CreatedAt");
 
-            builder.HasIndex(n => new { n.UserId, n.IsRead })
+            builder.HasIndex(n => new { n.OwnerId, n.IsRead })
                 .HasDatabaseName("IX_SocialNotif_UserId_IsRead");
 
-            builder.HasIndex(n => new { n.UserId, n.ActionType, n.ReferenceId, n.IsRead })
+            builder.HasIndex(n => new { n.OwnerId, n.ActionType, n.ReferenceId, n.IsRead })
                 .HasDatabaseName("IX_SocialNotif_Aggregation");
         }
     }
