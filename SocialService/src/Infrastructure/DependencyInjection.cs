@@ -34,6 +34,7 @@ namespace SocialService.Infrastructure
             services.AddSingleton<ICloudinaryService, CloudinaryService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
+            services.AddScoped<IAuthorIdentityService, AuthorIdentityService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
 
             return services;

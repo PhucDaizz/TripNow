@@ -2,6 +2,7 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
+using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
 {
@@ -10,22 +11,27 @@ namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IAuthorIdentityService _authorIdentityService;
 
         public CreateNormalPostCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
-            ICloudinaryService cloudinaryService)
+            ICloudinaryService cloudinaryService,
+            IAuthorIdentityService authorIdentityService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
+            _authorIdentityService = authorIdentityService;
         }
 
         public async Task<Result<Guid>> Handle(CreateNormalPostCommand request, CancellationToken cancellationToken)
         {
             var userId = Guid.Parse(_currentUserService.UserId);
 
-            var post = Domain.Entities.Post.CreateNormalPost(userId, request.Content, request.HotelId);
+            var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(request.HotelId, cancellationToken);
+
+            var post = Domain.Entities.Post.CreateNormalPost(userId, request.Content, request.HotelId, authorType);
 
             if (request.Images != null && request.Images.Any())
             {

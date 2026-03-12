@@ -2,6 +2,7 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
+using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.Post.Commands.CreateEventPost
 {
@@ -11,33 +12,38 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
         private readonly IHotelCatalogService _hotelCatalogService;
+        private readonly IAuthorIdentityService _authorIdentityService;
 
         public CreateEventPostCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICloudinaryService cloudinaryService,
-            IHotelCatalogService hotelCatalogService)
+            IHotelCatalogService hotelCatalogService,
+            IAuthorIdentityService authorIdentityService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
             _hotelCatalogService = hotelCatalogService;
+            _authorIdentityService = authorIdentityService;
         }
 
         public async Task<Result<Guid>> Handle(CreateEventPostCommand request, CancellationToken cancellationToken)
         {
             var userId = Guid.Parse(_currentUserService.UserId);
 
-            var hotel = await _hotelCatalogService.GetHotelDetail(request.HotelId, cancellationToken);
 
-            if (hotel == null)
+            var isHotelExist = await _hotelCatalogService.IsHotelExisting(request.HotelId, cancellationToken);
+            if (!isHotelExist)
             {
-                return Result.Failure<Guid>(new Error("NOT.FOUD", $"Can not find this hotelId: {request.HotelId}"));
+                return Result.Failure<Guid>(new Error("NOT.FOUND", $"Can not find this hotelId: {request.HotelId}"));
             }
 
-            if (userId != hotel.OwnerId)
+            var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(request.HotelId, cancellationToken);
+
+            if (authorType != PostAuthorType.Hotel)
             {
-                return Result.Failure<Guid>(new Error("FORBIDDEN", "You are not the owner of this hotel."));
+                return Result.Failure<Guid>(new Error("FORBIDDEN", "You don't have permission to create an event for this hotel."));
             }
 
             var post = Domain.Entities.Post.CreateEventPost(userId, request.HotelId, request.Content);

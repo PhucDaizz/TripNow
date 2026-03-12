@@ -126,7 +126,7 @@ namespace SocialService.API.Controllers
         /// Tạo 1 bài post sự kiên cho khách sạn
         /// </summary>
         /// <remarks>
-        /// - Chỉ chủ khách sạn được tạo
+        /// - Chỉ chủ khách sạn, lễ tân được tạo
         /// - Post này có thê post nhằm mục đích giảm giá hoặc thông báo nghĩ lễ ,....
         /// </remarks>
         [HttpPost("event")]
@@ -265,14 +265,15 @@ namespace SocialService.API.Controllers
         /// - Khi user bấm vào trang Profile của 1 khách sạn, họ sẽ muốn xem tất cả các bài Post (Event, Review, Normal check-in) thuộc về khách sạn đó.
         /// </remarks>
         [HttpGet("hotel/{hotelId}")] 
-        public async Task<IActionResult> GetPostsByHotel(Guid hotelId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10, [FromQuery] PostType? type = null)
+        public async Task<IActionResult> GetPostsByHotel(Guid hotelId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10, [FromQuery] PostType? type = null, [FromQuery] PostAuthorType? authorType = null)
         {
             var query = new GetPostsByHotelQuery
             {
                 HotelId = hotelId,
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                Type = type
+                Type = type,
+                AuthorType = authorType
             };
             var result = await _mediator.Send(query);
             return Ok(ApiResponse<Domain.Common.Models.PagedResult<PostDto>>.SuccessResponse(result.Value));

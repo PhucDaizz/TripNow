@@ -27,6 +27,11 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByHotel
                 baseQuery = baseQuery.Where(p => p.Type == request.Type.Value);
             }
 
+            if (request.AuthorType.HasValue)
+            {
+                baseQuery = baseQuery.Where(p => p.AuthorType == request.AuthorType.Value);
+            }
+
             var totalCount = await baseQuery.CountAsync(cancellationToken);
 
             if (totalCount == 0)
@@ -49,7 +54,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByHotel
                             CommentCount = p.CommentCount,
                             CreatedAt = p.CreatedAt,
                             IsEdited = p.UpdatedAt.HasValue,
-
+                            AuthorType = p.AuthorType.ToString(),
                             AuthorId = p.UserId,
                             AuthorName = author != null ? author.FullName : "Người dùng ẩn danh",
                             AuthorAvatar = author != null ? author.AvatarUrl : "",

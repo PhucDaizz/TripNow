@@ -48,7 +48,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsFeed
                             CommentCount = p.CommentCount,
                             CreatedAt = p.CreatedAt,
                             IsEdited = p.UpdatedAt.HasValue,
-
+                            AuthorType = p.AuthorType.ToString(),
                             AuthorId = p.UserId,
                             AuthorName = author != null ? author.FullName : "Người dùng ẩn danh",
                             AuthorAvatar = author != null ? author.AvatarUrl : "",

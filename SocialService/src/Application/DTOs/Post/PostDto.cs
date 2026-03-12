@@ -13,6 +13,8 @@ namespace SocialService.Application.DTOs.Post
         public string AuthorName { get; set; }
         public string AuthorAvatar { get; set; }
 
+        public string? AuthorType { get; set; }
+
         public int LikeCount { get; set; }
         public int CommentCount { get; set; }
         public DateTime CreatedAt { get; set; }

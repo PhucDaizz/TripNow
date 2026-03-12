@@ -34,6 +34,10 @@ namespace SocialService.Infrastructure.Data.Configurations
                    .HasMaxLength(50)
                    .IsRequired();
 
+            builder.Property(x => x.AuthorType)
+                   .HasColumnType("tinyint") 
+                   .IsRequired();
+
             builder.Property(x => x.LikeCount).HasDefaultValue(0);
             builder.Property(x => x.CommentCount).HasDefaultValue(0);
 
@@ -59,7 +63,7 @@ namespace SocialService.Infrastructure.Data.Configurations
                    .HasForeignKey<Review>(r => r.PostId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => new { x.HotelId, x.Status, x.CreatedAt })
+            builder.HasIndex(x => new { x.HotelId, x.AuthorType, x.Status, x.CreatedAt })
                    .HasDatabaseName("IX_Posts_Hotel_Feed");
 
             builder.HasIndex(x => new { x.UserId, x.Status })
