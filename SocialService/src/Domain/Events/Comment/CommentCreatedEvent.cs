@@ -2,5 +2,5 @@
 
 namespace SocialService.Domain.Events.Comment
 {
-    public record CommentCreatedEvent(Guid commentId, Guid postId, Guid userId): DomainEvent;
+    public record CommentCreatedEvent(Guid CommentId, Guid PostId, Guid UserId, Guid? ParentCommentId): DomainEvent;
 }

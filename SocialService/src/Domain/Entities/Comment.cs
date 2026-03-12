@@ -34,7 +34,7 @@ namespace SocialService.Domain.Entities
             IsDeleted = false;
             IsHidden = false;
 
-            AddDomainEvent(new CommentCreatedEvent(this.Id, this.PostId, this.UserId));
+            AddDomainEvent(new CommentCreatedEvent(this.Id, this.PostId, this.UserId, this.ParentCommentId));
         }
 
         public static Comment Create(Guid postId, Guid userId, string content, Guid? parentCommentId = null)

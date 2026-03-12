@@ -20,14 +20,14 @@ namespace SocialService.Domain.Entities
         {
             var like = new PostLike(postId, userId);
 
-            like.AddDomainEvent(new PostLikedEvent(postId));
+            like.AddDomainEvent(new PostLikedEvent(postId, userId));
 
             return like;
         }
 
-        public void Delete()
+        public void Delete(Guid userId)
         {
-            this.AddDomainEvent(new PostUnlikedEvent(this.PostId));
+            this.AddDomainEvent(new PostUnlikedEvent(this.PostId, userId));
         }
     }
 }

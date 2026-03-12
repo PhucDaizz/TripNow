@@ -1,5 +1,6 @@
 ﻿using SocialService.Domain.Common;
 using SocialService.Domain.Enum;
+using SocialService.Domain.Events.UserFollow;
 using SocialService.Domain.Exceptions; 
 
 namespace SocialService.Domain.Entities
@@ -26,6 +27,14 @@ namespace SocialService.Domain.Entities
             TargetId = targetId;
             Type = type;
             CreatedAt = DateTime.UtcNow;
+
+            AddDomainEvent(new UserFollowedEvent(followerId, targetId, type));
+        }
+
+
+        public void Unfollow()
+        {
+            AddDomainEvent(new UserUnfollowedEvent(this.FollowerId, this.TargetId, this.Type));
         }
 
     }

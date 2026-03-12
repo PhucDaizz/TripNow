@@ -43,13 +43,6 @@ namespace SocialService.Application.Features.UserFollow.Commands.FollowUser
                 UserId = request.TargetId,
             };
 
-            await _integrationEventService.PublishAsync<FollowUserRequest>(
-                eventRequest,
-                "social.events",
-                "topic",
-                "increase.follow.user",
-                cancellationToken);
-
             await _unitOfWork.userFollowRepository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 

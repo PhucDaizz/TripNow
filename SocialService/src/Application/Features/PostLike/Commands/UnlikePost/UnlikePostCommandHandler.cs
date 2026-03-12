@@ -24,7 +24,7 @@ namespace SocialService.Application.Features.PostLike.Commands.UnlikePost
             var like = await _unitOfWork.postLikeRepository.GetByUserIdAndPostAsync(userId, request.PostId, cancellationToken);
             if (like == null) return Result.Failure<bool>(new Error("NOT.LIKE", "You haven't liked this post yet."));
 
-            like.Delete();
+            like.Delete(userId);
 
             await _unitOfWork.postLikeRepository.DeleteAsync(like);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

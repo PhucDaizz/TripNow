@@ -22,7 +22,8 @@ namespace SocialService.Domain.Entities
         public DateTime? UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        
+        //public PostAuthorType AuthorType { get; private set; }
+
         public Review? ReviewDetail { get; private set; }
 
         private readonly List<PostImage> _images = new();

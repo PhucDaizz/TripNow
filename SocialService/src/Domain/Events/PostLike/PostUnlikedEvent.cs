@@ -2,5 +2,5 @@
 
 namespace SocialService.Domain.Events.PostLike
 {
-    public record PostUnlikedEvent(Guid PostId) : DomainEvent;
+    public record PostUnlikedEvent(Guid PostId, Guid UserId) : DomainEvent;
 }

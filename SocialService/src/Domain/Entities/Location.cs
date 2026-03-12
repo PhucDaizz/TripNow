@@ -1,5 +1,6 @@
 ﻿using SocialService.Domain.Common;
 using SocialService.Domain.Enum;
+using SocialService.Domain.Events.Location;
 using SocialService.Domain.Exceptions;
 using SocialService.Domain.ValueObject;
 
@@ -40,6 +41,10 @@ namespace SocialService.Domain.Entities
         public void Verify()
         {
             IsVerify = true;
+            AddDomainEvent(new LocationVerifiedEvent{
+                LocationId = Id,
+                CreateBy = CreatedByUserId ?? Guid.Empty
+            });
         }
 
         public void UpdateType(LocationType newType)

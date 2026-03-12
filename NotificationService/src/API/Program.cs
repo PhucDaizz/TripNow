@@ -6,6 +6,7 @@ using NotificationService.API.Extensions;
 using NotificationService.API.StartUp;
 using NotificationService.Application;
 using NotificationService.Infrastructure;
+using NotificationService.Infrastructure.BackgroundJobs.Consumer;
 using System.Diagnostics;
 
 namespace NotificationService.API
@@ -35,9 +36,14 @@ namespace NotificationService.API
 
             builder.Services.AddSharedRabbitMQ(builder.Configuration);
 
+
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
+
+            builder.Services.AddHostedService<SocialNotificationConsumer>();
+            builder.Services.AddHostedService<SystemNotificationConsumer>();
+
             var app = builder.Build();
 
             app.UseExceptionHandler();

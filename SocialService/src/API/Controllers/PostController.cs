@@ -35,9 +35,10 @@ namespace SocialService.API.Controllers
         /// </summary>
         /// <remarks>
         /// - Ví dụ có thể là 1 bài post "hằng ngày, vui chơi,..."
+        /// - Chỉ khách hàng, chủ khách sạn và lễ tân mới có thể tạo bài post này.
         /// </remarks>
         [HttpPost("normal")]
-        [Authorize]
+        [Authorize(Roles = $"{AppRoles.Customer},{AppRoles.HotelOwner},{AppRoles.Receptionist}")]
         public async Task<IActionResult> CreateNormalPost([FromForm] CreateNormalPostRequest request)
         {
             var command = new CreateNormalPostCommand
@@ -75,6 +76,7 @@ namespace SocialService.API.Controllers
         /// </summary>
         /// <remarks>
         /// - Ví dụ có thể là 1 bài post sau khi trải nghiệm xong 1 dịch vụ khách sạn hoặc trải nghiệm tại 1 địa điểm được đê xuất trên Location
+        /// - Chỉ khách hàng mới có thể tạo bài post này, và phải liên quan đến trải nghiệm của họ (ví dụ: sau khi đặt phòng xong, hoặc sau khi check-out, hoặc sau khi sử dụng dịch vụ tại khách sạn xong, họ sẽ được nhắc tạo 1 bài review về trải nghiệm đó).
         /// </remarks>
         [HttpPost("review")]
         [Authorize(Roles = AppRoles.Customer)] 

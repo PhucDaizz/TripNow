@@ -1,7 +1,6 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 using SocialService.Application.Common.Interfaces;
-using SocialService.Application.DTOs.UserFollow;
 using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.UserFollow.Commands.UnfollowUser
@@ -30,16 +29,7 @@ namespace SocialService.Application.Features.UserFollow.Commands.UnfollowUser
                 return Result.Failure<bool>(new Error("NOT.FOLLOWING.YET", "You have never followed this user"));
             }
 
-            await _integrationEventService.PublishAsync<UnfollowEvent>(
-                new UnfollowEvent
-                {
-                    UserId = userId
-                },
-                "social.events",
-                "topic",
-                "unfollow.user",
-                cancellationToken
-            );
+            userFollow.Unfollow();
 
             await _unitOfWork.userFollowRepository.DeleteAsync(userFollow, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

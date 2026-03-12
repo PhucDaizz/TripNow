@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Application.DTOs.PostLike.Event;
+using SocialService.Domain.Enum.NotificationService;
 using SocialService.Domain.Events.PostLike;
 
 namespace SocialService.Application.Features.Post.EventHandlers
@@ -7,10 +9,12 @@ namespace SocialService.Application.Features.Post.EventHandlers
     public class PostUnlikedEventHandler : INotificationHandler<PostUnlikedEvent>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IIntegrationEventService _integrationEventService;
 
-        public PostUnlikedEventHandler(IUnitOfWork unitOfWork)
+        public PostUnlikedEventHandler(IUnitOfWork unitOfWork, IIntegrationEventService integrationEventService)
         {
             _unitOfWork = unitOfWork;
+            _integrationEventService = integrationEventService;
         }
 
         public async Task Handle(PostUnlikedEvent notification, CancellationToken cancellationToken)
@@ -21,6 +25,19 @@ namespace SocialService.Application.Features.Post.EventHandlers
                 post.DecrementLikeCount();
                 await _unitOfWork.postRepository.UpdateAsync(post);
             }
+
+            await _integrationEventService.PublishAsync<PostUnlikedIntegrationEvent>(
+                new PostUnlikedIntegrationEvent
+                {
+                    OwnerId = post.UserId,
+                    SocialActionType = SocialActionType.Like,
+                    ReferenceId = post.Id,
+                    UnlikedUserId = notification.UserId
+                },
+                "social.events",
+                "topic",
+                "post.unlike",
+                cancellationToken);
         }
     }
 }

@@ -7,6 +7,7 @@
         ReplyComment = 3,   // Trả lời bình luận của bác
         Mention = 4,        // Tag/Nhắc tên bác (@username) trong bài/comment
         Follow = 5,         // Bắt đầu theo dõi (Khách theo dõi Khách sạn)
-        Share = 6           // Chia sẻ bài viết của bác
+        Share = 6,           // Chia sẻ bài viết của bác
+        LocationVerified = 7   // Địa điểm đóng góp
     }
 }

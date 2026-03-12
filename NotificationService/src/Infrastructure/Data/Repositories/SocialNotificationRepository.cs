@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using NotificationService.Application.Common.Interfaces;
 using NotificationService.Domain.Entities;
+using NotificationService.Domain.Enum;
 using NotificationService.Domain.Repositories;
 
 namespace NotificationService.Infrastructure.Data.Repositories
@@ -36,6 +37,16 @@ namespace NotificationService.Infrastructure.Data.Repositories
             return await _context.SocialNotifications.FirstOrDefaultAsync(n => n.Id == id, token);
         }
 
+        public async Task<SocialNotification?> GetExistingForAggregationAsync(Guid userId, SocialActionType actionType, string referenceId, CancellationToken cancellationToken = default)
+        {
+            return await _context.SocialNotifications
+                .FirstOrDefaultAsync(n =>
+                    n.UserId == userId &&
+                    n.ActionType == actionType &&
+                    n.ReferenceId == referenceId,
+                    cancellationToken);
+        }
+
         public async Task MarkAllAsReadByUserIdAsync(Guid userId, CancellationToken token = default)
         {
             await _context.SocialNotifications
@@ -44,6 +55,18 @@ namespace NotificationService.Infrastructure.Data.Repositories
                     .SetProperty(n => n.IsRead, true)
                     .SetProperty(n => n.ReadAt, DateTime.UtcNow),
                     token);
+        }
+
+        public Task RemoveAsync(SocialNotification socialNotification, CancellationToken token = default)
+        {
+            _context.SocialNotifications.Remove(socialNotification);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(SocialNotification socialNotification, CancellationToken token = default)
+        {
+            _context.SocialNotifications.Update(socialNotification);
+            return Task.CompletedTask;
         }
     }
 }

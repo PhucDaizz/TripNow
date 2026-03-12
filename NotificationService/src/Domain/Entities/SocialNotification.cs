@@ -52,6 +52,16 @@ namespace NotificationService.Domain.Entities
             ReadAt = null;
         }
 
+        public bool RemoveInteraction(Guid unlikedUserId)
+        {
+            if (ActorCount > 0)
+            {
+                ActorCount--;
+            }
+
+            return ActorCount == 0;
+        }
+
         public void MarkAsRead()
         {
             if (!IsRead)
