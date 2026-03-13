@@ -61,6 +61,7 @@ namespace SocialService.API
             builder.Services.AddApplication();
 
             builder.Services.AddHostedService<MemberEventsConsumer>();
+            builder.Services.AddHostedService<HotelEventsConsumer>();
 
             builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
                (sp, client) =>

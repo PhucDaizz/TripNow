@@ -162,16 +162,16 @@ namespace SocialService.API.Controllers
         /// <remarks>
         /// - Admin xem được tất cả người dùng chỉ xem của họ
         /// </remarks>
-        [HttpGet("{userId}/followers")]
+        [HttpGet("{targetId}/followers")]
         [Authorize] 
         public async Task<IActionResult> GetFollowersList(
-            Guid userId,
+            Guid targetId,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
             var query = new GetFollowersQuery
             {
-                UserId = userId,
+                TargetId = targetId,
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };

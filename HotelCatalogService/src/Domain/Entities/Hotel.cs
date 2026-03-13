@@ -60,6 +60,8 @@ namespace HotelCatalogService.Domain.Entities
             Rating = rating;
             StartingPrice = 0;
             Slug = SlugHelper.GenerateSlug(name);
+
+            this.AddDomainEvent(new HotelCreatedEvent(this.Id, this.Name));
         }
 
 
@@ -295,6 +297,7 @@ namespace HotelCatalogService.Domain.Entities
                     existingImg.SetThumbnail(false);
                 }
                 img.SetThumbnail(true);
+                AddDomainEvent(new HotelThumbnailChangedEvent(this.Id, img.ImageUrl));
             }
             else if (img.IsThumbnail && !isThumbnail)
             {
@@ -311,7 +314,9 @@ namespace HotelCatalogService.Domain.Entities
 
             if (img.IsThumbnail && _images.Count > 0)
             {
-                _images.First().SetThumbnail(true);
+                var newThumbnail = _images.First();
+                newThumbnail.SetThumbnail(true);
+                AddDomainEvent(new HotelThumbnailChangedEvent(this.Id, newThumbnail.ImageUrl));
             }
         }
 

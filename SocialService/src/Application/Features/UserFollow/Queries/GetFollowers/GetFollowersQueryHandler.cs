@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SocialService.Application.Common.Interfaces;
+using SocialService.Application.Contracts;
 using SocialService.Application.DTOs.UserFollow;
 using SocialService.Domain.Common;
 using SocialService.Domain.Common.Models;
@@ -13,26 +14,43 @@ namespace SocialService.Application.Features.UserFollow.Queries.GetFollowers
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthorIdentityService _authorIdentityService;
 
-        public GetFollowersQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        public GetFollowersQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService, IAuthorIdentityService authorIdentityService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _authorIdentityService = authorIdentityService;
         }
 
         public async Task<Result<PagedResult<FollowerDto>>> Handle(GetFollowersQuery request, CancellationToken cancellationToken)
         {
-            var currentUserId = Guid.Parse(_currentUserService.UserId);
-            var userRoles = _currentUserService.Role;
-            var isAdmin = userRoles.Contains(AppRoles.SysAdmin);
+            var currentUserId = Guid.Parse(_currentUserService.UserId!);
+            var isAdmin = _currentUserService.Role?.Contains(AppRoles.SysAdmin) ?? false;
 
-            if (!isAdmin && currentUserId != request.UserId)
+            bool hasPermission = false;
+
+            if (isAdmin || currentUserId == request.TargetId)
             {
-                return Result.Failure<PagedResult<FollowerDto>>(new Error("NOT.PERMIT", "You do not have permission to view other people's follower lists."));
+                hasPermission = true;
+            }
+            else
+            {
+                var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(request.TargetId, cancellationToken);
+
+                if (authorType == AuthorType.Hotel)
+                {
+                    hasPermission = true;
+                }
+            }
+
+            if (!hasPermission)
+            {
+                return Result.Failure<PagedResult<FollowerDto>>(new Error("NOT.PERMIT", "You do not have permission to view this follower list."));
             }
 
             var query = _context.UserFollows.AsNoTracking()
-                .Where(x => x.TargetId == request.UserId && x.Type == TypeFollow.FollowUser);
+                .Where(x => x.TargetId == request.TargetId);
 
             var resultQuery = from f in query
                               join m in _context.Members.AsNoTracking()
