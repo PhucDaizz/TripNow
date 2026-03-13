@@ -19,13 +19,13 @@ namespace ChatService.Infrastructure.Data.Configurations
                    .IsRequired();
 
             builder.HasIndex(x => x.FullName)
-                   .HasDatabaseName("IX_Members_FullName");
+                   .HasDatabaseName("IX_ChatProfiles_FullName");
 
             builder.HasIndex(x => x.Type)
-                   .HasDatabaseName("IX_Members_Type");
+                   .HasDatabaseName("IX_ChatProfiles_Type");
 
             builder.HasIndex(x => new { x.Type, x.FullName })
-                   .HasDatabaseName("IX_Members_Type_FullName");
+                   .HasDatabaseName("IX_ChatProfiles_Type_FullName");
         }
     }
 }
