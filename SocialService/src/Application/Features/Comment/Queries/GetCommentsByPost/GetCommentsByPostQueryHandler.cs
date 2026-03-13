@@ -31,13 +31,13 @@ namespace SocialService.Application.Features.Comment.Queries.GetCommentsByPost
             }
 
             var resultQuery = from c in query
-                              join u in _context.Members on c.UserId equals u.Id
+                              join u in _context.Members on c.AuthorId equals u.Id
                               orderby c.CreatedAt descending
                               select new CommentDto
                               {
                                   Id = c.Id,
                                   PostId = c.PostId,
-                                  UserId = c.UserId,
+                                  UserId = c.AuthorId,
                                   UserName = u.FullName, 
                                   UserAvatar = u.AvatarUrl,
                                   Content = c.Content,

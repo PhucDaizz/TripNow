@@ -30,8 +30,7 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
 
         public async Task<Result<Guid>> Handle(CreateEventPostCommand request, CancellationToken cancellationToken)
         {
-            var userId = Guid.Parse(_currentUserService.UserId);
-
+            var currentUserId = Guid.Parse(_currentUserService.UserId);
 
             var isHotelExist = await _hotelCatalogService.IsHotelExisting(request.HotelId, cancellationToken);
             if (!isHotelExist)
@@ -46,7 +45,8 @@ namespace SocialService.Application.Features.Post.Commands.CreateEventPost
                 return Result.Failure<Guid>(new Error("FORBIDDEN", "You don't have permission to create an event for this hotel."));
             }
 
-            var post = Domain.Entities.Post.CreateEventPost(userId, request.HotelId, request.Content);
+            var post = Domain.Entities.Post.CreateEventPost(request.HotelId, request.HotelId, request.Content);
+            post.ChangeCreateBy(currentUserId);
 
             if (request.Images != null && request.Images.Any())
             {

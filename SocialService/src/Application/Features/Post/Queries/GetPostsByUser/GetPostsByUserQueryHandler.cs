@@ -20,7 +20,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByUser
         public async Task<Result<PagedResult<PostDto>>> Handle(GetPostsByUserQuery request, CancellationToken cancellationToken)
         {
             var baseQuery = _context.Posts.AsNoTracking()
-                .Where(p => p.UserId == request.UserId && !p.IsDeleted);
+                .Where(p => p.AuthorId == request.UserId && !p.IsDeleted);
 
             if (request.Type.HasValue)
             {
@@ -36,7 +36,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByUser
             }
 
             var query = from p in baseQuery
-                        join m in _context.Members.AsNoTracking() on p.UserId equals m.Id into pm
+                        join m in _context.Members.AsNoTracking() on p.AuthorId equals m.Id into pm
                         from author in pm.DefaultIfEmpty()
                         orderby p.CreatedAt descending
                         select new PostDto
@@ -50,7 +50,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsByUser
                             CreatedAt = p.CreatedAt,
                             IsEdited = p.UpdatedAt.HasValue,
                             AuthorType = p.AuthorType.ToString(),
-                            AuthorId = p.UserId,
+                            AuthorId = p.AuthorId,
                             AuthorName = author != null ? author.FullName : "Người dùng ẩn danh",
                             AuthorAvatar = author != null ? author.AvatarUrl : "",
 

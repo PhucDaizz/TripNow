@@ -13,7 +13,7 @@ namespace SocialService.Infrastructure.Data.Configurations
 
             builder.ToTable("Comments");
 
-            builder.Property(c => c.UserId)
+            builder.Property(c => c.AuthorId)
                 .IsRequired(true);
 
             builder.Property(c => c.Content)

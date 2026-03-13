@@ -27,11 +27,23 @@ namespace SocialService.Application.Features.Post.Commands.CreateNormalPost
 
         public async Task<Result<Guid>> Handle(CreateNormalPostCommand request, CancellationToken cancellationToken)
         {
-            var userId = Guid.Parse(_currentUserService.UserId);
+            var currentUserId = Guid.Parse(_currentUserService.UserId);
 
             var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(request.HotelId, cancellationToken);
 
-            var post = Domain.Entities.Post.CreateNormalPost(userId, request.Content, request.HotelId, authorType);
+            Guid authorId;
+
+            if (authorType == AuthorType.Hotel && request.HotelId.HasValue)
+            {
+                authorId = request.HotelId.Value;
+            }
+            else
+            {
+                authorId = currentUserId;
+            }
+
+            var post = Domain.Entities.Post.CreateNormalPost(authorId, request.Content, request.HotelId, authorType);
+            post.ChangeCreateBy(currentUserId);
 
             if (request.Images != null && request.Images.Any())
             {

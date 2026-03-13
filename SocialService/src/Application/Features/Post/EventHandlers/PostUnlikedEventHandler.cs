@@ -29,7 +29,7 @@ namespace SocialService.Application.Features.Post.EventHandlers
             await _integrationEventService.PublishAsync<PostUnlikedIntegrationEvent>(
                 new PostUnlikedIntegrationEvent
                 {
-                    OwnerId = post.UserId,
+                    OwnerId = post.AuthorId,
                     SocialActionType = SocialActionType.Like,
                     ReferenceId = post.Id,
                     UnlikedUserId = notification.UserId

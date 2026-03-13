@@ -8,7 +8,7 @@ namespace SocialService.Domain.Entities
     public class Comment: BaseEntity, AggregateRoot
     {
         public Guid PostId { get; private set; }
-        public Guid UserId { get; private set; }
+        public Guid AuthorId { get; private set; }
         public string Content { get; private set; }
 
 
@@ -28,7 +28,7 @@ namespace SocialService.Domain.Entities
             ValidateContent(content);
 
             PostId = postId;
-            UserId = userId;
+            AuthorId = userId;
             Content = content.Trim();
             ParentCommentId = parentCommentId;
 
@@ -37,7 +37,7 @@ namespace SocialService.Domain.Entities
             IsHidden = false;
             AuthorType = authorType;
 
-            AddDomainEvent(new CommentCreatedEvent(this.Id, this.PostId, this.UserId, this.ParentCommentId));
+            AddDomainEvent(new CommentCreatedEvent(this.Id, this.PostId, this.AuthorId, this.ParentCommentId));
         }
 
         public static Comment Create(Guid postId, Guid userId, string content, AuthorType authorType, Guid? parentCommentId = null)
@@ -48,13 +48,8 @@ namespace SocialService.Domain.Entities
         /// <summary>
         /// Sửa nội dung comment
         /// </summary>
-        public void EditContent(string newContent, Guid editorId)
+        public void EditContent(string newContent)
         {
-            if (editorId != UserId)
-            {
-                throw new DomainException("Bạn không có quyền sửa comment này.");
-            }
-
             ValidateContent(newContent);
 
             Content = newContent.Trim();
@@ -66,13 +61,8 @@ namespace SocialService.Domain.Entities
         /// <summary>
         /// Xóa comment (Soft Delete) - Người dùng tự xóa
         /// </summary>
-        public void Delete(Guid deleterId)
+        public void Delete()
         {
-            if (deleterId != UserId)
-            {
-                throw new DomainException("Bạn không có quyền xóa comment này.");
-            }
-
             if (IsDeleted) return;
 
             IsDeleted = true;
@@ -107,6 +97,17 @@ namespace SocialService.Domain.Entities
             }
 
             // Có thể thêm check từ ngữ tục tĩu (Bad words) ở đây hoặc dùng Service riêng
+        }
+
+        public void ChangeCreateBy(Guid currentUserId)
+        {
+            CreatedBy = currentUserId.ToString();
+        }
+
+        public void ChangeUpdateBy(Guid currentUserId)
+        {
+            UpdatedBy = currentUserId.ToString();
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

@@ -2,6 +2,7 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
+using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.Comment.Commands.CreateComment
 {
@@ -23,7 +24,7 @@ namespace SocialService.Application.Features.Comment.Commands.CreateComment
 
         public async Task<Result<Guid>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
-            var userId = Guid.Parse(_currentUserService.UserId);
+            var currentUserId = Guid.Parse(_currentUserService.UserId!);
 
             var postExists = await _unitOfWork.postRepository.IsPostExisting(request.PostId, cancellationToken);
             if (!postExists)
@@ -53,7 +54,18 @@ namespace SocialService.Application.Features.Comment.Commands.CreateComment
 
             var authorType = await _authorIdentityService.ResolveAuthorTypeAsync(post.HotelId, cancellationToken);
 
-            var comment = new Domain.Entities.Comment(request.PostId, userId, request.Content, authorType, request.ParentCommentId);
+            Guid authorId;
+            if (authorType == AuthorType.Hotel && post.HotelId.HasValue)
+            {
+                authorId = post.HotelId.Value;
+            }
+            else
+            {
+                authorId = currentUserId;
+            }
+
+            var comment = new Domain.Entities.Comment(request.PostId, authorId, request.Content, authorType, request.ParentCommentId);
+            comment.ChangeCreateBy(currentUserId);
 
             await _unitOfWork.commentRepository.AddAsync(comment);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -20,14 +20,14 @@ namespace SocialService.Application.Features.Comment.Queries.GetCommentById
             
             var query = from c in _context.Comments.AsNoTracking()
                         join m in _context.Members.AsNoTracking()
-                        on c.UserId equals m.Id into pm 
+                        on c.AuthorId equals m.Id into pm 
                         from author in pm.DefaultIfEmpty()
                         where c.Id == request.CommentId
                         select new CommentDto
                         {
                             Id = c.Id,
                             PostId = c.PostId,
-                            UserId = c.UserId,
+                            UserId = c.AuthorId,
                             Content = c.Content,
                             ParentCommentId = c.ParentCommentId,
                             CreatedAt = c.CreatedAt,

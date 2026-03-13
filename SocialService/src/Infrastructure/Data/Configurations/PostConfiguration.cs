@@ -17,7 +17,7 @@ namespace SocialService.Infrastructure.Data.Configurations
                    .IsRequired()
                    .HasColumnType("longtext");
 
-            builder.Property(c => c.UserId)
+            builder.Property(c => c.AuthorId)
                 .IsRequired(true);
 
             builder.Property(x => x.ThumbnailUrl)
@@ -66,7 +66,7 @@ namespace SocialService.Infrastructure.Data.Configurations
             builder.HasIndex(x => new { x.HotelId, x.AuthorType, x.Status, x.CreatedAt })
                    .HasDatabaseName("IX_Posts_Hotel_Feed");
 
-            builder.HasIndex(x => new { x.UserId, x.Status })
+            builder.HasIndex(x => new { x.AuthorId, x.Status })
                    .HasDatabaseName("IX_Posts_User_Profile");
 
             builder.HasIndex(x => new { x.Status, x.CreatedAt })

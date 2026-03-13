@@ -25,7 +25,7 @@ namespace SocialService.Application.Features.Post.EventHandlers
             post.IncrementLikeCount();
             await _unitOfWork.postRepository.UpdateAsync(post);
 
-            if (post.UserId == notification.UserId) return;
+            if (post.AuthorId == notification.UserId) return;
 
             var actor = await _unitOfWork.memberRepository.GetByIdAsync(notification.UserId);
             if (actor == null) return;
@@ -33,7 +33,7 @@ namespace SocialService.Application.Features.Post.EventHandlers
             await _integrationEventService.PublishAsync<PostLikedIntegrationEvent>(
                 new PostLikedIntegrationEvent
                 {
-                    OwnerId = post.UserId,                  
+                    OwnerId = post.AuthorId,                  
                     SocialActionType = SocialActionType.Like,
                     ReferenceId = post.Id,      
                     LastActorId = actor.Id,

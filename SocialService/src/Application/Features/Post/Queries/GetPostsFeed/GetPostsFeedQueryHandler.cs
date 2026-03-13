@@ -35,7 +35,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsFeed
             }
 
             var query = from p in baseQuery
-                        join m in _context.Members.AsNoTracking() on p.UserId equals m.Id into pm
+                        join m in _context.Members.AsNoTracking() on p.AuthorId equals m.Id into pm
                         from author in pm.DefaultIfEmpty()
                         orderby p.CreatedAt descending
                         select new PostDto
@@ -49,7 +49,7 @@ namespace SocialService.Application.Features.Post.Queries.GetPostsFeed
                             CreatedAt = p.CreatedAt,
                             IsEdited = p.UpdatedAt.HasValue,
                             AuthorType = p.AuthorType.ToString(),
-                            AuthorId = p.UserId,
+                            AuthorId = p.AuthorId,
                             AuthorName = author != null ? author.FullName : "Người dùng ẩn danh",
                             AuthorAvatar = author != null ? author.AvatarUrl : "",
 

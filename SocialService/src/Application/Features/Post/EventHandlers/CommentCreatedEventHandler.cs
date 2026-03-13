@@ -49,7 +49,7 @@ namespace SocialService.Application.Features.Post.EventHandlers
                 }
                 else
                 {
-                    receiverId = parentComment.UserId; 
+                    receiverId = parentComment.AuthorId; 
                     isHotelNotification = false;
                 }
             }
@@ -65,7 +65,7 @@ namespace SocialService.Application.Features.Post.EventHandlers
                 }
                 else
                 {
-                    receiverId = post.UserId; 
+                    receiverId = post.AuthorId; 
                     isHotelNotification = false;
                 }
             }

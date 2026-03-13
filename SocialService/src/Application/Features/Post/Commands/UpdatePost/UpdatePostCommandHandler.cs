@@ -1,7 +1,8 @@
-﻿using Domain.Common.Response;
+using Domain.Common.Response;
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
+using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.Post.Commands.UpdatePost
 {
@@ -11,30 +12,48 @@ namespace SocialService.Application.Features.Post.Commands.UpdatePost
         private readonly ICurrentUserService _currentUserService;
         private readonly ICloudinaryService _cloudinaryService;
         private readonly IImageProcessor _imageProcessor;
+        private readonly IAuthorIdentityService _authorIdentityService;
 
         public UpdatePostCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICloudinaryService cloudinaryService,
-            IImageProcessor imageProcessor)
+            IImageProcessor imageProcessor,
+            IAuthorIdentityService authorIdentityService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _cloudinaryService = cloudinaryService;
             _imageProcessor = imageProcessor;
+            _authorIdentityService = authorIdentityService;
         }
 
         public async Task<Result<bool>> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
         {
-            var userId = Guid.Parse(_currentUserService.UserId);
+            var currentUserId = Guid.Parse(_currentUserService.UserId!);
 
             var post = await _unitOfWork.postRepository.GetPostDetailAsync(request.PostId, cancellationToken);
 
             if (post == null || post.IsDeleted)
                 return Result.Failure<bool>(new Error("NOT_FOUND", "The article does not exist."));
 
-            if (post.UserId != userId)
+            bool hasPermission = false;
+
+            var currentUserHotelContext = await _authorIdentityService.ResolveAuthorTypeAsync(post.HotelId, cancellationToken);
+
+            if (post.AuthorType == AuthorType.User && post.AuthorId == currentUserId)
+            {
+                hasPermission = true;
+            }
+            else if (post.AuthorType == AuthorType.Hotel && currentUserHotelContext == AuthorType.Hotel)
+            {
+                hasPermission = true;
+            }
+
+            if (!hasPermission)
+            {
                 return Result.Failure<bool>(new Error("FORBIDDEN", "You do not have permission to edit this post."));
+            }
 
             post.UpdateContent(request.Content);
 

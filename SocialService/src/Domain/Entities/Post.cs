@@ -6,7 +6,7 @@ namespace SocialService.Domain.Entities
 {
     public class Post : BaseEntity, AggregateRoot
     {
-        public Guid UserId { get; private set; }
+        public Guid AuthorId { get; private set; }
         public Guid? HotelId { get; private set; } // HotelId: Đánh dấu post này nằm trên tường của KS nào hoặc thuộc chuyến đi nào
 
         public string Content { get; private set; }
@@ -70,7 +70,7 @@ namespace SocialService.Domain.Entities
                 throw new DomainException("Bài đăng sự kiện (Event) bắt buộc phải thuộc về một Khách sạn (HotelId).");
             }
 
-            UserId = userId;
+            AuthorId = userId;
             HotelId = hotelId == Guid.Empty ? null : hotelId;
             Content = content.Trim();
             Type = type;
@@ -163,6 +163,17 @@ namespace SocialService.Domain.Entities
         public string? GetImagePublicId(Guid imageId)
         {
             return _images.FirstOrDefault(x => x.Id == imageId)?.PublicId;
+        }
+
+        public void ChangeCreateBy(Guid userId)
+        {
+            CreatedBy = userId.ToString();
+        }
+
+        public void ChangeUpdateBy(Guid userId)
+        {
+            UpdatedBy = userId.ToString();
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }
