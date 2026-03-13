@@ -29,6 +29,26 @@ namespace ChatService.Application.Features.Conversation.Commands.SendMessage
                 return Result.Failure<MessageDto>(new Error("NOT.FOUND","Not found for this conversation"));
             }
 
+            Guid profileIdToLookup;
+
+            if (request.CurrentUserRole == SenderType.Hotel)
+            {
+                profileIdToLookup = conversation.HotelId;
+            }
+            else if (request.CurrentUserRole == SenderType.SystemBot)
+            {
+                profileIdToLookup = Guid.Empty;
+            }
+            else
+            {
+                profileIdToLookup = request.CurrentUserId;
+            }
+
+            var senderProfile = await _unitOfWork.ChatProfile.GetByIdAsync(profileIdToLookup);
+
+            string senderDisplayName = senderProfile?.FullName ?? "Người dùng";
+            string senderAvatar = senderProfile?.AvatarUrl ?? "";
+
             var newMessage = Messages.CreateMessage(
                 conversationId: request.ConversationId,
                 senderId: request.CurrentUserId,
@@ -52,7 +72,8 @@ namespace ChatService.Application.Features.Conversation.Commands.SendMessage
                 MessageType = newMessage.MessageType,
                 IsRead = newMessage.IsRead,
                 CreatedAt = DateTime.UtcNow,
-                SenderName = request.CurrentUserName
+                SenderName = senderDisplayName,
+                SenderAvatarUrl = senderAvatar,
             };
 
             Guid receiverId = request.CurrentUserRole == SenderType.Hotel

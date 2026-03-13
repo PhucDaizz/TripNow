@@ -15,6 +15,7 @@ namespace ChatService.Infrastructure
 
         public DbSet<Conversations> Conversations { get; set; }
         public DbSet<Messages> Messages { get; set; }
+        public DbSet<ChatProfile> ChatProfiles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

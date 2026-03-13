@@ -7,6 +7,7 @@ namespace ChatService.Application.Common.Interfaces
     {
         public DbSet<Conversations> Conversations { get; set; }
         public DbSet<Messages> Messages { get; set; }
+        public DbSet<ChatProfile> ChatProfiles { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

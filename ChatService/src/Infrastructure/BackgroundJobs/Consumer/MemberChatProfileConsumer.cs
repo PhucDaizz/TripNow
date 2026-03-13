@@ -1,20 +1,20 @@
-﻿using MediatR;
+﻿using ChatService.Application.Features.ChatProfile.EventHandlers.MemberChangeImage;
+using ChatService.Application.Features.ChatProfile.EventHandlers.MemberRegister;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nexus.BuildingBlocks.Interfaces;
-using SocialService.Application.Features.Member.EventHandlers.HotelCreated;
-using SocialService.Application.Features.Member.EventHandlers.HotelThumbnailChanged;
 
-namespace SocialService.Infrastructure.BackgroundJobs.Consumer
+namespace ChatService.Infrastructure.BackgroundJobs.Consumer
 {
-    public class HotelEventsConsumer : BackgroundService
+    public class MemberChatProfileConsumer : BackgroundService
     {
         private readonly IMessageConsumer _consumer;
-        private readonly ILogger<HotelEventsConsumer> _logger;
+        private readonly ILogger<MemberChatProfileConsumer> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public HotelEventsConsumer(IMessageConsumer consumer, ILogger<HotelEventsConsumer> logger, IServiceScopeFactory scopeFactory)
+        public MemberChatProfileConsumer(IMessageConsumer consumer, ILogger<MemberChatProfileConsumer> logger, IServiceScopeFactory scopeFactory)
         {
             _consumer = consumer;
             _logger = logger;
@@ -23,20 +23,19 @@ namespace SocialService.Infrastructure.BackgroundJobs.Consumer
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.Subscribe<HotelCreatedEvent>(
-               exchange: "hotel-catalog.events",
+            await _consumer.Subscribe<MemberRegisterEvent>(
+               exchange: "user.events",
                exchangeType: "topic",
-               routingKey: "hotel.created",
-               queueName: "social-service-hotel-created", 
+               routingKey: "user.registered",
+               queueName: "chat-service-member-registered",
                handler: (msg) => ProcessMessage(msg, stoppingToken));
 
-            await _consumer.Subscribe<HotelThumbnailChangedIntegrationEvent>(
-               exchange: "hotel-catalog.events",
+            await _consumer.Subscribe<MemberChangeImageEvent>(
+               exchange: "user.events",
                exchangeType: "topic",
-               routingKey: "hotel.thumbnail_changed",
-               queueName: "social-service-hotel-thumbnail-changed", 
+               routingKey: "user.avatar_changed",
+               queueName: "chat-service.member.avatar_changed",
                handler: (msg) => ProcessMessage(msg, stoppingToken));
-
         }
 
         private async Task ProcessMessage<TMessage>(TMessage message, CancellationToken token) where TMessage : class

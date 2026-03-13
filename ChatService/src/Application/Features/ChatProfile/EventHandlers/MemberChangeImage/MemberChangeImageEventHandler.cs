@@ -1,0 +1,26 @@
+﻿using ChatService.Application.Common.Interfaces;
+using MediatR;
+
+namespace ChatService.Application.Features.ChatProfile.EventHandlers.MemberChangeImage
+{
+    public class MemberChangeImageEventHandler : INotificationHandler<MemberChangeImageEvent>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public MemberChangeImageEventHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task Handle(MemberChangeImageEvent notification, CancellationToken cancellationToken)
+        {
+            var member = await _unitOfWork.ChatProfile.GetByIdAsync(notification.UserId, cancellationToken);
+            if (member != null)
+            {
+                member.UpdateInfo(member.FullName, notification.ImageUrl);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+    }
+}

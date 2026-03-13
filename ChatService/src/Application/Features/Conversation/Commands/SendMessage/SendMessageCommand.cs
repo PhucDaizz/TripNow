@@ -12,10 +12,7 @@ namespace ChatService.Application.Features.Conversation.Commands.SendMessage
         public string Content { get; set; } = string.Empty;
         public MessageType MessageType { get; set; }
 
-
         public Guid CurrentUserId { get; set; }
         public SenderType CurrentUserRole { get; set; }
-
-        public string CurrentUserName { get; set; } = string.Empty;
     }
 }

@@ -4,6 +4,7 @@ using ChatService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatService.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260313081832_AddChatProfile")]
+    partial class AddChatProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,7 +68,7 @@ namespace ChatService.Infrastructure.Migrations
                     b.HasIndex("Type", "FullName")
                         .HasDatabaseName("IX_Members_Type_FullName");
 
-                    b.ToTable("ChatProfiles", (string)null);
+                    b.ToTable("ChatProfiles");
                 });
 
             modelBuilder.Entity("ChatService.Domain.Entities.Conversations", b =>

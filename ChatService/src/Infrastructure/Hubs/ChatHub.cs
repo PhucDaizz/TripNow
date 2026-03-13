@@ -41,10 +41,6 @@ namespace ChatService.Infrastructure.Hubs
                 _ => SenderType.Customer
             };
 
-            command.CurrentUserName = Context.User?.FindFirst(ClaimTypes.Name)?.Value
-                           ?? Context.User?.FindFirst("name")?.Value
-                           ?? "Người dùng ẩn danh";
-
             await _mediator.Send(command);
         }
 

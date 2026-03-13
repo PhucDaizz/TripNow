@@ -9,11 +9,15 @@ namespace ChatService.Infrastructure
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
         public IConversationRepository Conversation { get;}
+        public IChatProfileRepository ChatProfile { get; }
 
-        public UnitOfWork(ApplicationDbContext context, IConversationRepository conversationRepository)
+        public UnitOfWork(ApplicationDbContext context, 
+            IConversationRepository conversationRepository,
+            IChatProfileRepository chatProfileRepository)
         {
             _context = context;
             Conversation = conversationRepository;
+            ChatProfile = chatProfileRepository;
         }
 
 

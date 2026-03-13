@@ -31,7 +31,7 @@ namespace ChatService.Application.Features.Conversation.Queries.GetAll
                     request.HotelId.Value, request.PageIndex, request.PageSize, cancellationToken);
 
                 conversations = dbResult.Items;
-                totalCount = dbResult.TotalCount; 
+                totalCount = dbResult.TotalCount;
             }
             else
             {
@@ -39,25 +39,44 @@ namespace ChatService.Application.Features.Conversation.Queries.GetAll
                     request.CurrentUserId, request.PageIndex, request.PageSize, cancellationToken);
 
                 conversations = dbResult.Items;
-                totalCount = dbResult.TotalCount; 
+                totalCount = dbResult.TotalCount;
             }
 
-            var dtos = conversations.Select(c => new ConversationListDto
+            if (!conversations.Any())
             {
-                Id = c.Id,
-                HotelId = c.HotelId,
-                UserId = c.UserId,
-                LastMessage = c.LastMessage ?? string.Empty,
-                UpdatedAt = c.UpdatedAt ?? c.CreatedAt,
-                UnreadCount = request.CurrentUserRole == SenderType.Customer
-                              ? c.CustomerUnreadCount
-                              : c.HotelUnreadCount,
-                DisplayName = request.CurrentUserRole == SenderType.Customer
-                              ? $"Khách sạn {c.HotelId.ToString().Substring(0, 4)}"
-                              : $"Khách hàng {c.UserId.ToString().Substring(0, 4)}",
-                AvatarUrl = request.CurrentUserRole == SenderType.Customer
-                              ? "https://ui-avatars.com/api/?name=Hotel&background=random"
-                              : "https://ui-avatars.com/api/?name=Customer&background=random"
+                return Result.Success(PagedResult<ConversationListDto?>.Create(new List<ConversationListDto?>(), 0, request.PageIndex, request.PageSize));
+            }
+
+            var targetProfileIds = request.CurrentUserRole == SenderType.Customer
+                ? conversations.Select(c => c.HotelId).Distinct().ToList() 
+                : conversations.Select(c => c.UserId).Distinct().ToList(); 
+
+            var profiles = await _unitOfWork.ChatProfile.GetByIdsAsync(targetProfileIds, cancellationToken);
+
+            var profileDict = profiles.ToDictionary(p => p.Id);
+
+            var dtos = conversations.Select(c =>
+            {
+                var targetId = request.CurrentUserRole == SenderType.Customer ? c.HotelId : c.UserId;
+
+                profileDict.TryGetValue(targetId, out var targetProfile);
+
+                return new ConversationListDto
+                {
+                    Id = c.Id,
+                    HotelId = c.HotelId,
+                    UserId = c.UserId,
+                    LastMessage = c.LastMessage ?? string.Empty,
+                    UpdatedAt = c.UpdatedAt ?? c.CreatedAt,
+                    UnreadCount = request.CurrentUserRole == SenderType.Customer
+                                  ? c.CustomerUnreadCount
+                                  : c.HotelUnreadCount,
+
+                    DisplayName = targetProfile?.FullName ?? "Người dùng ẩn danh",
+                    AvatarUrl = string.IsNullOrEmpty(targetProfile?.AvatarUrl)
+                                ? $"https://ui-avatars.com/api/?name={(request.CurrentUserRole == SenderType.Customer ? "Hotel" : "Customer")}&background=random"
+                                : targetProfile.AvatarUrl
+                };
             }).ToList();
 
             var pagedData = PagedResult<ConversationListDto?>.Create(

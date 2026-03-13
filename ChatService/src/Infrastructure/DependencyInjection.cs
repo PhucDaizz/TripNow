@@ -26,6 +26,7 @@ namespace ChatService.Infrastructure
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IConversationRepository, ConversationRepository>();
+            services.AddScoped<IChatProfileRepository, ChatProfileRepository>();
 
             services.AddTransient<IChatNotificationService, ChatNotificationService>();
             services.AddScoped<IDomainEventService, DomainEventService>();
