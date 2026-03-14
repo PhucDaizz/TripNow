@@ -9,6 +9,7 @@ using HotelCatalogService.Infrastructure;
 using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Booking;
 using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Room;
 using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Social;
+using HotelCatalogService.Infrastructure.Hubs;
 using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using Microsoft.AspNetCore.Http.Features;
@@ -64,6 +65,18 @@ namespace HotelCatalogService.API
 
             builder.Services.AddSharedRabbitMQ(builder.Configuration);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DevTestPolicy", policy =>
+                {
+                    policy
+                        .SetIsOriginAllowed(_ => true)   // cho phép mọi origin kể cả null (file://)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();             // bắt buộc cho SignalR
+                });
+            });
+
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
@@ -86,8 +99,12 @@ namespace HotelCatalogService.API
                     client.BaseAddress = new Uri(options.Booking);
                 });
 
+            builder.Services.AddSignalR();
+
 
             var app = builder.Build();
+
+            app.UseCors("DevTestPolicy");
 
             app.UseExceptionHandler();
 
@@ -99,6 +116,7 @@ namespace HotelCatalogService.API
 
             app.UseAuthorization();
 
+            app.MapHub<HousekeepingHub>("/hubs/housekeeping");
 
             app.MapControllers();
 

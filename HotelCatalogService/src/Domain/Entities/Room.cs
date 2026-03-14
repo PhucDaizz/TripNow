@@ -12,6 +12,8 @@ namespace HotelCatalogService.Domain.Entities
         public string RoomName { get; private set; } 
         public RoomStatus Status { get; private set; }
 
+        public Guid? AssignedToStaffId { get; private set; }
+
         public DateOnly? MaintenanceStart { get; private set; }
         public DateOnly? MaintenanceEnd { get; private set; }
 
@@ -25,6 +27,7 @@ namespace HotelCatalogService.Domain.Entities
             Status = RoomStatus.Available;
             MaintenanceStart = null;
             MaintenanceEnd = null;
+            AssignedToStaffId = null;
         }
 
         public void UpdateDetails(string roomName, Guid roomTypeId)
@@ -40,7 +43,11 @@ namespace HotelCatalogService.Domain.Entities
             RoomTypeId = roomTypeId;
         }
 
-        public void MarkAsDirty() => Status = RoomStatus.Dirty;
+        public void MarkAsDirty()
+        {
+            Status = RoomStatus.Dirty;
+            AssignedToStaffId = null;
+        }
         public void MarkAsMaintain(DateOnly fromDate, DateOnly toDate)
         {
             if (fromDate > toDate)
@@ -81,22 +88,30 @@ namespace HotelCatalogService.Domain.Entities
             Status = RoomStatus.Available;
         }
 
-        public void StartCleaning()
+        public void StartCleaning(Guid staffId)
         {
             if (Status != RoomStatus.Dirty)
                 throw new InvalidOperationException("Chỉ phòng đang Dơ (Dirty) mới có thể bắt đầu dọn.");
 
+            if (AssignedToStaffId.HasValue && AssignedToStaffId.Value != staffId)
+                throw new DomainException("Phòng này đã có người khác nhận dọn trước đó!");
+
             Status = RoomStatus.Cleaning;
+            AssignedToStaffId = staffId;
         }
 
         // 2. Hoàn tất dọn (Chỉ được phép khi đang Cleaning)
         // Sửa lại hàm MarkAsClean cũ hoặc tạo hàm mới FinishCleaning
-        public void FinishCleaning()
+        public void FinishCleaning(Guid staffId)
         {
             if (Status != RoomStatus.Cleaning)
                 throw new InvalidOperationException("Phải chuyển sang trạng thái Đang dọn (Cleaning) trước khi hoàn tất.");
 
+            if (AssignedToStaffId != staffId)
+                throw new DomainException("Bạn không phải là người đang dọn phòng này, không thể bấm hoàn thành!");
+
             Status = RoomStatus.Available;
+            AssignedToStaffId = null;
         }
 
         public void CheckIn(Guid updateBy)

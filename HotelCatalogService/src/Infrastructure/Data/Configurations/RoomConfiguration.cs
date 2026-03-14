@@ -18,6 +18,9 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                    .HasConversion<byte>()
                    .IsRequired();
 
+            builder.Property(x => x.AssignedToStaffId)
+                    .IsRequired(false);
+
             builder.HasOne<RoomType>()
                    .WithMany()
                    .HasForeignKey(r => r.RoomTypeId)

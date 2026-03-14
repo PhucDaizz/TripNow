@@ -3,6 +3,7 @@ using HotelCatalogService.Application.Contracts;
 using HotelCatalogService.Domain.Repositories;
 using HotelCatalogService.Infrastructure.Data.Repositories;
 using HotelCatalogService.Infrastructure.Services;
+using HotelCatalogService.Infrastructure.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,7 @@ namespace HotelCatalogService.Infrastructure
 
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IHousekeepingSignalRService, HousekeepingSignalRService>();
             services.AddSingleton<ICloudinaryService, CloudinaryService>();
             services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
 
