@@ -32,7 +32,8 @@ namespace SocialService.Application.Features.Locations.EventHandlers
                 Title = "Địa điểm đã được phê duyệt! 🎉",
                 Message = $"Tuyệt vời! Địa điểm '{location.Name}' của bạn đã được hệ thống kiểm duyệt và hiển thị công khai.",
                 Type = NotificationType.LocationVerified, 
-                ReferenceId = location.Id.ToString()
+                ReferenceId = location.Id.ToString(),
+                IsHotelNotification = false
             };
 
             await _integrationEventService.PublishAsync(

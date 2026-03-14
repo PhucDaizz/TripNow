@@ -2,7 +2,6 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
-using SocialService.Application.DTOs.UserFollow;
 using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.UserFollow.Commands.FollowUser
@@ -12,14 +11,12 @@ namespace SocialService.Application.Features.UserFollow.Commands.FollowUser
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
-        private readonly IIntegrationEventService _integrationEventService;
 
-        public FollowUserCommandHandler(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IAuthService authService, IIntegrationEventService integrationEventService)
+        public FollowUserCommandHandler(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IAuthService authService)
         {
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _authService = authService;
-            _integrationEventService = integrationEventService;
         }
 
         public async Task<Result<bool>> Handle(FollowUserCommand request, CancellationToken cancellationToken)
@@ -37,11 +34,6 @@ namespace SocialService.Application.Features.UserFollow.Commands.FollowUser
                 request.TargetId,
                 TypeFollow.FollowUser
             );
-
-            var eventRequest = new FollowUserRequest
-            {
-                UserId = request.TargetId,
-            };
 
             await _unitOfWork.userFollowRepository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();

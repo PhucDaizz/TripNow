@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.DTOs.PostLike.Event;
+using SocialService.Domain.Enum;
 using SocialService.Domain.Enum.NotificationService;
 using SocialService.Domain.Events.PostLike;
 
@@ -30,6 +31,8 @@ namespace SocialService.Application.Features.Post.EventHandlers
             var actor = await _unitOfWork.memberRepository.GetByIdAsync(notification.UserId);
             if (actor == null) return;
 
+            bool isHotelNotification = post.AuthorType == AuthorType.Hotel;
+
             await _integrationEventService.PublishAsync<PostLikedIntegrationEvent>(
                 new PostLikedIntegrationEvent
                 {
@@ -38,7 +41,8 @@ namespace SocialService.Application.Features.Post.EventHandlers
                     ReferenceId = post.Id,      
                     LastActorId = actor.Id,
                     LastActorName = actor.FullName ?? "Người dùng",
-                    ActorAvatarUrl = actor.AvatarUrl
+                    ActorAvatarUrl = actor.AvatarUrl,
+                    IsHotelNotification = isHotelNotification
                 },
                 "social.events",              
                 "topic",                      

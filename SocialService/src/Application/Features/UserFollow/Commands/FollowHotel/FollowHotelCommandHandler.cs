@@ -2,7 +2,6 @@
 using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.Contracts;
-using SocialService.Application.DTOs.UserFollow;
 using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.UserFollow.Commands.FollowHotel
@@ -12,14 +11,12 @@ namespace SocialService.Application.Features.UserFollow.Commands.FollowHotel
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHotelCatalogService _hotelCatalogService;
-        private readonly IIntegrationEventService _integrationEventService;
 
-        public FollowHotelCommandHandler(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IHotelCatalogService hotelCatalogService, IIntegrationEventService integrationEventService)
+        public FollowHotelCommandHandler(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IHotelCatalogService hotelCatalogService)
         {
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _hotelCatalogService = hotelCatalogService;
-            _integrationEventService = integrationEventService;
         }
 
         public async Task<Result<bool>> Handle(FollowHotelCommand request, CancellationToken cancellationToken)
@@ -37,18 +34,6 @@ namespace SocialService.Application.Features.UserFollow.Commands.FollowHotel
                 request.HotelId,
                 TypeFollow.FollowHotel
             );
-
-            var eventRequest = new FollowHotelRequest
-            {
-                HotelId = request.HotelId,
-            };
-
-            await _integrationEventService.PublishAsync<FollowHotelRequest>(
-                eventRequest,
-                "social.events",
-                "topic",
-                "increase.follow.hotel",
-                cancellationToken);
 
             await _unitOfWork.userFollowRepository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();

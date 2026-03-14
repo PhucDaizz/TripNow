@@ -9,6 +9,9 @@ namespace NotificationService.Application.Services
         Task SendSystemNotificationAsync(Guid userId, SystemNotificationDto notification);
         Task UpdateSystemBadgeCountAsync(Guid userId, int unreadCount);
 
+        Task SendHotelSystemNotificationAsync(Guid hotelId, SystemNotificationDto notification);
+        Task UpdateHotelSystemBadgeCountAsync(Guid hotelId, int unreadCount);
+
         // MXH
         Task SendSocialNotificationAsync(Guid userId, SocialNotificationDto notification);
         Task UpdateSocialBadgeCountAsync(Guid userId, int unreadCount);

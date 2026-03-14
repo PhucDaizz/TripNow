@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SocialService.Application.Common.Interfaces;
 using SocialService.Application.DTOs.PostLike.Event;
+using SocialService.Domain.Enum;
 using SocialService.Domain.Enum.NotificationService;
 using SocialService.Domain.Events.PostLike;
 
@@ -20,11 +21,13 @@ namespace SocialService.Application.Features.Post.EventHandlers
         public async Task Handle(PostUnlikedEvent notification, CancellationToken cancellationToken)
         {
             var post = await _unitOfWork.postRepository.GetByIdAsync(notification.PostId);
-            if (post != null)
-            {
-                post.DecrementLikeCount();
-                await _unitOfWork.postRepository.UpdateAsync(post);
-            }
+
+            if (post == null) return;
+
+            post.DecrementLikeCount();
+            await _unitOfWork.postRepository.UpdateAsync(post);
+
+            bool isHotelNotification = post.AuthorType == AuthorType.Hotel;
 
             await _integrationEventService.PublishAsync<PostUnlikedIntegrationEvent>(
                 new PostUnlikedIntegrationEvent
@@ -32,7 +35,8 @@ namespace SocialService.Application.Features.Post.EventHandlers
                     OwnerId = post.AuthorId,
                     SocialActionType = SocialActionType.Like,
                     ReferenceId = post.Id,
-                    UnlikedUserId = notification.UserId
+                    UnlikedUserId = notification.UserId,
+                    IsHotelNotification = isHotelNotification 
                 },
                 "social.events",
                 "topic",

@@ -3,5 +3,9 @@ using MediatR;
 
 namespace NotificationService.Application.Features.SystemNotification.Commands.MarkAllSystemNotificationsAsRead
 {
-    public record MarkAllSystemNotificationsAsReadCommand(Guid UserId) : IRequest<Result>;
+    public record MarkAllSystemNotificationsAsReadCommand: IRequest<Result>
+    {
+        public Guid OwnerId { get; set; }
+        public bool IsHotel { get; set; }
+    }
 }

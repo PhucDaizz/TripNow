@@ -1,7 +1,6 @@
 ﻿using Domain.Common.Response;
 using MediatR;
 using SocialService.Application.Common.Interfaces;
-using SocialService.Application.DTOs.UserFollow;
 using SocialService.Domain.Enum;
 
 namespace SocialService.Application.Features.UserFollow.Commands.UnfollowHotel
@@ -10,13 +9,11 @@ namespace SocialService.Application.Features.UserFollow.Commands.UnfollowHotel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IIntegrationEventService _integrationEventService;
 
-        public UnfollowHotelCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IIntegrationEventService integrationEventService)
+        public UnfollowHotelCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
-            _integrationEventService = integrationEventService;
         }
 
         public async Task<Result<bool>> Handle(UnfollowHotelCommand notification, CancellationToken cancellationToken)
@@ -30,16 +27,7 @@ namespace SocialService.Application.Features.UserFollow.Commands.UnfollowHotel
                 return Result.Failure<bool>(new Error("NOT.FOLLOWING.YET", "You have never followed this hotel"));
             }
 
-            await _integrationEventService.PublishAsync<UnfollowHotelEvent>(
-                new UnfollowHotelEvent
-                {
-                    HotelId = notification.HotelId
-                },
-                "social.events",
-                "topic",
-                "unfollow.hotel",
-                cancellationToken
-            );
+            userFollow.Unfollow();
 
             await _unitOfWork.userFollowRepository.DeleteAsync(userFollow, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

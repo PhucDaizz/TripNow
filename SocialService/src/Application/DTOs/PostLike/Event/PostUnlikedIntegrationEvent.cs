@@ -8,5 +8,6 @@ namespace SocialService.Application.DTOs.PostLike.Event
         public SocialActionType SocialActionType { get; set; }
         public Guid ReferenceId { get; set; }
         public Guid UnlikedUserId { get; set; }
+        public bool IsHotelNotification { get; set; }
     }
 }

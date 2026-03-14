@@ -15,7 +15,8 @@ namespace NotificationService.Infrastructure.SignalR
         {
             _hubContext = hubContext;
         }
-        
+
+        // User-specific notifications
         public async Task SendSystemNotificationAsync(Guid userId, SystemNotificationDto notification)
         {
             await _hubContext.Clients.User(userId.ToString()).ReceiveSystemNotification(notification);
@@ -37,6 +38,7 @@ namespace NotificationService.Infrastructure.SignalR
             await _hubContext.Clients.User(userId.ToString()).UpdateSocialBadgeCount(unreadCount);
         }
 
+        // Hotel-specific notifications
         public async Task SendHotelSocialNotificationAsync(Guid hotelId, SocialNotificationDto notification)
         {
             await _hubContext.Clients.Group($"Hotel_{hotelId}").ReceiveSocialNotification(notification);
@@ -45,6 +47,15 @@ namespace NotificationService.Infrastructure.SignalR
         public async Task UpdateHotelSocialBadgeCountAsync(Guid hotelId, int unreadCount)
         {
             await _hubContext.Clients.Group($"Hotel_{hotelId}").UpdateSocialBadgeCount(unreadCount);
+        }
+        public async Task SendHotelSystemNotificationAsync(Guid hotelId, SystemNotificationDto notification)
+        {
+            await _hubContext.Clients.Group($"Hotel_{hotelId}").ReceiveSystemNotification(notification);
+        }
+
+        public async Task UpdateHotelSystemBadgeCountAsync(Guid hotelId, int unreadCount)
+        {
+            await _hubContext.Clients.Group($"Hotel_{hotelId}").UpdateSystemBadgeCount(unreadCount);
         }
     }
 }

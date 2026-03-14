@@ -38,10 +38,17 @@ namespace NotificationService.Application.Features.SocialNotification.EventHandl
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-           
+
             int unreadCount = await _unitOfWork.SocialNotification.CountUnreadByUserIdAsync(notification.OwnerId, cancellationToken);
 
-            await _notificationService.UpdateSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            if (notification.IsHotelNotification)
+            {
+                await _notificationService.UpdateHotelSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
+            else
+            {
+                await _notificationService.UpdateSocialBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
         }
     }
 }

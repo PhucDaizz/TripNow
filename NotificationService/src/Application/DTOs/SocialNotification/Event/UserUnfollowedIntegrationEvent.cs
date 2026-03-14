@@ -2,5 +2,6 @@
 {
     public class UserUnfollowedIntegrationEvent: BaseSocialIntegrationEvent
     {
+        public bool IsHotelNotification { get; set; }
     }
 }

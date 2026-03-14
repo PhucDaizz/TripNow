@@ -18,9 +18,18 @@ namespace NotificationService.Application.Features.SystemNotification.Commands.M
 
         public async Task<Result> Handle(MarkAllSystemNotificationsAsReadCommand request, CancellationToken cancellationToken)
         {
-            await _unitOfWork.Notification.MarkAllAsReadByUserIdAsync(request.UserId, cancellationToken);
+            await _unitOfWork.Notification.MarkAllAsReadByUserIdAsync(request.OwnerId, cancellationToken);
 
-            await _notificationService.UpdateSystemBadgeCountAsync(request.UserId, 0);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            if (request.IsHotel)
+            {
+                await _notificationService.UpdateHotelSystemBadgeCountAsync(request.OwnerId, 0);
+            }
+            else
+            {
+                await _notificationService.UpdateSystemBadgeCountAsync(request.OwnerId, 0);
+            }
 
             return Result.Success();
         }

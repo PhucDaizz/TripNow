@@ -20,24 +20,31 @@ namespace NotificationService.Application.Features.SystemNotification.Commands.M
         {
             var notification = await _unitOfWork.Notification.GetByIdAsync(request.NotificationId, cancellationToken);
 
-            if (notification != null)
-            {
-                if (notification.OwnerId != request.UserId)
-                {
-                    return Result.Failure(new Error("Unauthorized", "You are not authorized to mark this notification as read."));
-                }
-                notification.MarkAsRead();
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-                int unreadCount = await _unitOfWork.Notification.CountUnreadByUserIdAsync(request.UserId, cancellationToken);
-
-                await _notificationService.UpdateSystemBadgeCountAsync(request.UserId, unreadCount);
-                return Result.Success();
-            }
-            else
+            if (notification == null)
             {
                 return Result.Failure(new Error("Not Found", "The specified notification was not found."));
             }
+
+            if (notification.OwnerId != request.OwnerId)
+            {
+                return Result.Failure(new Error("Unauthorized", "You are not authorized to mark this notification as read."));
+            }
+
+            notification.MarkAsRead();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            int unreadCount = await _unitOfWork.Notification.CountUnreadByUserIdAsync(request.OwnerId, cancellationToken);
+
+            if (request.IsHotel)
+            {
+                await _notificationService.UpdateHotelSystemBadgeCountAsync(request.OwnerId, unreadCount);
+            }
+            else
+            {
+                await _notificationService.UpdateSystemBadgeCountAsync(request.OwnerId, unreadCount);
+            }
+
+            return Result.Success();
         }
     }
 }

@@ -9,5 +9,6 @@ namespace NotificationService.Application.Features.SocialNotification.EventHandl
         public SocialActionType SocialActionType { get; set; }
         public Guid ReferenceId { get; set; }
         public Guid UnlikedUserId { get; set; }
+        public bool IsHotelNotification { get; set; }
     }
 }

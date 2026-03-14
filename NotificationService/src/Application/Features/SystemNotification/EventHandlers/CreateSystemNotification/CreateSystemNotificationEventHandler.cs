@@ -33,11 +33,18 @@ namespace NotificationService.Application.Features.SystemNotification.EventHandl
 
             var notifDto = SystemNotificationDto.FromEntity(newNotif);
 
-            await _notificationService.SendSystemNotificationAsync(notification.OwnerId, notifDto);
-
             int unreadCount = await _unitOfWork.Notification.CountUnreadByUserIdAsync(notification.OwnerId, cancellationToken);
 
-            await _notificationService.UpdateSystemBadgeCountAsync(notification.OwnerId, unreadCount);
+            if (notification.IsHotelNotification)
+            {
+                await _notificationService.SendHotelSystemNotificationAsync(notification.OwnerId, notifDto);
+                await _notificationService.UpdateHotelSystemBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
+            else
+            {
+                await _notificationService.SendSystemNotificationAsync(notification.OwnerId, notifDto);
+                await _notificationService.UpdateSystemBadgeCountAsync(notification.OwnerId, unreadCount);
+            }
         }
     }
 }

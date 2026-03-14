@@ -18,9 +18,18 @@ namespace NotificationService.Application.Features.SocialNotification.Commands.M
 
         public async Task<Result> Handle(MarkAllSocialNotificationsAsReadCommand request, CancellationToken cancellationToken)
         {
-            await _unitOfWork.SocialNotification.MarkAllAsReadByUserIdAsync(request.UserId, cancellationToken);
+            await _unitOfWork.SocialNotification.MarkAllAsReadByUserIdAsync(request.OwnerId, cancellationToken);
 
-            await _notificationService.UpdateSocialBadgeCountAsync(request.UserId, 0);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            if (request.IsHotel)
+            {
+                await _notificationService.UpdateHotelSocialBadgeCountAsync(request.OwnerId, 0);
+            }
+            else
+            {
+                await _notificationService.UpdateSocialBadgeCountAsync(request.OwnerId, 0);
+            }
 
             return Result.Success();
         }

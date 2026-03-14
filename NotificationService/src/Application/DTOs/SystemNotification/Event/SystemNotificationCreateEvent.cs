@@ -9,5 +9,6 @@ namespace NotificationService.Application.DTOs.SystemNotification.Event
         public string Message { get; set; } 
         public NotificationType Type { get; set; } 
         public string ReferenceId { get; set; }
+        public bool IsHotelNotification { get; set; }
     }
 }
