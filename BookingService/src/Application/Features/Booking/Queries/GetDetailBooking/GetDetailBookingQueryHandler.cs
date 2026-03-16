@@ -66,20 +66,12 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
 
         private async Task<bool> CanViewBooking(BookingDetailResponse booking, CancellationToken cancellationToken)
         {
-            return _currentUserService.Role switch
+            if (_currentUserService.Role == AppRoles.Customer)
             {
-                AppRoles.SysAdmin => true,
+                return string.Equals(booking.UserId.ToString(), _currentUserService.UserId, StringComparison.OrdinalIgnoreCase);
+            }
 
-                AppRoles.HotelOwner => await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken),
-
-                AppRoles.Receptionist =>
-                    booking.HotelId == _currentUserService.HotelId,
-
-                AppRoles.Customer =>
-                    booking.UserId.ToString() == _currentUserService.UserId,
-
-                _ => false
-            };
+            return await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken);
         }
 
     }

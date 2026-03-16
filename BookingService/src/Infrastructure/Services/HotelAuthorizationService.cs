@@ -1,5 +1,6 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.Contracts;
+using BookingService.Domain.Common;
 
 namespace BookingService.Infrastructure.Services
 {
@@ -18,6 +19,11 @@ namespace BookingService.Infrastructure.Services
 
         public async Task<bool> HasHotelAccessAsync(Guid hotelId, CancellationToken cancellationToken = default)
         {
+            if (_currentUser.Role == AppRoles.SysAdmin)
+            {
+                return true;
+            }
+
             if (_currentUser.HotelId.HasValue && _currentUser.HotelId != Guid.Empty)
             {
                 return _currentUser.HotelId == hotelId;

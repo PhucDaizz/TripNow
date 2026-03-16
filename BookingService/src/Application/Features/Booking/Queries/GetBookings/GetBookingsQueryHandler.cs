@@ -29,46 +29,33 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
                 .AsQueryable();
 
             var role = _currentUserService.Role;
-            var currentUserId = Guid.Parse(_currentUserService.UserId);
 
-            switch (role)
+            if (role == AppRoles.Customer)
             {
-                case AppRoles.Customer:
-                    query = query.Where(b => b.UserId == currentUserId);
-                    break;
+                var currentUserId = Guid.Parse(_currentUserService.UserId!);
+                query = query.Where(b => b.UserId == currentUserId);
+            }
+            else
+            {
+                Guid? targetHotelId = _currentUserService.HotelId ?? request.HotelId;
 
-                case AppRoles.HotelOwner:
-                    Guid? targetHotelId = _currentUserService.HotelId ?? request.HotelId;
-                    if (targetHotelId == null)
-                    {
-                        return Result.Failure<PagedResult<BookingSummaryDto>>(
-                            new Error("Auth.NoHotel", "Please provide the HotelId to view the booking list."));
-                    }
+                if (role != AppRoles.SysAdmin && (targetHotelId == null || targetHotelId == Guid.Empty))
+                {
+                    return Result.Failure<PagedResult<BookingSummaryDto>>(
+                        new Error("Auth.NoHotel", "Please provide the HotelId to view the booking list."));
+                }
+
+                if (targetHotelId.HasValue && targetHotelId != Guid.Empty)
+                {
                     bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(targetHotelId.Value, cancellationToken);
                     if (!hasAccess)
                     {
                         return Result.Failure<PagedResult<BookingSummaryDto>>(
                             new Error("Auth.Forbidden", "You do not have permission to access this hotel's order data."));
                     }
+
                     query = query.Where(b => b.HotelId == targetHotelId.Value);
-                    break;
-                case AppRoles.Receptionist:
-                    var staffHotelId = _currentUserService.HotelId;
-                    if (staffHotelId == null)
-                        return Result.Failure<PagedResult<BookingSummaryDto>>(new Error("Auth.NoHotel", "Staff not assigned to any hotel."));
-
-                    query = query.Where(b => b.HotelId == staffHotelId);
-                    break;
-
-                case AppRoles.SysAdmin:
-                    if (request.HotelId.HasValue)
-                    {
-                        query = query.Where(b => b.HotelId == request.HotelId.Value);
-                    }
-                    break;
-
-                default:
-                    return Result.Failure<PagedResult<BookingSummaryDto>>(new Error("Auth.InvalidRole", "Unauthorized access."));
+                }
             }
 
             if (request.BookingId.HasValue)

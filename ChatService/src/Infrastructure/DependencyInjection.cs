@@ -32,7 +32,7 @@ namespace ChatService.Infrastructure
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddSingleton<IChatNotificationService, ChatNotificationService>();
+            //services.AddSingleton<IChatNotificationService, ChatNotificationService>();
             return services;
         }
     }

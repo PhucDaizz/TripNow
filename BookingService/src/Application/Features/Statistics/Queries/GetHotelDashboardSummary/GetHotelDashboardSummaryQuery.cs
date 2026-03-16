@@ -1,6 +1,5 @@
 using BookingService.Application.Common.Interfaces;
 using BookingService.Application.DTOs.Statistics;
-using BookingService.Domain.Common;
 using BookingService.Domain.Enum;
 using Domain.Common.Response;
 using MediatR;
@@ -32,36 +31,25 @@ namespace BookingService.Application.Features.Statistics.Queries.GetHotelDashboa
 
         public async Task<Result<HotelDashboardSummaryDto>> Handle(GetHotelDashboardSummaryQuery request, CancellationToken cancellationToken)
         {
-            Guid? hotelId = request.HotelId;
-            var role = _currentUserService.Role;
+            Guid? resolvedHotelId = (_currentUserService.HotelId.HasValue && _currentUserService.HotelId != Guid.Empty)
+                ? _currentUserService.HotelId
+                : request.HotelId;
 
-            switch (role)
+            if (resolvedHotelId == null || resolvedHotelId == Guid.Empty)
             {
-                case AppRoles.HotelOwner:
-                case AppRoles.Receptionist:
-                    hotelId = _currentUserService.HotelId ?? request.HotelId;
-
-                    if (hotelId == null)
-                        return Result.Failure<HotelDashboardSummaryDto>(new Error("Statistics.HotelRequired", "Please provide the HotelId to view the Dashboard."));
-
-                    bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(hotelId.Value, cancellationToken);
-                    if (!hasAccess)
-                        return Result.Failure<HotelDashboardSummaryDto>(new Error("Auth.Forbidden", "You do not have permission to view the statistics of this hotel."));
-                    break;
-
-                case AppRoles.SysAdmin:
-                    hotelId = request.HotelId;
-                    break;
-
-                default:
-                    return Result.Failure<HotelDashboardSummaryDto>(new Error("Auth.InvalidRole", "Unauthorized access."));
+                return Result.Failure<HotelDashboardSummaryDto>(new Error("Statistics.HotelRequired", "Please provide the HotelId to view the Dashboard."));
             }
 
-            var query = _context.Booking.AsNoTracking();
-            if (hotelId.HasValue)
+            Guid targetHotelId = resolvedHotelId.Value;
+
+            bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(targetHotelId, cancellationToken);
+
+            if (!hasAccess)
             {
-                query = query.Where(b => b.HotelId == hotelId.Value);
+                return Result.Failure<HotelDashboardSummaryDto>(new Error("Auth.Forbidden", "You do not have permission to view the statistics of this hotel."));
             }
+
+            var query = _context.Booking.AsNoTracking().Where(b => b.HotelId == targetHotelId);
 
             var today = request.Date;
 

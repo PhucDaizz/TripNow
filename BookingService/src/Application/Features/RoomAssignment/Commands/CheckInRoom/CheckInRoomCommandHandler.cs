@@ -39,6 +39,9 @@ namespace BookingService.Application.Features.RoomAssignment.Commands.CheckInRoo
                 return Result.Failure(new Error("Auth.Forbidden", "You do not have permission to perform check-in for this hotel."));
             }
 
+            if (string.IsNullOrEmpty(_currentUserService.UserId))
+                return Result.Failure(new Error("Auth.Unauthorized", "User ID not found in token."));
+
             var checkInBy = Guid.Parse(_currentUserService.UserId);
 
             var roomInfo = await _hotelCatalogService.CheckInRoom(request.HotelId, request.RoomId, checkInBy, cancellationToken);

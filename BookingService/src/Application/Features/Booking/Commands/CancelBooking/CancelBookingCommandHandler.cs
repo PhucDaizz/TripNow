@@ -61,18 +61,12 @@ namespace BookingService.Application.Features.Booking.Commands.CancelBooking
             if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
                 return false;
 
-            return _currentUser.Role switch
+            if (_currentUser.Role == AppRoles.Customer)
             {
-                AppRoles.SysAdmin => true,
+                return string.Equals(_currentUser.UserId, booking.UserId.ToString(), StringComparison.OrdinalIgnoreCase);
+            }
 
-                AppRoles.HotelOwner => await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken),
-
-                AppRoles.Receptionist =>
-                    _currentUser.HotelId == booking.HotelId,
-
-                AppRoles.Customer => string.Equals(_currentUser.UserId, booking.UserId.ToString(), StringComparison.OrdinalIgnoreCase),
-                _ => false
-            };
+            return await _hotelAuthService.HasHotelAccessAsync(booking.HotelId, cancellationToken);
         }
 
     }

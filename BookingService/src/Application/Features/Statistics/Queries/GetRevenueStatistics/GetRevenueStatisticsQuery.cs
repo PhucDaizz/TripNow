@@ -20,11 +20,16 @@ namespace BookingService.Application.Features.Statistics.Queries.GetRevenueStati
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public GetRevenueStatisticsQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        public GetRevenueStatisticsQueryHandler(
+            IApplicationDbContext context,
+            ICurrentUserService currentUserService,
+            IHotelAuthorizationService hotelAuthService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result<List<RevenueDataPointDto>>> Handle(GetRevenueStatisticsQuery request, CancellationToken cancellationToken)
@@ -37,9 +42,18 @@ namespace BookingService.Application.Features.Statistics.Queries.GetRevenueStati
                 hotelId = _currentUserService.HotelId;
             }
 
+            if (hotelId.HasValue)
+            {
+                bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(hotelId.Value, cancellationToken);
+                if (!hasAccess)
+                    return Result.Failure<List<RevenueDataPointDto>>(new Error("Auth.Forbidden", "You do not have permission to view the revenue statistics of this hotel."));
+            }
+
+            var toDateEndOfDay = request.ToDate.Date.AddDays(1).AddTicks(-1);
+
             var query = _context.Booking.AsNoTracking()
                 .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Completed)
-                .Where(b => b.CreatedAt >= request.FromDate && b.CreatedAt <= request.ToDate);
+                .Where(b => b.CreatedAt >= request.FromDate && b.CreatedAt <= toDateEndOfDay);
 
             if (hotelId.HasValue)
             {
@@ -50,27 +64,46 @@ namespace BookingService.Application.Features.Statistics.Queries.GetRevenueStati
 
             if (request.GroupBy.Equals("Month", StringComparison.OrdinalIgnoreCase))
             {
-                result = await query
+                var monthlyRaw = await query
                     .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month })
-                    .Select(g => new RevenueDataPointDto
+                    .Select(g => new
                     {
-                        Label = $"{g.Key.Month}/{g.Key.Year}",
+                        g.Key.Year,
+                        g.Key.Month,
                         Revenue = g.Sum(b => b.TotalAmount),
                         BookingCount = g.Count()
                     })
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
                     .ToListAsync(cancellationToken);
+
+                result = monthlyRaw.Select(x => new RevenueDataPointDto
+                {
+                    Label = $"{x.Month:D2}/{x.Year}",
+                    Revenue = x.Revenue,
+                    BookingCount = x.BookingCount
+                }).ToList();
             }
             else
             {
-                result = await query
-                    .GroupBy(b => b.CreatedAt.Date)
-                    .Select(g => new RevenueDataPointDto
+                var dailyRaw = await query
+                    .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month, b.CreatedAt.Day })
+                    .Select(g => new
                     {
-                        Label = g.Key.ToString("yyyy-MM-dd"),
+                        g.Key.Year,
+                        g.Key.Month,
+                        g.Key.Day,
                         Revenue = g.Sum(b => b.TotalAmount),
                         BookingCount = g.Count()
                     })
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month).ThenBy(x => x.Day)
                     .ToListAsync(cancellationToken);
+
+                result = dailyRaw.Select(x => new RevenueDataPointDto
+                {
+                    Label = $"{x.Year}-{x.Month:D2}-{x.Day:D2}",
+                    Revenue = x.Revenue,
+                    BookingCount = x.BookingCount
+                }).ToList();
             }
 
             return Result.Success(result);
