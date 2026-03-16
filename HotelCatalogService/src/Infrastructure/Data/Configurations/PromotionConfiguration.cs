@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -29,6 +29,12 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.Navigation(p => p.PromotionUsages)
                 .HasField("_promotionUsages");
+
+            builder.HasIndex(p => p.HotelId)
+                   .HasDatabaseName("IX_Promotions_HotelId");
+
+            builder.HasIndex(p => new { p.HotelId, p.IsActive })
+                   .HasDatabaseName("IX_Promotions_HotelId_IsActive");
         }
     }
 }

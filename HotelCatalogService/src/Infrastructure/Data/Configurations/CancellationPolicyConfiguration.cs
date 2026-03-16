@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -32,6 +32,9 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
                 .HasForeignKey(x => x.CancellationPolicyId)
                 .OnDelete(DeleteBehavior.Cascade); 
             builder.Navigation(x => x.Rules).HasField("_rules");
+
+            builder.HasIndex(x => x.HotelId)
+                   .HasDatabaseName("IX_CancellationPolicies_HotelId");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +21,14 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.Property(x => x.RefundPercentage)
                 .HasColumnType("decimal(5,2)") 
                 .IsRequired();
+
+            builder.HasIndex(p => p.CancellationPolicyId)
+                .HasDatabaseName("IX_CancellationRules_CancellationPolicyId");
+
+
+            builder.HasIndex(x => new { x.CancellationPolicyId, x.HoursBeforeCheckIn })
+                   .IsUnique()
+                   .HasDatabaseName("IX_CancellationRules_PolicyId_Hours");
         }
     }
 }

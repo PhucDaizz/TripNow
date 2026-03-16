@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,6 +13,10 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.ToTable("RoomTypeImages");
             builder.Property(x => x.PublicId).HasMaxLength(500).IsRequired();
             builder.Property(x => x.ImageUrl).HasMaxLength(500).IsRequired();
+
+            builder.HasIndex(x => x.PublicId)
+                   .IsUnique()
+                   .HasDatabaseName("IX_RoomTypeImages_PublicId");
         }
     }
 }

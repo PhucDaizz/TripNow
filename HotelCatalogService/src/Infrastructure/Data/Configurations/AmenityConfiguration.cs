@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,6 +15,10 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.Property(a => a.Name).HasMaxLength(100).IsRequired();
             builder.Property(a => a.Icon).HasColumnType("varchar(50)");
+
+            builder.HasIndex(a => a.Name)
+                   .IsUnique()
+                   .HasDatabaseName("IX_Amenities_Name");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Entities;
+using HotelCatalogService.Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,6 +13,13 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
             builder.ToTable("Floors");
 
             builder.Property(f => f.FloorNumber).IsRequired();
+
+            builder.HasIndex(p => p.BlockId)
+                   .HasDatabaseName("IX_Floors_BlockId");
+
+            builder.HasIndex(f => new { f.BlockId, f.FloorNumber })
+                   .IsUnique()
+                   .HasDatabaseName("IX_Floors_BlockId_FloorNumber");
 
             builder.HasMany(f => f.Rooms)
                    .WithOne()
