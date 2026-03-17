@@ -1,5 +1,6 @@
 ﻿using PaymentService.Domain.Common;
 using PaymentService.Domain.Enum;
+using PaymentService.Domain.Events.Payout;
 using PaymentService.Domain.Exceptions;
 
 namespace PaymentService.Domain.Entities
@@ -41,7 +42,15 @@ namespace PaymentService.Domain.Entities
 
             TransactionReference = transactionRef;
             Status = PayoutStatus.Completed;
-            FailureReason = null; 
+            FailureReason = null;
+
+            AddDomainEvent(new PayoutCompletedEvent
+                {
+                    PayoutId = this.Id, 
+                    OwnerWalletId = this.OwnerWalletId, 
+                    Amount = this.Amount, 
+                    TransactionReference = transactionRef 
+                });
         }
 
         public void MarkAsFailed(string reason)
@@ -51,16 +60,22 @@ namespace PaymentService.Domain.Entities
                 throw new DomainException("Không thể đánh dấu thất bại cho Payout đã thành công.");
             }
 
-            if(Status != PayoutStatus.Processing)
+            if (Status != PayoutStatus.Pending && Status != PayoutStatus.Processing)
             {
-                throw new DomainException("Chỉ được hủy đơn đang chờ xử lý.");
+                throw new DomainException("Chỉ được hủy đơn đang chờ xử lý hoặc chờ duyệt.");
             }
 
             FailureReason = reason;
             Status = PayoutStatus.Failed;
 
-            // CPayoutFailedEvent (để trigger hoàn tiền vào ví)
-            // AddDomainEvent(new PayoutFailedEvent(this.Id, this.SettlementId));
+            AddDomainEvent(
+                new PayoutRejectedEvent
+                {
+                    PayoutId = this.Id,
+                    OwnerWalletId = this.OwnerWalletId,
+                    Amount = this.Amount,
+                    Reason = reason
+                });
         }
 
         public void MarkAsProcessing()

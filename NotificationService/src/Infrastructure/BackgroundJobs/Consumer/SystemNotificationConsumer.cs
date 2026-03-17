@@ -26,8 +26,22 @@ namespace NotificationService.Infrastructure.BackgroundJobs.Consumer
                exchange: "social.events",
                exchangeType: "topic",
                routingKey: "new.notification.system",
-               queueName: "notification-service-create-system",
+               queueName: "notification-service-social-system",
                handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<SystemNotificationCreateEvent>(
+               exchange: "payment.events",
+               exchangeType: "topic",
+               routingKey: "new.notification.system",
+               queueName: "notification-service-payment-system",
+               handler: (msg) => ProcessMessage(msg, stoppingToken));
+
+            await _consumer.Subscribe<SystemNotificationCreateEvent>(
+                exchange: "payment.events",
+                exchangeType: "topic",
+                routingKey: "refundrequest.completed",
+                queueName: "notification-service-customer-refund", 
+                handler: (msg) => ProcessMessage(msg, stoppingToken));
         }
 
         private async Task ProcessMessage<TMessage>(TMessage message, CancellationToken token) where TMessage : class

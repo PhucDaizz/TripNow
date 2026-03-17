@@ -28,9 +28,9 @@ namespace PaymentService.Application.Features.Payout.Commands.RejectPayout
                         return Result.Failure(new Error("Payout.NotFound", "Withdrawal order not found."));
                     }
 
-                    if (payout.Status != Domain.Enum.PayoutStatus.Pending)
+                    if (payout.Status != Domain.Enum.PayoutStatus.Pending && payout.Status != Domain.Enum.PayoutStatus.Processing)
                     {
-                        return Result.Failure(new Error("Payout.InvalidState", "You can only reject withdrawal requests that are in Pending status.."));
+                        return Result.Failure(new Error("Payout.InvalidState", "You can only reject withdrawal requests that are in Pending or Processing status."));
                     }
 
                     var wallet = await _unitOfWork.OwnerWallets.GetByIdAsync(payout.OwnerWalletId, cancellationToken);
