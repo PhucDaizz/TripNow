@@ -1,6 +1,5 @@
 ﻿using Application.Common.Interfaces;
 using Application.DTOs.User;
-using AutoMapper;
 using Domain.Common.Response;
 using MediatR;
 
@@ -9,12 +8,10 @@ namespace Application.Features.User.Queries.GetInfoDetail
     public class GetInfoDetailQueryHandler : IRequestHandler<GetInfoDetailQuery, Result<InforDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetInfoDetailQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetInfoDetailQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public async Task<Result<InforDto>> Handle(GetInfoDetailQuery request, CancellationToken cancellationToken)
@@ -24,7 +21,19 @@ namespace Application.Features.User.Queries.GetInfoDetail
             {
                 return Result.Failure<InforDto>(new Error("NotFound","User not found."));
             }
-            var inforDto = _mapper.Map<InforDto>(user);
+
+            var inforDto = new InforDto
+            {
+                UserName = user.UserName!,
+                FullName = user.FullName,
+                AvatarUrl = user.AvatarUrl,
+                Email = user.Email!,
+                EmailConfirmed = user.EmailConfirmed,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                Gender = user.Gender
+            };
+                
             return Result.Success(inforDto);
         }
     }

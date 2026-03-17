@@ -16,8 +16,6 @@ namespace Application
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
             return services;
         }
     }
