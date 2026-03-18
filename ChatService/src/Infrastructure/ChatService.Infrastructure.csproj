@@ -28,8 +28,4 @@
     <ProjectReference Include="..\Domain\ChatService.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Settings\" />
-  </ItemGroup>
-
 </Project>

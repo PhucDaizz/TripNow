@@ -68,6 +68,7 @@ namespace ChatService.API.Controllers
         /// </remarks>
         [HttpGet("all")]
         public async Task<IActionResult> GetAllConversation(
+            [FromQuery] Guid? hotelId,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 20)
         {
@@ -93,13 +94,9 @@ namespace ChatService.API.Controllers
                 CurrentUserId = currentUserId,
                 CurrentUserRole = roleEnum,
                 PageIndex = pageIndex,
-                PageSize = pageSize
+                PageSize = pageSize,
+                HotelId = _currentUserService.HotelId ?? hotelId
             };
-
-            var hotelId =  _currentUserService.HotelId;
-            if (hotelId != null)
-                query.HotelId = hotelId;
-
 
             var result = await _mediator.Send(query);
 

@@ -11,10 +11,12 @@ namespace ChatService.Application.Features.Conversation.Queries.GetAll
     public class GetAllConversationsQueryHandler : IRequestHandler<GetAllConversationsQuery, Result<PagedResult<ConversationListDto?>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHotelAuthorizationService _hotelAuthService;
 
-        public GetAllConversationsQueryHandler(IUnitOfWork unitOfWork)
+        public GetAllConversationsQueryHandler(IUnitOfWork unitOfWork, IHotelAuthorizationService hotelAuthService)
         {
             _unitOfWork = unitOfWork;
+            _hotelAuthService = hotelAuthService;
         }
 
         public async Task<Result<PagedResult<ConversationListDto?>>> Handle(GetAllConversationsQuery request, CancellationToken cancellationToken)
@@ -24,8 +26,14 @@ namespace ChatService.Application.Features.Conversation.Queries.GetAll
 
             if (request.CurrentUserRole == SenderType.Hotel)
             {
-                if (!request.HotelId.HasValue)
-                    return Result.Failure<PagedResult<ConversationListDto?>>(new Error("UNAUTHORIZED", "Lễ tân chưa được gán Khách sạn."));
+                if (!request.HotelId.HasValue || request.HotelId == Guid.Empty)
+                    return Result.Failure<PagedResult<ConversationListDto?>>(new Error("UNAUTHORIZED", "Vui lòng cung cấp HotelId để xem tin nhắn."));
+
+                bool hasAccess = await _hotelAuthService.HasHotelAccessAsync(request.HotelId.Value, cancellationToken);
+                if (!hasAccess)
+                {
+                    return Result.Failure<PagedResult<ConversationListDto?>>(new Error("FORBIDDEN", "Bạn không có quyền xem tin nhắn của khách sạn này."));
+                }
 
                 var dbResult = await _unitOfWork.Conversation.GetConversationsByHotelIdAsync(
                     request.HotelId.Value, request.PageIndex, request.PageSize, cancellationToken);
