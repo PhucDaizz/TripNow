@@ -30,7 +30,8 @@ namespace NotificationService.Infrastructure
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
-
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IHotelAuthorizationService, HotelAuthorizationService>();
             return services;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using NotificationService.Application.Common.Interfaces;
 using NotificationService.Application.Features.SocialNotification.Commands.MarkAllSocialNotificationsAsRead;
 using NotificationService.Application.Features.SocialNotification.Commands.MarkSocialNotificationAsRead;
 using NotificationService.Application.Features.SocialNotification.Queries.GetUnreadSystemCount;
@@ -8,8 +9,6 @@ using NotificationService.Application.Features.SystemNotification.Commands.MarkA
 using NotificationService.Application.Features.SystemNotification.Commands.MarkSystemNotificationAsRead;
 using NotificationService.Application.Features.SystemNotification.Queries.GetUnreadSocialCount;
 using NotificationService.Application.HubInterfaces;
-using NotificationService.Domain.Common;
-using System.Security.Claims;
 
 namespace NotificationService.Infrastructure.Hubs
 {
@@ -17,16 +16,17 @@ namespace NotificationService.Infrastructure.Hubs
     public class NotificationHub: Hub<INotificationClient>
     {
         private readonly IMediator _mediator;
+        private readonly IHotelAuthorizationService _hotelAuthorizationService;
 
-        public NotificationHub(IMediator mediator)
+        public NotificationHub(IMediator mediator, IHotelAuthorizationService hotelAuthorizationService)
         {
             _mediator = mediator;
+            _hotelAuthorizationService = hotelAuthorizationService;
         }
 
         public async Task MarkSystemNotificationAsRead(Guid notificationId, Guid? hotelId = null)
         {
-            Guid ownerId = ResolveOwnerIdSecurely(hotelId);
-            bool isHotel = hotelId.HasValue && ownerId == hotelId.Value;
+            var (ownerId, isHotel) = await ResolveOwnerAndTypeAsync(hotelId);
 
             var command = new MarkSystemNotificationAsReadCommand
             {
@@ -39,8 +39,7 @@ namespace NotificationService.Infrastructure.Hubs
 
         public async Task MarkSocialNotificationAsRead(Guid notificationId, Guid? hotelId = null)
         {
-            Guid ownerId = ResolveOwnerIdSecurely(hotelId);
-            bool isHotel = hotelId.HasValue && ownerId == hotelId.Value;
+            var (ownerId, isHotel) = await ResolveOwnerAndTypeAsync(hotelId);
 
             var command = new MarkSocialNotificationAsReadCommand
             {
@@ -53,8 +52,7 @@ namespace NotificationService.Infrastructure.Hubs
 
         public async Task MarkAllSystemAsRead(Guid? hotelId = null)
         {
-            Guid ownerId = ResolveOwnerIdSecurely(hotelId);
-            bool isHotel = hotelId.HasValue && ownerId == hotelId.Value;
+            var (ownerId, isHotel) = await ResolveOwnerAndTypeAsync(hotelId);
 
             await _mediator.Send(new MarkAllSystemNotificationsAsReadCommand
             {
@@ -65,8 +63,7 @@ namespace NotificationService.Infrastructure.Hubs
 
         public async Task MarkAllSocialAsRead(Guid? hotelId = null)
         {
-            Guid ownerId = ResolveOwnerIdSecurely(hotelId);
-            bool isHotel = hotelId.HasValue && ownerId == hotelId.Value;
+            var (ownerId, isHotel) = await ResolveOwnerAndTypeAsync(hotelId);
 
             await _mediator.Send(new MarkAllSocialNotificationsAsReadCommand
             {
@@ -93,10 +90,9 @@ namespace NotificationService.Infrastructure.Hubs
 
                 if (Guid.TryParse(hotelIdString, out var requestedHotelId))
                 {
-                    // KIỂM TRA: Có thực sự được phép nghe lén cái Hotel này không?
-                    Guid validatedOwnerId = ResolveOwnerIdSecurely(requestedHotelId);
+                    bool hasAccess = await _hotelAuthorizationService.HasHotelAccessAsync(requestedHotelId, Context.ConnectionAborted);
 
-                    if (validatedOwnerId == requestedHotelId)
+                    if (hasAccess)
                     {
                         await Groups.AddToGroupAsync(Context.ConnectionId, $"Hotel_{requestedHotelId}");
 
@@ -105,6 +101,12 @@ namespace NotificationService.Infrastructure.Hubs
 
                         var hotelSystemBadgeCount = await _mediator.Send(new GetUnreadSystemCountQuery(requestedHotelId));
                         await Clients.Caller.UpdateSystemBadgeCount(hotelSystemBadgeCount.Value);
+                    }
+                    else
+                    {
+                        // CỐ TÌNH TRUYỀN ID BẬY -> ĐÁ VĂNG LUÔN HOẶC BỎ QUA
+                        // Bác có thể ngắt kết nối luôn bằng lệnh dưới đây nếu muốn cực gắt:
+                        // Context.Abort(); 
                     }
                 }
             }
@@ -117,30 +119,21 @@ namespace NotificationService.Infrastructure.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private Guid ResolveOwnerIdSecurely(Guid? requestedHotelId)
+        private async Task<(Guid OwnerId, bool IsHotel)> ResolveOwnerAndTypeAsync(Guid? requestedHotelId)
         {
             var userId = Guid.Parse(Context.UserIdentifier!);
 
-            if (!requestedHotelId.HasValue) return userId;
-
-            var tokenHotelId = Context.User?.FindFirst("HotelId")?.Value;
-            var role = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
-
-            // KỊCH BẢN 1: Lễ tân (Có HotelId trong Token)
-            if (!string.IsNullOrEmpty(tokenHotelId) && tokenHotelId == requestedHotelId.Value.ToString())
+            if (requestedHotelId.HasValue && requestedHotelId.Value != Guid.Empty)
             {
-                return requestedHotelId.Value; // Xác thực thành công
+                bool hasAccess = await _hotelAuthorizationService.HasHotelAccessAsync(requestedHotelId.Value, Context.ConnectionAborted);
+                if (!hasAccess)
+                {
+                    throw new HubException("Bạn không có quyền thao tác trên dữ liệu của khách sạn này.");
+                }
+                return (requestedHotelId.Value, true);
             }
 
-            // KỊCH BẢN 2: Chủ khách sạn (Chỉ có Role, không có HotelId trong Token)
-            if (role == AppRoles.HotelOwner) 
-            {
-                // Tạm thời ta tin tưởng nếu Role là Owner. 
-                // (Nếu muốn bảo mật tuyệt đối 100%, phải dùng Redis hoặc gọi gRPC sang Catalog Service để check giống hệt bên SocialService).
-                return requestedHotelId.Value;
-            }
-
-            return userId;
+            return (userId, false);
         }
     }
 }

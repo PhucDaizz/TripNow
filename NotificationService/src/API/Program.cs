@@ -1,13 +1,17 @@
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using Nexus.BuildingBlocks.Extensions;
 using NotificationService.API.Common.ExceptionHandling;
 using NotificationService.API.ExceptionHandling;
 using NotificationService.API.Extensions;
 using NotificationService.API.StartUp;
 using NotificationService.Application;
+using NotificationService.Application.Common.Interfaces;
 using NotificationService.Infrastructure;
 using NotificationService.Infrastructure.BackgroundJobs.Consumer;
 using NotificationService.Infrastructure.Hubs;
+using NotificationService.Infrastructure.Services;
+using NotificationService.Infrastructure.Settings;
 using System.Diagnostics;
 
 namespace NotificationService.API
@@ -21,6 +25,10 @@ namespace NotificationService.API
             builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddHealthChecks();
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.Configure<ServiceUrlOptions>(
+                builder.Configuration.GetSection(ServiceUrlOptions.SectionName));
 
             builder.Services.AddProblemDetails(options =>
             {
@@ -44,6 +52,13 @@ namespace NotificationService.API
 
             builder.Services.AddHostedService<SocialNotificationConsumer>();
             builder.Services.AddHostedService<SystemNotificationConsumer>();
+
+            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
+                (sp, client) =>
+                {
+                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                    client.BaseAddress = new Uri(options.HotelCatalog);
+                });
 
             var app = builder.Build();
 
