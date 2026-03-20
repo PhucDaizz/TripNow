@@ -8,10 +8,17 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail
     public class GetHotelDetailQueryHandler : IRequestHandler<GetHotelDetailQuery, Result<HotelDetailDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IIntegrationEventService _integrationEventService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetHotelDetailQueryHandler(IUnitOfWork unitOfWork)
+        public GetHotelDetailQueryHandler(
+            IUnitOfWork unitOfWork, 
+            IIntegrationEventService integrationEventService,
+            ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
+            _integrationEventService = integrationEventService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<HotelDetailDto>> Handle(GetHotelDetailQuery request, CancellationToken cancellationToken)
@@ -41,6 +48,25 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail
                         .Select(i => i.ImageUrl)
                         .FirstOrDefault()
             };
+
+            var userIdStr = _currentUserService.UserId;
+            if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out Guid userId))
+            {
+                var viewEvent = new UserViewedHotelIntegrationEvent
+                {
+                    UserId = userId,
+                    HotelId = hotel.Id,
+                    ViewedAt = DateTime.UtcNow
+                };
+
+                await _integrationEventService.PublishAsync(
+                    viewEvent,
+                    exchange: "hotel-catalog.events",
+                    exchangeType: "topic",
+                    routingKey: "hotel.viewed",
+                    cancellationToken: cancellationToken
+                );
+            }
 
             return Result.Success<HotelDetailDto>(result);
         }

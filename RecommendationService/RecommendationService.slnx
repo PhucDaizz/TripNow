@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/API/RecommendationService.API.csproj" />
+  <Project Path="src/Application/RecommendationService.Application.csproj" />
+  <Project Path="src/Domain/RecommendationService.Domain.csproj" />
+  <Project Path="src/Infrastructure/RecommendationService.Infrastructure.csproj" />
+</Solution>

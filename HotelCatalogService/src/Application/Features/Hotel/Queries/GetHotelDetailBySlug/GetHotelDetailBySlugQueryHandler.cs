@@ -8,11 +8,18 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailB
 {
     public class GetHotelDetailBySlugQueryHandler : IRequestHandler<GetHotelDetailBySlugQuery, Result<HotelDetailDto>>
     {
-        private readonly IApplicationDbContext _context; 
+        private readonly IApplicationDbContext _context;
+        private readonly IIntegrationEventService _integrationEventService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetHotelDetailBySlugQueryHandler(IApplicationDbContext context)
+        public GetHotelDetailBySlugQueryHandler(
+            IApplicationDbContext context, 
+            IIntegrationEventService integrationEventService,
+            ICurrentUserService currentUserService)
         {
             _context = context;
+            _integrationEventService = integrationEventService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Result<HotelDetailDto>> Handle(GetHotelDetailBySlugQuery request, CancellationToken token)
@@ -44,6 +51,25 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailB
                         .Select(i => i.ImageUrl)
                         .FirstOrDefault()
             };
+
+            var userIdStr = _currentUserService.UserId;
+            if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out Guid userId))
+            {
+                var viewEvent = new UserViewedHotelIntegrationEvent
+                {
+                    UserId = userId,
+                    HotelId = hotel.Id,
+                    ViewedAt = DateTime.UtcNow
+                };
+
+                await _integrationEventService.PublishAsync(
+                    viewEvent,
+                    exchange: "hotel-catalog.events",
+                    exchangeType: "topic",
+                    routingKey: "hotel.viewed",
+                    cancellationToken: token
+                );
+            }
 
             return Result.Success(dto);
         }

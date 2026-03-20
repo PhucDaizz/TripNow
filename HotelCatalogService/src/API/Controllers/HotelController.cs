@@ -13,6 +13,7 @@ using HotelCatalogService.Application.Features.Hotel.Commands.SuspendHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailBySlug;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsByIds;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
 using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting;
@@ -553,6 +554,17 @@ namespace HotelCatalogService.API.Controllers
             };
             var result = await _mediator.Send(request);
             return Ok(ApiResponse<bool>.SuccessResponse(result));
+        }
+
+        /// <summary>
+        /// Lấy danh sách khách sạn theo id dùng cho viêc recommend, không cần đăng nhập
+        /// </summary>
+        [HttpPost("by-ids")]
+        public async Task<IActionResult> GetHotelsByIds([FromBody] List<Guid> ids)
+        {
+            var query = new GetHotelsByIdsQuery(ids);
+            var result = await _mediator.Send(query);
+            return Ok(ApiResponse<IEnumerable<HotelSummaryDto>>.SuccessResponse(result.Value));
         }
     }
 }
