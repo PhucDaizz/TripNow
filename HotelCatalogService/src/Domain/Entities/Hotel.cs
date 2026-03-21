@@ -77,7 +77,7 @@ namespace HotelCatalogService.Domain.Entities
         public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size)
         {
             if (_roomTypes.Any(x => x.Name == name)) 
-                throw new ArgumentException("LThe room type already exists.");
+                throw new ArgumentException("The room type already exists.");
 
             var roomType = new RoomType(this.Id, name, basePrice, capacity, size);
             _roomTypes.Add(roomType);

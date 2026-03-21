@@ -5,7 +5,10 @@ using RecommendationService.API.ExceptionHandling;
 using RecommendationService.API.Extensions;
 using RecommendationService.API.StartUp;
 using RecommendationService.Application;
+using RecommendationService.Application.Common.Interfaces;
 using RecommendationService.Infrastructure;
+using RecommendationService.Infrastructure.Services;
+using RecommendationService.Infrastructure.Settings;
 using System.Diagnostics;
 
 namespace RecommendationService.API
@@ -35,6 +38,21 @@ namespace RecommendationService.API
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddSharedRabbitMQ(builder.Configuration);
+
+            builder.Services.Configure<OllamaSettings>(builder.Configuration.GetSection("Ollama"));
+            builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAI"));
+
+            var aiProvider = builder.Configuration["AI_Provider"] ?? "Ollama";
+
+            if (aiProvider.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+            {
+                builder.Services.AddSingleton<IEmbeddingService, OpenAiEmbeddingService>();
+            }
+            else
+            {
+                builder.Services.AddHttpClient<OllamaEmbeddingService>();
+                builder.Services.AddSingleton<IEmbeddingService, OllamaEmbeddingService>();
+            }
 
             builder.AddDependencies();
             builder.Services.AddInfrastructure(builder.Configuration);
