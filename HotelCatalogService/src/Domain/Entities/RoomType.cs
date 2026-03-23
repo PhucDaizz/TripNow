@@ -10,6 +10,7 @@ namespace HotelCatalogService.Domain.Entities
         public decimal BasePrice { get; private set; }
         public int Capacity { get; private set; }
         public decimal SizeM2 { get; private set; }
+        public string Description { get; private set; }
 
         private readonly List<RoomPrice> _prices = new();
         private readonly List<RoomTypeImage> _images = new();
@@ -26,13 +27,14 @@ namespace HotelCatalogService.Domain.Entities
         }
 
 
-        internal RoomType(Guid hotelId, string name, decimal basePrice, int capacity, decimal sizeM2): this()
+        internal RoomType(Guid hotelId, string name, decimal basePrice, int capacity, decimal sizeM2, string description) : this()
         {
             HotelId = hotelId;
             Name = name;
             BasePrice = basePrice;
             Capacity = capacity;
             SizeM2 = sizeM2;
+            Description = description;
         }
 
         public void SetSpecialPrice(DateTime date, decimal price)

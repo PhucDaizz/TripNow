@@ -14,6 +14,7 @@ using HotelCatalogService.Application.Features.Hotel.Commands.UpdateHotel;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailBySlug;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsByIds;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelStructure;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsWithPagination;
 using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting;
@@ -65,6 +66,7 @@ namespace HotelCatalogService.API.Controllers
                 Street = request.Street,
                 City = request.City,
                 Country = request.Country,
+                Rating = request.Rating,
                 Latitude = request.Latitude,
                 Longitude = request.Longitude
             };
@@ -204,6 +206,30 @@ namespace HotelCatalogService.API.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy toàn bộ cấu trúc Tòa nhà -> Tầng -> Phòng của Khách sạn
+        /// </summary>
+        /// <remarks>
+        /// - Chỉ HotelOwner được phép gọi
+        /// - fetch để có thể hiển thị giao diện tạo cấu trúc khách sạn nhanh (2.1), giam bớt nhầm lẫn khi tạo cấu trúc khách sạn
+        /// </remarks>
+        [HttpGet("{id:guid}/structure")]
+        [Authorize(Roles = $"{AppRoles.HotelOwner}")]
+        public async Task<IActionResult> GetHotelStructure(Guid id)
+        {
+            var query = new GetHotelStructureQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                return NotFound(ApiResponse<object>.ErrorResponse(result.Error.Message));
+            }
+
+            return Ok(ApiResponse<List<BlockResponseDto>>.SuccessResponse(result.Value));
+        }
+
+
 
         /// <summary>
         /// 2.1 Tạo cấu trúc khách sạn nhanh 
@@ -564,7 +590,7 @@ namespace HotelCatalogService.API.Controllers
         {
             var query = new GetHotelsByIdsQuery(ids);
             var result = await _mediator.Send(query);
-            return Ok(ApiResponse<IEnumerable<HotelSummaryDto>>.SuccessResponse(result.Value));
+            return Ok(ApiResponse<IEnumerable<HotelSummaryDtoo>>.SuccessResponse(result.Value));
         }
     }
 }

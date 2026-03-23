@@ -26,7 +26,7 @@ namespace RecommendationService.Infrastructure.Data.Configurations
             builder.Property(x => x.SearchedAt)
                 .IsRequired();
 
-            builder.HasIndex(x => x.UserId);
+            builder.HasIndex(x => new { x.UserId, x.SearchedAt });
         }
     }
 }

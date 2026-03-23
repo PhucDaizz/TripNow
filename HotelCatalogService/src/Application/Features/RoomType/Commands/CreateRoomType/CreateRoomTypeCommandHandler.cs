@@ -23,7 +23,7 @@ namespace HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomT
             if (hotel == null) return Result.Failure<Guid>(new Error("Hotel.NotFound", "Not found hotel"));
             if (hotel.OwnerId != request.OwnerId) return Result.Failure<Guid>(new Error("Hotel.Forbidden", "No permission"));
 
-            hotel.DefineRoomType(request.Name, request.BasePrice, request.Capacity, request.SizeM2);
+            hotel.DefineRoomType(request.Name, request.BasePrice, request.Capacity, request.SizeM2, request.Description);
 
             if (hotel.StartingPrice == 0 || request.BasePrice < hotel.StartingPrice)
             {

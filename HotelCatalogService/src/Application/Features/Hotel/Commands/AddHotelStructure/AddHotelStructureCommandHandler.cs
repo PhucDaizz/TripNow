@@ -18,28 +18,65 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.AddHotelStruct
 
         public async Task<Result> Handle(AddHotelStructureCommand request, CancellationToken token)
         {
-            var hotel = await _unitOfWork.Hotel.GetByIdIncludeAsync(request.HotelId, token, h => h.Blocks);
+            var hotel = await _unitOfWork.Hotel.GetHotelWithFullStructureAsync(request.HotelId, token);
 
             if (hotel == null) return Result.Failure<Guid>(new Error("Hotel.NotFound", "Hotel not found!"));
             if (hotel.OwnerId != request.OwnerId) return Result.Failure<Guid>(new Error("Hotel.Forbidden", "Not permitted"));
 
-            var existingBlockNames = hotel.Blocks
-                .Select(b => b.Name.ToLower())
+
+            var trackedBlockNames = hotel.Blocks.Select(b => b.Name.ToLower()).ToHashSet();
+            var trackedRoomNames = hotel.Blocks
+                .SelectMany(b => b.Floors)
+                .SelectMany(f => f.Rooms)
+                .Select(r => r.RoomName.Trim().ToLower())
                 .ToHashSet();
+
+            var inventoryChanges = new Dictionary<Guid, int>();
 
             foreach (var blockDto in request.Blocks)
             {
-                if (existingBlockNames.Contains(blockDto.BlockName.ToLower()))
+                var normalizedBlockName = blockDto.BlockName.Trim().ToLower();
+
+                if (!trackedBlockNames.Add(normalizedBlockName)) 
                 {
-                    return Result.Failure(new Error(
-                        "Hotel.BlockExists",
-                        $"The '{blockDto.BlockName}' field already exists. Please use the manual add room function.."
-                    ));
+                    return Result.Failure(new Error("Hotel.BlockExists", $"Tòa nhà '{blockDto.BlockName}' bị trùng lặp."));
+                }
+
+                var block = hotel.AddBlock(blockDto.BlockName);
+                var trackedFloorNames = new HashSet<int>();
+
+                foreach (var floorDto in blockDto.Floors)
+                {
+                    if (!trackedFloorNames.Add(floorDto.FloorName))
+                    {
+                        return Result.Failure(new Error(
+                            "Hotel.FloorExists",
+                            $"Tầng '{floorDto.FloorName}' bị trùng lặp trong tòa {blockDto.BlockName}."));
+                    }
+
+                    var floor = block.AddFloor(floorDto.FloorName);
+
+                    foreach (var roomDto in floorDto.Rooms)
+                    {
+                        var normalizedRoomName = roomDto.RoomName.Trim().ToLower();
+
+                        if (!trackedRoomNames.Add(normalizedRoomName))
+                        {
+                            return Result.Failure(new Error("Hotel.RoomExists", $"Tên phòng '{roomDto.RoomName}' bị trùng lặp trong khách sạn."));
+                        }
+
+                        floor.AddRoomNoEvent(roomDto.RoomName, roomDto.RoomTypeId);
+
+                        if (!inventoryChanges.ContainsKey(roomDto.RoomTypeId))
+                        {
+                            inventoryChanges[roomDto.RoomTypeId] = 0;
+                        }
+                        inventoryChanges[roomDto.RoomTypeId]++;
+                    }
                 }
             }
 
-
-            var inventoryChanges = new Dictionary<Guid, int>();
+            /*var inventoryChanges = new Dictionary<Guid, int>();
 
             foreach (var blockDto in request.Blocks)
             {
@@ -60,7 +97,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.AddHotelStruct
                         inventoryChanges[roomDto.RoomTypeId]++;
                     }
                 }
-            }
+            }*/
 
             await _unitOfWork.SaveChangesAsync(token);
 

@@ -26,7 +26,7 @@ namespace RecommendationService.Infrastructure.Services
             }
         }
 
-        public async Task UpsertVectorAsync(string collectionName, Guid id, float[] vector, Dictionary<string, string>? payload = null)
+        public async Task UpsertVectorAsync(string collectionName, Guid id, float[] vector, Dictionary<string, object>? payload = null)
         {
             var point = new PointStruct
             {
@@ -38,7 +38,7 @@ namespace RecommendationService.Infrastructure.Services
             {
                 foreach (var item in payload)
                 {
-                    point.Payload.Add(item.Key, item.Value);
+                    point.Payload[item.Key] = MapToQdrantValue(item.Value);
                 }
             }
 
@@ -77,6 +77,25 @@ namespace RecommendationService.Infrastructure.Services
             }).ToList();
 
             return mappedResults;
+        }
+
+        private Value MapToQdrantValue(object value)
+        {
+            if (value == null)
+                return new Value { NullValue = Qdrant.Client.Grpc.NullValue.NullValue };
+
+            return value switch
+            {
+                string s => new Value { StringValue = s },
+                int i => new Value { IntegerValue = i },
+                long l => new Value { IntegerValue = l },
+                float f => new Value { DoubleValue = f },
+                double d => new Value { DoubleValue = d },
+                decimal dec => new Value { DoubleValue = (double)dec }, 
+                bool b => new Value { BoolValue = b },
+                Guid g => new Value { StringValue = g.ToString() },
+                _ => new Value { StringValue = value.ToString() } 
+            };
         }
     }
 }

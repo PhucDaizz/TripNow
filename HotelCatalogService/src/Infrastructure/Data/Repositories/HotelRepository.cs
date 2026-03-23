@@ -379,5 +379,15 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
             return await _context.Room.AsNoTracking()
                            .AnyAsync(r => r.FloorId == floorId, cancellationToken);
         }
+
+        public async Task<Hotel?> GetHotelWithFullStructureAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Hotel
+                .Include(h => h.Blocks)
+                    .ThenInclude(b => b.Floors)
+                        .ThenInclude(f => f.Rooms)
+                .AsSplitQuery() 
+                .FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
+        }
     }
 }

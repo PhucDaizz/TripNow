@@ -125,7 +125,8 @@ namespace HotelCatalogService.API.Controllers
                 Name = request.Name,
                 BasePrice = request.BasePrice,
                 Capacity = request.Capacity,
-                SizeM2 = request.SizeM2
+                SizeM2 = request.SizeM2,
+                Description = request.Description
             };
 
             var result = await _mediator.Send(command);

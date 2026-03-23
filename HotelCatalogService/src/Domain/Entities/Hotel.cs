@@ -1,4 +1,4 @@
-﻿using HotelCatalogService.Domain.Common;
+using HotelCatalogService.Domain.Common;
 using HotelCatalogService.Domain.Common.Helpers;
 using HotelCatalogService.Domain.Enum;
 using HotelCatalogService.Domain.Events.Hotel;
@@ -74,12 +74,12 @@ namespace HotelCatalogService.Domain.Entities
             return new Hotel(ownerId, name, description, address, location, rating);
         }
 
-        public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size)
+        public void DefineRoomType(string name, decimal basePrice, int capacity, decimal size, string desciption)
         {
             if (_roomTypes.Any(x => x.Name == name)) 
                 throw new ArgumentException("The room type already exists.");
 
-            var roomType = new RoomType(this.Id, name, basePrice, capacity, size);
+            var roomType = new RoomType(this.Id, name, basePrice, capacity, size, desciption);
             _roomTypes.Add(roomType);
         }
 
@@ -220,8 +220,47 @@ namespace HotelCatalogService.Domain.Entities
 
             Status = HotelStatus.Active;
 
+            var amenityNames = _amenities.Select(a => a.Description ?? string.Empty).ToList();
+
+            var roomTypeSummaries = _roomTypes.Select(rt => 
+            {
+                string? cancelPolicyStr = null;
+                if (rt.CancellationPolicy != null)
+                {
+                    var policy = rt.CancellationPolicy;
+                    cancelPolicyStr = $"Policy: {policy.Name}";
+                    if (policy.Rules.Any())
+                    {
+                        var rulesStr = string.Join("; ", policy.Rules.OrderByDescending(r => r.HoursBeforeCheckIn).Select(r => $"Refund {r.RefundPercentage}% if cancelled {r.HoursBeforeCheckIn}h before check-in"));
+                        cancelPolicyStr += $" ({rulesStr})";
+                    }
+                }
+
+                return new RoomTypeSummary(
+                    rt.Name,
+                    rt.BasePrice,
+                    rt.Capacity,
+                    rt.SizeM2,
+                    rt.Description,
+                    cancelPolicyStr);
+            }).ToList();
+
+            var thumbnail = _images.FirstOrDefault(img => img.IsThumbnail)?.ImageUrl;
+
             // Email thông báo cho chủ khách sạn
             AddDomainEvent(new HotelApprovedEvent(Id, Name, OwnerId));
+            AddDomainEvent(new HotelPublishedEvent(
+                Id,
+                Name,
+                Description,
+                Address.City,
+                Address.Street,
+                Address.Country,
+                Rating,
+                StartingPrice,
+                amenityNames,
+                roomTypeSummaries,
+                thumbnail));
         }
 
         public void SubmitForApproval()

@@ -11,5 +11,6 @@ namespace HotelCatalogService.Application.Features.RoomType.Commands.CreateRoomT
         public decimal BasePrice { get; set; }
         public int Capacity { get; set; }
         public decimal SizeM2 { get; set; }
+        public string Description { get; set; }
     }
 }

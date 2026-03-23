@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RecommendationService.Application.Common.Interfaces;
 using RecommendationService.Domain.Repositories;
+using RecommendationService.Infrastructure.BackgroundJobs.Consumer;
 using RecommendationService.Infrastructure.Data.Repositories;
 using RecommendationService.Infrastructure.Services;
 using RecommendationService.Infrastructure.Settings;
@@ -31,6 +32,10 @@ namespace RecommendationService.Infrastructure
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            // Background consumers
+            services.AddHostedService<UserViewedHotelConsumer>();
+            services.AddHostedService<HotelIndexedConsumer>();
 
             return services;
         }

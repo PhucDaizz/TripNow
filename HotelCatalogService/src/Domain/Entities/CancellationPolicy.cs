@@ -21,6 +21,7 @@ namespace HotelCatalogService.Domain.Entities
             Name = name;
             Description = description;
             Type = type;
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void AddRule(int hoursBeforeCheckIn, decimal refundPercentage)
@@ -31,6 +32,7 @@ namespace HotelCatalogService.Domain.Entities
 
             var rule = new CancellationRule(Id, hoursBeforeCheckIn, refundPercentage);
             _rules.Add(rule);
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void RemoveRule(Guid ruleId)
@@ -40,6 +42,7 @@ namespace HotelCatalogService.Domain.Entities
             {
                 _rules.Remove(rule);
             }
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void UpdateRule(Guid ruleId, int hoursBeforeCheckIn, decimal refundPercentage)
@@ -53,6 +56,8 @@ namespace HotelCatalogService.Domain.Entities
              if (refundPercentage < 0 || refundPercentage > 100)
                 throw new ArgumentException("Refund percentage must be between 0 and 100.");
 
+            UpdatedAt = DateTime.UtcNow;
+
             rule.Update(hoursBeforeCheckIn, refundPercentage);
         }
 
@@ -61,6 +66,7 @@ namespace HotelCatalogService.Domain.Entities
             Name = name;
             Description = description;
             Type = type;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }
