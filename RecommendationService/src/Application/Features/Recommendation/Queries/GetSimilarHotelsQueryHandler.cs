@@ -17,18 +17,24 @@ namespace RecommendationService.Application.Features.Recommendation.Queries
 
         public async Task<Result<IEnumerable<Guid>>> Handle(GetSimilarHotelsQuery request, CancellationToken cancellationToken)
         {
-            // Dùng Qdrant Recommend API: lấy vector của hotel đang xem làm "positive example",
-            // Qdrant sẽ tìm các hotel có vector tương tự nhất nhưng không phải chính hotel đó.
-            var results = await _qdrantService.RecommendAsync(
-                collectionName  : CollectionName,
-                positiveHotelIds: [request.HotelId],
-                limit           : (ulong)request.Limit);
+            var cities = await _qdrantService.GetCitiesByHotelIdsAsync("Hotels", new[] { request.HotelId });
+            var targetCity = cities.FirstOrDefault();
 
-            var similarHotelIds = results
-                .Where(r => r.HotelId != request.HotelId)
-                .Select(r => r.HotelId);
+            if (string.IsNullOrEmpty(targetCity))
+            {
+                return Result.Failure<IEnumerable<Guid>>(new Error("Hotel.NotFound", "Không tìm thấy dữ liệu Khách sạn này trên hệ thống AI."));
+            }
 
-            return Result.Success<IEnumerable<Guid>>(similarHotelIds);
+            var recommendations = await _qdrantService.GetSimilarHotelsAdvancedAsync(
+                collectionName: "Hotels",
+                currentHotelId: request.HotelId,
+                targetCity: targetCity,
+                totalLimit: (ulong)request.Limit
+            );
+
+            var recommendedHotelIds = recommendations.Select(x => x.HotelId).ToList();
+
+            return Result.Success<IEnumerable<Guid>>(recommendedHotelIds);
         }
     }
 }

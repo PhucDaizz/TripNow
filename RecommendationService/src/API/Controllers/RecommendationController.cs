@@ -30,5 +30,17 @@ namespace RecommendationService.API.Controllers
 
             return Ok(ApiResponse<IEnumerable<Guid>>.SuccessResponse(result.Value));
         }
+
+        [HttpGet("hotel/{hotelId:guid}/similar")]
+        public async Task<IActionResult> GetSimilarHotels(Guid hotelId, [FromQuery] int limit = 5)
+        {
+            var query = new GetSimilarHotelsQuery(hotelId, limit);
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
+
+            return Ok(ApiResponse<IEnumerable<Guid>>.SuccessResponse(result.Value));
+        }
     }
 }

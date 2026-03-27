@@ -14,7 +14,7 @@ namespace HotelCatalogService.Infrastructure.Data.Configurations
 
             builder.Property(rt => rt.Name).HasMaxLength(150).IsRequired();
             builder.Property(rt => rt.BasePrice).HasColumnType("decimal(18,2)").IsRequired();
-            builder.Property(rt => rt.SizeM2).HasColumnType("decimal(4,2)");
+            builder.Property(rt => rt.SizeM2).HasColumnType("decimal(5,2)");
             builder.Property(rt => rt.Capacity).IsRequired();
 
             builder.HasMany(rt => rt.Prices)

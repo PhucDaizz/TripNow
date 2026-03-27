@@ -61,13 +61,36 @@ namespace RecommendationService.Infrastructure.Services
             return mappedResults;
         }
 
-        public async Task<IReadOnlyList<VectorSearchResult>> RecommendAsync(string collectionName, IEnumerable<Guid> positiveHotelIds, ulong limit = 10)
+        public async Task<IReadOnlyList<VectorSearchResult>> RecommendAsync(
+            string collectionName,
+            IEnumerable<Guid> positiveHotelIds,
+            List<string>? preferredCities = null, 
+            ulong limit = 10)
         {
             var positivePoints = positiveHotelIds.Select(id => new PointId { Uuid = id.ToString() }).ToList();
 
+            Filter? filter = null;
+
+            if (preferredCities != null && preferredCities.Any())
+            {
+                filter = new Filter();
+                foreach (var city in preferredCities.Distinct()) 
+                {
+                    filter.Should.Add(new Condition
+                    {
+                        Field = new FieldCondition
+                        {
+                            Key = "city",
+                            Match = new Match { Keyword = city }
+                        }
+                    });
+                }
+            }
+
             var qdrantResults = await _client.RecommendAsync(
                 collectionName: collectionName,
-                positive: positivePoints, 
+                positive: positivePoints,
+                filter: filter,
                 limit: limit);
 
             var mappedResults = qdrantResults.Select(r => new VectorSearchResult
@@ -77,6 +100,76 @@ namespace RecommendationService.Infrastructure.Services
             }).ToList();
 
             return mappedResults;
+        }
+
+        public async Task<List<string>> GetCitiesByHotelIdsAsync(string collectionName, IEnumerable<Guid> hotelIds)
+        {
+            var pointIds = hotelIds.Select(id => new PointId { Uuid = id.ToString() }).ToList();
+
+            var points = await _client.RetrieveAsync(collectionName, pointIds, withPayload: true);
+
+            var cities = points
+                .Where(p => p.Payload.ContainsKey("city"))
+                .Select(p => p.Payload["city"].StringValue) 
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .ToList();
+
+            return cities;
+        }
+
+        public async Task<IReadOnlyList<VectorSearchResult>> GetSimilarHotelsAdvancedAsync(
+            string collectionName,
+            Guid currentHotelId,
+            string targetCity,
+            ulong totalLimit = 5)
+        {
+            var positivePoint = new PointId { Uuid = currentHotelId.ToString() };
+
+            ulong cityLimit = (ulong)Math.Ceiling(totalLimit * 0.8);
+            ulong exploreLimit = totalLimit - cityLimit;
+
+            var cityFilter = new Filter();
+            cityFilter.Must.Add(new Condition
+            {
+                Field = new FieldCondition { Key = "city", Match = new Match { Keyword = targetCity } }
+            });
+
+            var cityTask = _client.RecommendAsync(
+                collectionName: collectionName,
+                positive: new[] { positivePoint },
+                filter: cityFilter,
+                limit: cityLimit);
+
+            var exploreFilter = new Filter();
+            exploreFilter.MustNot.Add(new Condition
+            {
+                Field = new FieldCondition { Key = "city", Match = new Match { Keyword = targetCity } }
+            });
+
+            var exploreTask = _client.RecommendAsync(
+                collectionName: collectionName,
+                positive: new[] { positivePoint },
+                filter: exploreFilter,
+                limit: exploreLimit);
+
+            await Task.WhenAll(cityTask, exploreTask);
+
+            var finalResults = new List<VectorSearchResult>();
+
+            finalResults.AddRange(cityTask.Result.Select(r => new VectorSearchResult
+            {
+                HotelId = Guid.Parse(r.Id.Uuid),
+                Score = r.Score,
+            }));
+
+            finalResults.AddRange(exploreTask.Result.Select(r => new VectorSearchResult
+            {
+                HotelId = Guid.Parse(r.Id.Uuid),
+                Score = r.Score,
+            }));
+
+            return finalResults;
         }
 
         private Value MapToQdrantValue(object value)
@@ -96,6 +189,26 @@ namespace RecommendationService.Infrastructure.Services
                 Guid g => new Value { StringValue = g.ToString() },
                 _ => new Value { StringValue = value.ToString() } 
             };
+        }
+
+        public async Task<IEnumerable<Guid>> GetRandomHotelsAsync(string collectionName, ulong limit)
+        {
+            int vectorSize = 1024;
+
+            var random = new Random();
+            var randomVector = new float[vectorSize];
+            for (int i = 0; i < vectorSize; i++)
+            {
+                randomVector[i] = (float)((random.NextDouble() * 2.0) - 1.0);
+            }
+
+            var searchResults = await _client.SearchAsync(
+                collectionName: collectionName,
+                vector: randomVector,
+                limit: limit
+            );
+
+            return searchResults.Select(r => Guid.Parse(r.Id.Uuid)).ToList();
         }
     }
 }

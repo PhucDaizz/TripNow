@@ -263,6 +263,49 @@ namespace HotelCatalogService.Domain.Entities
                 thumbnail));
         }
 
+        public void RepublishToVectorDb()
+        {
+            var amenityNames = _amenities.Select(a => a.Description ?? string.Empty).ToList();
+
+            var roomTypeSummaries = _roomTypes.Select(rt =>
+            {
+                string? cancelPolicyStr = null;
+                if (rt.CancellationPolicy != null)
+                {
+                    var policy = rt.CancellationPolicy;
+                    cancelPolicyStr = $"Policy: {policy.Name}";
+                    if (policy.Rules.Any())
+                    {
+                        var rulesStr = string.Join("; ", policy.Rules.OrderByDescending(r => r.HoursBeforeCheckIn).Select(r => $"Refund {r.RefundPercentage}% if cancelled {r.HoursBeforeCheckIn}h before check-in"));
+                        cancelPolicyStr += $" ({rulesStr})";
+                    }
+                }
+
+                return new RoomTypeSummary(
+                    rt.Name,
+                    rt.BasePrice,
+                    rt.Capacity,
+                    rt.SizeM2,
+                    rt.Description,
+                    cancelPolicyStr);
+            }).ToList();
+
+            var thumbnail = _images.FirstOrDefault(img => img.IsThumbnail)?.ImageUrl;
+
+            AddDomainEvent(new HotelPublishedEvent(
+                Id,
+                Name,
+                Description,
+                Address.City,
+                Address.Street,
+                Address.Country,
+                Rating,
+                StartingPrice,
+                amenityNames,
+                roomTypeSummaries,
+                thumbnail));
+        }
+
         public void SubmitForApproval()
         {
             if (Status != HotelStatus.Draft && Status != HotelStatus.Rejected)

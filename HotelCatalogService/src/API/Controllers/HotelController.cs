@@ -1,6 +1,7 @@
 ﻿using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.Hotel;
 using HotelCatalogService.Application.DTOs.Room;
+using HotelCatalogService.Application.Features.Hotel.Commands;
 using HotelCatalogService.Application.Features.Hotel.Commands.AddHotelStructure;
 using HotelCatalogService.Application.Features.Hotel.Commands.ApproveHotel;
 using HotelCatalogService.Application.Features.Hotel.Commands.CloseTemporarilyHotel;
@@ -592,6 +593,29 @@ namespace HotelCatalogService.API.Controllers
             var result = await _mediator.Send(query);
             return Ok(ApiResponse<IEnumerable<HotelSummaryDtoo>>.SuccessResponse(result.Value));
         }
+
+        /*/// <summary>
+        /// Đồng bộ lại dữ liệu các khách sạn đang Active sang Vector DB (Qdrant)
+        /// Sử dụng khi đổi model embedding (ví dụ sang bge-m3)
+        /// </summary>
+        [HttpPost("sync-vector-db")]
+        public async Task<IActionResult> SyncHotelsToVectorDb(CancellationToken cancellationToken)
+        {
+            var command = new SyncHotelsToVectorDbCommand();
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Đã trigger thành công event đồng bộ các khách sạn đang Active sang Qdrant!"
+            });
+        }*/
     }
 }
 
