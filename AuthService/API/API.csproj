@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<UserSecretsId>1cb9ef63-31d5-4e04-a310-4b07a640f52b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>

@@ -1,10 +1,4 @@
-﻿using Application.Common.Interfaces;
-using Application.DTOs.StaffProfile;
 using Application.DTOs.User;
-using Application.Features.StaffProfile.Commands.CreateStaffProfile;
-using Application.Features.StaffProfile.Commands.DeleteStaffProfile;
-using Application.Features.StaffProfile.Commands.UpdateStaffProfile;
-using Application.Features.StaffProfile.Queries.GetStaffProfile;
 using Application.Features.User.Commands.ConfirmEmail;
 using Application.Features.User.Commands.ExternalLogin;
 using Application.Features.User.Commands.ForgotPassword;
@@ -14,11 +8,6 @@ using Application.Features.User.Commands.Register;
 using Application.Features.User.Commands.RegisterHotelOwner;
 using Application.Features.User.Commands.ResetPasswordCommand;
 using Application.Features.User.Commands.SendEmailConfim;
-using Application.Features.User.Commands.UpdateInfor;
-using Application.Features.User.Commands.UploadAvatar;
-using Application.Features.User.Queries.GetInfoDetail;
-using Application.Features.User.Queries.GetUsersWithPagination;
-using Application.Features.User.Queries.IsUserExisting;
 using Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -35,13 +24,11 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IMediator mediator, ICurrentUserService currentUserService, IConfiguration configuration)
+        public AuthController(IMediator mediator, IConfiguration configuration)
         {
             _mediator = mediator;
-            _currentUserService = currentUserService;
             _configuration = configuration;
         }
 
@@ -134,37 +121,6 @@ namespace API.Controllers
             }
 
             return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(result.Value));
-        }
-
-        /// <summary>
-        /// Xem thông tin của bản thân
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpGet("me")]
-        [Authorize]
-        public async Task<IActionResult> GetInfo()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(ApiResponse<GetInfoDetailQuery>.ErrorResponse("User not authenticated"));
-            }
-
-            var result = await _mediator.Send(new GetInfoDetailQuery
-            {
-                UserId = userId
-            });
-
-            if (result.IsSuccess)
-            {
-                return Ok(ApiResponse<InforDto>.SuccessResponse(result.Value));
-            }
-            return BadRequest(ApiResponse<InforDto>.ErrorResponse(
-                result.Error.Code,
-                new List<string> { result.Error.Message }
-            ));
         }
 
         /// <summary>
@@ -354,272 +310,6 @@ namespace API.Controllers
             }
 
             return Ok(ApiResponse<string>.SuccessResponse(result.Value));
-        }
-
-        /// <summary>
-        /// Cập nhật thông tin cá nhân
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpPut("profile")]
-        [Authorize]
-        public async Task<IActionResult> UpdateInfor([FromBody]UpdateInforCommand command)
-        {
-            
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(ApiResponse<string>.ErrorResponse("User not found!"));
-            }
-
-            var result = await _mediator.Send(command);
-            if (result.IsSuccess)
-            {
-                return Ok(ApiResponse<string>.SuccessResponse(result.Value, "User information updated successfully."));
-            }
-            return BadRequest(ApiResponse<string>.ErrorResponse(
-                result.Error.Code,
-                new List<string> { result.Error.Message }
-            ));
-
-        }
-
-        /// <summary>
-        /// Tải lên ảnh đại diện lưu ý dùng IFormFile
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpPost("upload-avatar")]
-        [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
-        [RequestFormLimits(MultipartBodyLengthLimit = 5 * 1024 * 1024)]
-        public async Task<IActionResult> UploadAvatar(IFormFile file, [FromQuery] bool deleteOld = true)
-        {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                if (file == null || file.Length == 0)
-                    return BadRequest("No file uploaded");
-
-                var result = await _mediator.Send(new UploadAvatarCommand
-                {
-                    File = file,
-                    UserId = userId,
-                    DeleteOldAvatar = deleteOld,
-                    OptimizeImage = true
-                });
-
-                return Ok(ApiResponse<UploadAvatarResult>.SuccessResponse(result.Value, "Avatar uploaded successfully"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<string>.ErrorResponse("UPLOAD_FAILED", new List<string> { ex.Message }));
-            }
-        }
-
-        /// <summary>
-        /// Admin xem thông tin người dùng
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpGet("{userId}")]
-        [Authorize(Roles = AppRoles.SysAdmin)]
-        public async Task<IActionResult> GetUserInfo(string userId)
-        {
-            var result = await _mediator.Send(new GetInfoDetailQuery
-            {
-                UserId = userId
-            });
-
-            return result.IsSuccess
-                ? Ok(ApiResponse<InforDto>.SuccessResponse(result.Value))
-                : NotFound(ApiResponse<InforDto>.ErrorResponse(result.Error.Code));
-        }
-
-        /// <summary>
-        /// Xem danh sách người dùng
-        /// </summary>
-        /// <remarks>
-        /// - Admin xem được tất cả 
-        /// - Chủ khách sạn chỉ xem nhân viên của khách sạn đó
-        /// - Lễ tân chỉ xem nhân viên của khách sạn đó
-        /// - Người dùng thông thường không được phép
-        /// Trường Role có các role gồm "SysAdmin", "HotelOwner", "Receptionist", "Housekeeping", "Customer"
-        /// </remarks>
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetUsers([FromQuery] GetUsersWithPaginationQuery query)
-        {
-            var currentRole = User.FindFirstValue(ClaimTypes.Role);
-            var currentHotelId = _currentUserService.HotelId;
-
-            if (currentRole == AppRoles.SysAdmin)
-            {
-            }
-            else if (currentRole == AppRoles.HotelOwner)
-            {
-                if (currentHotelId == null)
-                {
-                    return Ok(ApiResponse<PagedResult<UserDto>>.SuccessResponse(PagedResult<UserDto>.Empty()));
-                }
-
-                query.HotelId = currentHotelId;
-            }
-            else if (currentRole == AppRoles.Receptionist)
-            {
-                if (currentHotelId == null)
-                {
-                    return BadRequest(ApiResponse<object>.ErrorResponse("Staff account implies a hotel association but none found."));
-                }
-                query.HotelId = currentHotelId;
-            }
-            else
-            {
-                return Unauthorized();
-            }
-
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
-            {
-                return BadRequest(ApiResponse<object>.ErrorResponse(result.Error.Message));
-            }
-
-            return Ok(ApiResponse<Domain.Common.Models.PagedResult<UserDto>>.SuccessResponse(result.Value));
-        }
-
-
-        /// <summary>
-        /// Thêm nhân viên vào hệ thống khách sạn 
-        /// </summary>
-        /// <remarks>
-        /// Lưu ý: 1.chỉ admin hoặc chủ khách sạn đó mới được thêm
-        /// 2. Người muốn làm nhân viên phải đăng ký tài khoản khách hàng trước đó
-        /// Email là email của người muốn thêm
-        /// Các vị trí được thêm gồm: "HotelOwner", "Receptionist", "Housekeeping"
-        /// </remarks>
-        [HttpPost("staff-profile")]
-        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
-        public async Task<IActionResult> CreateStaffProfile(
-            [FromBody]CreateStaffProfileDto command)
-        {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var newStaffProfile = new CreateStaffProfileCommand
-            {
-                Email = command.Email,
-                HotelId = command.HotelId,
-                Position = command.Position,
-                CreatedByUserId = currentUserId
-            };
-
-            var result = await _mediator.Send(newStaffProfile);
-
-            if (result.IsSuccess)
-            {
-                return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(
-                    result.Value,
-                    "Staff profile created successfully"
-                ));
-            }
-
-            return BadRequest(ApiResponse<string>.ErrorResponse(
-                result.Error.Message,
-                new List<string> { result.Error.Code }
-            ));
-        }
-
-        /// <summary>
-        /// Xoá nhân viên ra khỏi hệ thống khách sạn
-        /// </summary>
-        /// <remarks>
-        /// Sau khi xoá sẽ được trở về role khách hàng thông thường
-        /// Lưu ý chỉ amdin hoặc chủ khách sạn mới được xoá
-        /// </remarks>
-        [HttpDelete("staff/{userid}")]
-        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
-        public async Task<IActionResult> DeleteStaffProfile(Guid userid)
-        {
-            var command = new DeleteStaffProfileCommand
-            {
-                UserId = userid,
-                DeletedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
-            };
-
-            var result = await _mediator.Send(command);
-
-            if (result.IsSuccess)
-                return NoContent();
-
-            return BadRequest(result.Error.Message);
-        }
-
-        /// <summary>
-        /// Cập nhật lại chức vụ của nhân viên
-        /// </summary>
-        /// <remarks>
-        /// Lưu ý: chỉ admin và chủ khách sạn mới được cập nhật
-        /// Các role mới được cập nhật gồm "HotelOwner", "Receptionist", "Housekeeping"
-        /// </remarks>
-        [HttpPut("staff/{userId}")]
-        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner}")]
-        public async Task<IActionResult> UpdateStaffProfile(
-            Guid userId,
-            [FromBody] UpdateStaffProfileDto command)
-        {
-
-            var staffProfileUpdate = new UpdateStaffProfileCommand
-            {
-                StaffProfileId = userId,
-                NewPosition = command.NewPosition,
-                HotelId = command.HotelId,
-                UpdatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
-            };
-
-            var result = await _mediator.Send(staffProfileUpdate);
-
-            if (result.IsSuccess)
-                return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
-
-            return BadRequest(ApiResponse<StaffProfileDto>.ErrorResponse(result.Error.Message));
-        }
-
-        /// <summary>
-        /// Xem thông tin nhân viên xua khách sạn nào role khách hàng không được xem
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpGet("staff-profile")]
-        [Authorize(Roles = $"{AppRoles.SysAdmin},{AppRoles.HotelOwner},{AppRoles.Housekeeping},{AppRoles.Receptionist}")]
-        public async Task<IActionResult> GetStaffProfile()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var result = await _mediator.Send(new GetStaffProfileQuery { UserId = userId });
-
-            if (result.IsFailure)
-            {
-                return NotFound(ApiResponse<string>.ErrorResponse("Employee information not found."));
-            }
-
-            return Ok(ApiResponse<StaffProfileDto>.SuccessResponse(result.Value));
-        }
-
-        /// <summary>
-        /// Không map ra APIGateWay
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        [HttpGet("user-existing")]
-        public async Task<IActionResult> IsUsserExisting([FromQuery]Guid userId)
-        {
-            var request = new IsUserExistingQuery
-            {
-                UserId = userId
-            };
-
-            var result = await _mediator.Send(request);
-            return Ok(ApiResponse<bool>.SuccessResponse(result.Value));
         }
     }
 }
