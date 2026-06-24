@@ -8,6 +8,7 @@ namespace RecommendationService.Application.Features.Hotel.EventHandlers.HotelIn
     public class HotelIndexedIntegrationEventHandler : INotificationHandler<HotelIndexedIntegrationEvent>
     {
         private const string CollectionName = "Hotels";
+        private const string RagCollection = "HotelKnowledgeBase";
 
         private readonly IEmbeddingService _embeddingService;
         private readonly IQdrantService    _qdrantService;
@@ -56,6 +57,70 @@ namespace RecommendationService.Application.Features.Hotel.EventHandlers.HotelIn
 
             _logger.LogInformation("Successfully indexed hotel {HotelId} into Qdrant collection '{Collection}'",
                 notification.HotelId, CollectionName);
+
+
+
+            await _qdrantService.EnsureCollectionExistsAsync(RagCollection, (ulong)_embeddingService.VectorSize);
+
+            var ragChunks = new List<(Guid Id, float[] Vector, Dictionary<string, object> Payload)>();
+
+            string generalInfo = $@"
+                Thông tin tổng quan khách sạn {notification.Name}:
+                - Mô tả: {notification.Description}
+                - Vị trí: {notification.Street}, {notification.City}, {notification.Country}
+                - Tiện ích chung: {string.Join(", ", notification.AmenityNames)}
+                ";
+
+            var generalVector = await _embeddingService.GenerateEmbeddingAsync(generalInfo, cancellationToken);
+            ragChunks.Add((
+                Guid.NewGuid(), 
+                generalVector,
+                CreateRagPayload(notification.HotelId, "Tổng quan", generalInfo)
+            ));
+
+            if (notification.RoomTypes != null)
+            {
+                foreach (var room in notification.RoomTypes)
+                {
+                    string roomInfo = $@"
+                        Thông tin phòng: {room.Name}
+                        - Giá cơ bản: {room.BasePrice} VND
+                        - Sức chứa: {room.Capacity} người
+                        - Diện tích: {room.SizeM2} m2
+                        - Mô tả phòng: {room.Description}
+                        - Chính sách hủy phòng này: {room.CancellationPolicyDescription ?? "Không có"}
+                        ";
+
+                    var roomVector = await _embeddingService.GenerateEmbeddingAsync(roomInfo, cancellationToken);
+
+                    ragChunks.Add((
+                        Guid.NewGuid(),
+                        roomVector,
+                        CreateRagPayload(notification.HotelId, $"Phòng {room.Name}", roomInfo)
+                    ));
+                }
+            }
+
+            foreach (var chunk in ragChunks)
+            {
+                await _qdrantService.UpsertVectorAsync(
+                    collectionName: RagCollection,
+                    id: chunk.Id, 
+                    vector: chunk.Vector,
+                    payload: chunk.Payload);
+            }
+
+
+        }
+
+        private Dictionary<string, object> CreateRagPayload(Guid hotelId, string category, string content)
+        {
+            return new Dictionary<string, object>
+            {
+                ["hotelId"] = hotelId.ToString(), 
+                ["category"] = category,
+                ["content"] = content
+            };
         }
     }
 }

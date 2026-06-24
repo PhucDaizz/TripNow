@@ -594,7 +594,7 @@ namespace HotelCatalogService.API.Controllers
             return Ok(ApiResponse<IEnumerable<HotelSummaryDtoo>>.SuccessResponse(result.Value));
         }
 
-        /*/// <summary>
+        /// <summary>
         /// Đồng bộ lại dữ liệu các khách sạn đang Active sang Vector DB (Qdrant)
         /// Sử dụng khi đổi model embedding (ví dụ sang bge-m3)
         /// </summary>
@@ -615,7 +615,7 @@ namespace HotelCatalogService.API.Controllers
                 Success = true,
                 Message = "Đã trigger thành công event đồng bộ các khách sạn đang Active sang Qdrant!"
             });
-        }*/
+        }
     }
 }
 

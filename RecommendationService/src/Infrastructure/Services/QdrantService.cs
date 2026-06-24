@@ -210,5 +210,90 @@ namespace RecommendationService.Infrastructure.Services
 
             return searchResults.Select(r => Guid.Parse(r.Id.Uuid)).ToList();
         }
+
+        public async Task<IReadOnlyList<string>> SearchHotelDocumentsAsync(
+            string collectionName,
+            float[] queryVector,
+            Guid hotelId,
+            ulong limit = 3)
+        {
+            /*// 1. FILTER: Khoanh vùng đúng Khách sạn đang chat
+            var filter = new Filter();
+            filter.Must.Add(new Condition
+            {
+                HasId = new HasIdCondition
+                {
+                    HasId = { new PointId { Uuid = hotelId.ToString() } }
+                }
+            });
+
+            // 2. TÌM KIẾM TRONG QDRANT
+            var searchResults = await _client.SearchAsync(
+                collectionName: collectionName,
+                vector: queryVector,
+                filter: filter,
+                limit: limit
+            );
+
+            var contextChunks = new List<string>();
+
+            // 3. BÓC TÁCH PAYLOAD THEO ĐÚNG KEY CỦA BÁC
+            foreach (var r in searchResults)
+            {
+                // Dùng TryGetValue để code bất tử, không bị văng Exception nếu lỡ thiếu trường
+                var name = r.Payload.TryGetValue("name", out var n) ? n.StringValue : "Đang cập nhật";
+                var city = r.Payload.TryGetValue("city", out var c) ? c.StringValue : "";
+                var country = r.Payload.TryGetValue("country", out var co) ? co.StringValue : "";
+
+                // Qdrant bọc số trong DoubleValue hoặc IntegerValue
+                var rating = r.Payload.TryGetValue("rating", out var rat) ? rat.DoubleValue.ToString("0.0") : "N/A";
+                var price = r.Payload.TryGetValue("starting_price", out var p) ? p.DoubleValue.ToString("N0") : "Đang cập nhật";
+                var maxCapacity = r.Payload.TryGetValue("max_capacity", out var cap) ? cap.IntegerValue.ToString() : "N/A";
+
+                var amenities = r.Payload.TryGetValue("amenities", out var a) ? a.StringValue : "Không có thông tin";
+
+                // 4. ĐÓNG GÓI THÀNH TEXT CHUẨN ĐỂ MỚM CHO AI (OPENROUTER)
+                string chunk = $@"
+                [THÔNG TIN KHÁCH SẠN]
+                Tên khách sạn: {name}
+                Vị trí: {city}, {country}
+                Đánh giá: {rating} sao
+                Giá khởi điểm: {price} VND/đêm
+                Sức chứa tối đa mỗi phòng: {maxCapacity} người
+                Các tiện ích nổi bật: {amenities}
+                ";
+                contextChunks.Add(chunk.Trim());
+            }
+
+            return contextChunks;*/
+
+
+            // 1. FILTER: Lọc theo trường "hotelId" nằm TRONG PAYLOAD 
+            var filter = new Filter();
+            filter.Must.Add(new Condition
+            {
+                Field = new FieldCondition
+                {
+                    Key = "hotelId", // Khớp với key gán trong CreateRagPayload
+                    Match = new Match { Keyword = hotelId.ToString() }
+                }
+            });
+
+            // 2. TÌM KIẾM TRONG QDRANT (Tìm các Vector giống nhất trong phạm vi Filter)
+            var searchResults = await _client.SearchAsync(
+                collectionName: collectionName,
+                vector: queryVector,
+                filter: filter,
+                limit: limit
+            );
+
+            // 3. TRÍCH XUẤT NỘI DUNG (Chỉ cần bốc thẳng cái "content" ra)
+            var contextChunks = searchResults
+                .Where(r => r.Payload.ContainsKey("content"))
+                .Select(r => r.Payload["content"].StringValue.Trim())
+                .ToList();
+
+            return contextChunks;
+        }
     }
 }

@@ -4,5 +4,6 @@
     {
         public const string SectionName = "ServiceUrls";
         public string HotelCatalog { get; set; } = default!;
+        public string Recommendation { get; set; } = default!;
     }
 }

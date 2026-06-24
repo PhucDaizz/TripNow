@@ -55,6 +55,15 @@ namespace ChatService.API
                     client.BaseAddress = new Uri(options.HotelCatalog);
                 });
 
+            builder.Services.AddHttpClient<IRecommendationService, RecommendationService>(
+                (sp, client) =>
+                {
+                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                    client.BaseAddress = new Uri(options.Recommendation);
+                });
+
+            builder.Services.AddHttpClient<IAiChatService, OpenRouterChatService>();
+
             // CORS — cho phép tất cả origin khi dev/test (bao gồm file://)
             builder.Services.AddCors(options =>
             {

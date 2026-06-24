@@ -16,5 +16,10 @@ namespace RecommendationService.Application.Common.Interfaces
         Task<List<string>> GetCitiesByHotelIdsAsync(string collectionName, IEnumerable<Guid> hotelIds);
         Task<IReadOnlyList<VectorSearchResult>> GetSimilarHotelsAdvancedAsync(string collectionName, Guid currentHotelId, string targetCity, ulong totalLimit = 5);
         Task<IEnumerable<Guid>> GetRandomHotelsAsync(string collectionName, ulong limit);
+        Task<IReadOnlyList<string>> SearchHotelDocumentsAsync(
+            string collectionName,
+            float[] queryVector,
+            Guid hotelId,
+            ulong limit = 3);
     }
 }
