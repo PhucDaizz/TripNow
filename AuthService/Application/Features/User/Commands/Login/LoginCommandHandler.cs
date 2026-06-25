@@ -1,5 +1,4 @@
-﻿using Application.Common.Interfaces;
-using Application.Contracts;
+﻿using Application.Contracts;
 using Application.DTOs.User;
 using Domain.Common.Response;
 using MediatR;

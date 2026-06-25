@@ -1,17 +1,15 @@
-﻿using Application.Common.Interfaces;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories
 {
     public class StaffProfileRepository : IStaffProfileRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public StaffProfileRepository(
-            IApplicationDbContext context
+            ApplicationDbContext context
             )
         {
             _context = context;

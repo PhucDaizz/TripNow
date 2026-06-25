@@ -1,5 +1,4 @@
-﻿using Application.DTOs.Hotel;
-using Application.DTOs.Payment;
+﻿using Application.DTOs.Payment;
 using Infrastructure.BackgroundJobs.Consumer.Hotel;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

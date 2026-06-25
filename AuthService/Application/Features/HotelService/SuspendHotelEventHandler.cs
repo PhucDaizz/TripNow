@@ -22,7 +22,7 @@ namespace Application.Features.HotelService
             if (owner != null)
             {
                 string htmlBody = _emailServices.CreateHotelSuspendedEmailBody(owner.FullName, notification.HotelName, notification.Reason);
-                var emailSent = await _emailServices.SendEmailAsync(owner.Email, "Khách sạn của bạn đã bị tạm thời khoá", htmlBody, true);
+                var emailSent = await _emailServices.SendEmailAsync(owner.Email!, "Khách sạn của bạn đã bị tạm thời khoá", htmlBody, true);
             }
         }
     }

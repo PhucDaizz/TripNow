@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Domain.Common
+﻿namespace Domain.Common
 {
     namespace Domain.Common
     {

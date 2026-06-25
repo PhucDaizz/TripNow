@@ -23,7 +23,7 @@ namespace Application.Features.HotelService
             if (owner is not null)
             {
                 string htmlBody = _emailServices.CreateHotelApprovedEmailBody(owner.FullName, notification.HotelName);
-                var emailSent = await _emailServices.SendEmailAsync(owner.Email, "🎉 Chúc mừng! Khách sạn của bạn đã được phê duyệt", htmlBody, true);
+                var emailSent = await _emailServices.SendEmailAsync(owner.Email!, "🎉 Chúc mừng! Khách sạn của bạn đã được phê duyệt", htmlBody, true);
             }
         }
     }

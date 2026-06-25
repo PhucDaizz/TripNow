@@ -16,7 +16,7 @@ namespace Application.Features.User.Queries.IsUserExisting
 
         public async Task<Result<bool>> Handle(IsUserExistingQuery request, CancellationToken cancellationToken)
         {
-            var isExisting = await _context.Users.AnyAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+            var isExisting = await _context.UserQuery.AnyAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
             return Result.Success(isExisting); 
         }
     }

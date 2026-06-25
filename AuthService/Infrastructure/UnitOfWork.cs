@@ -1,9 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Repositories;
 using Domain.Repositories;
-using Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure
 {

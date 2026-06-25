@@ -13,7 +13,10 @@ namespace Infrastructure
         {
             _domainEventService = domainEventService;
         }
+
         public DbSet<StaffProfile> StaffProfile { get; set; }
+        public IQueryable<ExtendedIdentityUser> UserQuery => Users;
+        public IQueryable<StaffProfile> StaffProfilesQuery => StaffProfile;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

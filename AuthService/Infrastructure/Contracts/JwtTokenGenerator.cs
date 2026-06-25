@@ -2,7 +2,6 @@
 using Application.Contracts;
 using Application.DTOs.User;
 using Infrastructure.Settings;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,7 +25,7 @@ namespace Infrastructure.Contracts
         }
         public async Task<string> CreateToken(CreateTokenDTO user, List<string> roles)
         {
-            var userHotel = await _dbContext.StaffProfile.FirstOrDefaultAsync(x => x.UserId == user.UserId);
+            var userHotel = await _unitOfWork.StaffProfile.GetByUserIdAsync(user.UserId);
             var userInfo = await _unitOfWork.Auth.GetUserByIdAsync(user.UserId);
 
             var claim = new List<Claim>

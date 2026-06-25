@@ -23,7 +23,7 @@ namespace Application.Features.HotelService
             if(owner != null)
             {
                 string htmlBody = _emailServices.CreateHotelRejectedEmailBody(owner.FullName, notification.HotelName, notification.Reason);
-                var emailSent = await _emailServices.SendEmailAsync(owner.Email, "Khách sạn của bạn bị từ chối phê duyệt", htmlBody, true);
+                var emailSent = await _emailServices.SendEmailAsync(owner.Email!, "Khách sạn của bạn bị từ chối phê duyệt", htmlBody, true);
             }
         }
     }
