@@ -15,7 +15,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.IsHotelOwner
 
         public async Task<bool> Handle(IsHotelOwnerQuery request, CancellationToken cancellationToken)
         {
-            var hotel = await _context.Hotel
+            var hotel = await _context.Hotels
                 .Where(h => h.Id == request.HotelId && h.OwnerId == request.UserId)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();

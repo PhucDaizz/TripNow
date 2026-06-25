@@ -17,13 +17,13 @@ namespace HotelCatalogService.Application.Features.RoomTypeImage.Queries.GetRoom
 
         public async Task<Result<List<RoomTypeImageDto>>> Handle(GetRoomTypeImagesQuery request, CancellationToken token)
         {
-            var roomTypeExists = await _context.RoomType.AnyAsync(rt => rt.Id == request.RoomTypeId, token);
+            var roomTypeExists = await _context.RoomTypes.AnyAsync(rt => rt.Id == request.RoomTypeId, token);
             if (!roomTypeExists)
             {
                 return Result.Failure<List<RoomTypeImageDto>>(new Error("RoomType.NotFound", "Không tìm thấy loại phòng."));
             }
 
-            var images = await _context.RoomTypeImage
+            var images = await _context.RoomTypeImages
                 .AsNoTracking()
                 .Where(img => img.RoomTypeId == request.RoomTypeId) 
                 .OrderByDescending(img => img.IsMainImage)         

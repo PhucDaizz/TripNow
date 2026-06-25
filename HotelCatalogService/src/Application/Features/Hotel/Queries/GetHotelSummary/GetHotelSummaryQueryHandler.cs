@@ -17,7 +17,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary
 
         public async Task<Result<HotelSummaryDto>> Handle(GetHotelSummaryQuery request, CancellationToken cancellationToken)
         {
-            var hotel = await _context.Hotel
+            var hotel = await _context.Hotels
             .Where(x => x.Id == request.HotelId)
             .Select(x => new HotelSummaryDto
             {

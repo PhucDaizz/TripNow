@@ -1,7 +1,6 @@
 using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelCatalogService.Application.Features.Hotel.Commands.ApproveHotel
 {
@@ -19,13 +18,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Commands.ApproveHotel
 
         public async Task<Result> Handle(ApproveHotelCommand request, CancellationToken cancellationToken)
         {
-            var hotel = await _context.Hotel
-                .Include(x => x.Amenities)
-                .Include(x => x.RoomTypes)
-                    .ThenInclude(rt => rt.CancellationPolicy!)
-                        .ThenInclude(cp => cp.Rules)
-                .Include(x => x.Images)
-                .FirstOrDefaultAsync(x => x.Id == request.HotelId);
+            var hotel = await _unitOfWork.Hotel.GetHotelAggregateDetailAsync(request.HotelId, cancellationToken);
 
             if (hotel == null)
             {

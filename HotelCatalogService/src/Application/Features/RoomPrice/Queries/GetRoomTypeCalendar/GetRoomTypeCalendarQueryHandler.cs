@@ -29,7 +29,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomType
 
             var startDateToScan = firstDayOfMonth < today ? today : firstDayOfMonth;
 
-            var roomTypeInfo = await _context.RoomType
+            var roomTypeInfo = await _context.RoomTypes
                 .Where(rt => rt.Id == request.RoomTypeId)
                 .Select(rt => new { rt.BasePrice })
                 .FirstOrDefaultAsync(token);
@@ -37,7 +37,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomType
             if (roomTypeInfo == null)
                 return Result.Failure<List<CalendarDayDto>>(new Error("RoomType.NotFound", "No room type found"));
 
-            var specialPrices = await _context.RoomPrice
+            var specialPrices = await _context.RoomPrices
                 .Where(p => EF.Property<Guid>(p, "RoomTypeId") == request.RoomTypeId
                          && p.Date >= startDateToScan
                          && p.Date <= lastDayOfMonth)

@@ -17,24 +17,25 @@ namespace HotelCatalogService.Application.Features.HotelImage.Queries
 
         public async Task<Result<List<HotelImageDto>>> Handle(GetHotelImagesQuery request, CancellationToken token)
         {
-            var hotelExists = await _context.Hotel.AnyAsync(h => h.Id == request.HotelId, token);
+            var hotelExists = await _context.Hotels.AnyAsync(h => h.Id == request.HotelId, token);
             if (!hotelExists)
             {
                 return Result.Failure<List<HotelImageDto>>(new Error("Hotel.NotFound", "Không tìm thấy khách sạn."));
             }
 
-            var images = await _context.HotelImage
+            var images = await _context.HotelImages
                 .AsNoTracking()
-                .Where(img => img.HotelId == request.HotelId) 
-                .OrderByDescending(img => img.IsThumbnail)    
-                .ThenBy(img => img.CreatedAt)                 
+                .Where(img => img.HotelId == request.HotelId)
+                .OrderByDescending(img => img.IsThumbnail)
+                .ThenBy(img => img.CreatedAt)
                 .Select(img => new HotelImageDto
                 {
                     Id = img.Id,
-                    ImageUrl = img.ImageUrl, 
-                    IsThumbnail = img.IsThumbnail, 
-                    Caption = img.Caption 
+                    ImageUrl = img.ImageUrl,
+                    IsThumbnail = img.IsThumbnail,
+                    Caption = img.Caption
                 })
+                .AsNoTracking()
                 .ToListAsync(token);
 
             return Result.Success(images);

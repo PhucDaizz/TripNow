@@ -17,14 +17,14 @@ namespace HotelCatalogService.Application.Features.HotelAmenity.Queries.GetHotel
 
         public async Task<Result<List<HotelAmenityDto>>> Handle(GetHotelAmenitiesQuery request, CancellationToken token)
         {
-            var hotelExists = await _context.Hotel.AnyAsync(h => h.Id == request.HotelId, token);
+            var hotelExists = await _context.Hotels.AnyAsync(h => h.Id == request.HotelId, token);
             if (!hotelExists)
             {
                 return Result.Failure<List<HotelAmenityDto>>(new Error("Hotel.NotFound", "Hotel is not avaiable."));
             }
 
-            var query = from ha in _context.HotelAmenity.AsNoTracking()
-                        join a in _context.Amenity.AsNoTracking()
+            var query = from ha in _context.HotelAmenities.AsNoTracking()
+                        join a in _context.Amenities.AsNoTracking()
                             on ha.AmenityId equals a.Id
                         where ha.HotelId == request.HotelId
                         select new HotelAmenityDto

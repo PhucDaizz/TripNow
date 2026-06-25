@@ -52,5 +52,12 @@ namespace HotelCatalogService.Domain.Repositories
         Task<Hotel?> GetHotelWithBookingPromotionUsageAsync(Guid hotelId, string code, Guid bookingId, CancellationToken token);
         Task<bool> HasRoomsInFloorAsync(Guid floorId, CancellationToken cancellationToken = default);
         Task<Hotel?> GetHotelWithFullStructureAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Room?> GetRoomByIdAsync(Guid roomId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy thông tin chi tiết của một khách sạn bao gồm Tiện ích, Loại phòng, Chính sách hủy và Hình ảnh.
+        /// </summary>
+        Task<Hotel?> GetHotelAggregateDetailAsync(Guid hotelId, CancellationToken cancellationToken = default);
+        Task<List<Hotel>> GetHotelsWithAggregateByStatusAsync(HotelStatus status, CancellationToken cancellationToken = default);
     }
 }

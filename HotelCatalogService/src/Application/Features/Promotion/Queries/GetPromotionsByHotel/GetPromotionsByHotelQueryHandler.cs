@@ -18,7 +18,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.GetPromotio
 
         public async Task<Result<PagedResult<PromotionDto>>> Handle(GetPromotionsByHotelQuery request, CancellationToken token)
         {
-            var query = _context.Promotion
+            var query = _context.Promotions
                 .AsNoTracking()
                 .Where(p => p.HotelId == request.HotelId);
 

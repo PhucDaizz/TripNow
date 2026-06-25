@@ -21,7 +21,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelsByIds
             if (request.HotelIds == null || !request.HotelIds.Any())
                 return Result.Success<IEnumerable<HotelSummaryDtoo>>(new List<HotelSummaryDtoo>());
 
-            var hotels = await _context.Hotel
+            var hotels = await _context.Hotels
                 .AsNoTracking()
                 .Include(x => x.Images) 
                 .Where(h => request.HotelIds.Contains(h.Id) && h.Status == HotelStatus.Active)

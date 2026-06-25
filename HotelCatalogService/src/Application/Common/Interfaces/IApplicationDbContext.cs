@@ -5,20 +5,20 @@ namespace HotelCatalogService.Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
+        public IQueryable<Hotel> Hotels { get; }
+        public IQueryable<Amenity> Amenities { get; }
+        public IQueryable<Block> Blocks { get; }
+        public IQueryable<Floor> Floors { get; }
+        public IQueryable<HotelAmenity> HotelAmenities { get; }
+        public IQueryable<Promotion> Promotions { get; }
+        public IQueryable<Room> Rooms { get; }
+        public IQueryable<RoomPrice> RoomPrices { get; }
+        public IQueryable<RoomType> RoomTypes { get; }
+        public IQueryable<RoomTypeImage> RoomTypeImages { get; }
+        public IQueryable<HotelImage> HotelImages { get; }
+        public IQueryable<PromotionUsage> PromotionUsages { get; }
+        public IQueryable<CancellationPolicy> CancellationPolicies { get; }
 
-        public DbSet<Hotel> Hotel { get; set; }
-        public DbSet<Amenity> Amenity { get; set; }
-        public DbSet<Block> Block { get; set; }
-        public DbSet<Floor> Floor { get; set; }
-        public DbSet<HotelAmenity> HotelAmenity { get; set; }
-        public DbSet<Promotion> Promotion { get; set; }
-        public DbSet<Room> Room { get; set; }
-        public DbSet<RoomPrice> RoomPrice { get; set; }
-        public DbSet<RoomType> RoomType { get; set; }
-        public DbSet<RoomTypeImage> RoomTypeImage { get; set; }
-        public DbSet<HotelImage> HotelImage { get; set; }
-        public DbSet<PromotionUsage> PromotionUsage { get; set; }
-        public DbSet<CancellationPolicy> CancellationPolicy { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

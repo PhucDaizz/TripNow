@@ -29,7 +29,7 @@ namespace HotelCatalogService.Application.Features.Room.Queries.GetAvailableRoom
             {
                 var ownerId = Guid.Parse(_currentUserService.UserId);
 
-                var isOwner = await _context.Hotel
+                var isOwner = await _context.Hotels
                     .AsNoTracking()
                     .AnyAsync(h => h.Id == request.HotelId && h.OwnerId == ownerId, cancellationToken);
 
@@ -39,7 +39,7 @@ namespace HotelCatalogService.Application.Features.Room.Queries.GetAvailableRoom
                 }
             }
 
-            var listBlocks = await _context.Block
+            var listBlocks = await _context.Blocks
                 .AsNoTracking()
                 .Where(b => b.HotelId == request.HotelId)
                 .Select(b => new BlockResponse

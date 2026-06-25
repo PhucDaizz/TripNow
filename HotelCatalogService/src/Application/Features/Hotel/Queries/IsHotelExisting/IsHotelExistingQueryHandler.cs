@@ -16,7 +16,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting
 
         public async Task<Result<bool>> Handle(IsHotelExistingQuery request, CancellationToken cancellationToken)
         {
-            var result = await _context.Hotel.AnyAsync(x => x.Id == request.HotelId, cancellationToken);
+            var result = await _context.Hotels.AnyAsync(x => x.Id == request.HotelId, cancellationToken);
             return Result.Success(result);
         }
     }

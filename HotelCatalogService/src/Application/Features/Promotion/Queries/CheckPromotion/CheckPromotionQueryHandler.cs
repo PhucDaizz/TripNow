@@ -20,7 +20,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.CheckPromot
         {
             var now = DateTime.UtcNow;
 
-            var promo = await _context.Promotion.AsNoTracking()
+            var promo = await _context.Promotions.AsNoTracking()
                 .FirstOrDefaultAsync(p => p.HotelId == request.HotelId && p.Code == request.Code, token);
 
             if (promo == null) return Result.Failure<PromotionDiscountDto>(new Error("Promotion.NotFound", "The discount code does not exist.."));
@@ -29,7 +29,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.CheckPromot
             if (now < promo.StartDate || now > promo.EndDate) return Result.Failure<PromotionDiscountDto>(new Error("Promotion.Expired", "The discount code has either not started or has expired."));
             if (promo.RemainingQuantity <= 0) return Result.Failure<PromotionDiscountDto>(new Error("Promotion.OutOfStock", "The discount code has expired."));
 
-            var hasUsed = await _context.PromotionUsage
+            var hasUsed = await _context.PromotionUsages
                 .AnyAsync(u => u.PromotionId == promo.Id && u.UserId == request.UserId, token);
 
             if (hasUsed)

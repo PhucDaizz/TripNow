@@ -22,7 +22,7 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Queries.Ge
 
         public async Task<Result<List<CancellationPolicyExtendDto>>> Handle(GetCancellationPoliciesByHotelQuery request, CancellationToken cancellationToken)
         {
-            var policies = await _context.CancellationPolicy
+            var policies = await _context.CancellationPolicies
                 .Where(p => p.HotelId == request.HotelId)
                 .Select(p => new CancellationPolicyExtendDto
                 {
@@ -31,7 +31,7 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Queries.Ge
                     Name = p.Name,
                     Type = p.Type.ToString(),
                     Description = p.Description,
-                    IsInUse = _context.RoomType.Any(rt => rt.CancellationPolicyId == p.Id),
+                    IsInUse = _context.RoomTypes.Any(rt => rt.CancellationPolicyId == p.Id),
                     UpdatedAt = p.UpdatedAt,
                     Rules = p.Rules.Select(r => new DTOs.CancellationPolicy.CancellationRuleDto
                     {
@@ -40,6 +40,7 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Queries.Ge
                         RefundPercentage = r.RefundPercentage
                     }).ToList()
                 })
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             return Result<List<CancellationPolicyExtendDto>>.Success(policies);

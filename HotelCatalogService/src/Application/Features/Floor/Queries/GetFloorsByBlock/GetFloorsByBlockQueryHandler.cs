@@ -29,7 +29,7 @@ namespace HotelCatalogService.Application.Features.Floor.Queries.GetFloorsByBloc
 
             var floorIds = block.Floors.Select(f => f.Id).ToList();
 
-            var roomCounts = await _context.Room.AsNoTracking()
+            var roomCounts = await _context.Rooms.AsNoTracking()
                 .Where(r => floorIds.Contains(r.FloorId))
                 .GroupBy(r => r.FloorId)
                 .Select(g => new { FloorId = g.Key, Count = g.Count() })

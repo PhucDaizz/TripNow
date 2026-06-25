@@ -24,7 +24,7 @@ namespace HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetailB
 
         public async Task<Result<HotelDetailDto>> Handle(GetHotelDetailBySlugQuery request, CancellationToken token)
         {
-            var hotel = await _context.Hotel
+            var hotel = await _context.Hotels
                 .AsNoTracking()
                 .Include(x => x.Images)
                 .FirstOrDefaultAsync(h => h.Slug == request.Slug, token);

@@ -18,7 +18,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBat
 
         public async Task<Result<List<RoomTypeCalendarDto>>> Handle(GetHotelBatchRoomPricesQuery request, CancellationToken token)
         {
-            var roomTypes = await _context.RoomType
+            var roomTypes = await _context.RoomTypes
                 .AsNoTracking()
                 .Where(rt => rt.HotelId == request.HotelId)
                 .Select(rt => new
@@ -47,7 +47,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBat
 
             var roomTypeIds = roomTypes.Select(x => x.Id).ToList();
 
-            var specialPricesRaw = await _context.RoomPrice
+            var specialPricesRaw = await _context.RoomPrices
                 .AsNoTracking()
                 .Where(p => roomTypeIds.Contains(p.RoomTypeId) 
                          && p.Date >= request.FromDate.Date

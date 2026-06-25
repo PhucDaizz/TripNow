@@ -24,7 +24,7 @@ namespace HotelCatalogService.Application.Features.Room.EventHandlers.RoomChecke
 
         public async Task Handle(RoomCheckedOutEvent notification, CancellationToken cancellationToken)
         {
-            var room = await _context.Room.FirstOrDefaultAsync(x => x.Id == notification.RoomId, cancellationToken);
+            var room = await _unitOfWork.Hotel.GetRoomByIdAsync(notification.RoomId, cancellationToken);
 
             if (room == null)
             {
@@ -35,8 +35,8 @@ namespace HotelCatalogService.Application.Features.Room.EventHandlers.RoomChecke
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var floor = await _context.Floor.FirstOrDefaultAsync(f => f.Id == room.FloorId, cancellationToken);
-            var block = await _context.Block.FirstOrDefaultAsync(b => b.Id == floor.BlockId, cancellationToken);
+            var floor = await _context.Floors.AsNoTracking().FirstOrDefaultAsync(f => f.Id == room.FloorId, cancellationToken);
+            var block = await _context.Blocks.AsNoTracking().FirstOrDefaultAsync(b => b.Id == floor.BlockId, cancellationToken);
 
             Guid hotelId = block!.HotelId;
 

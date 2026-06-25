@@ -13,7 +13,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.BuildingBlocks.Model;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace HotelCatalogService.API.Controllers
 {

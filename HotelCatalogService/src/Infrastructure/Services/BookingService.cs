@@ -6,12 +6,10 @@ namespace HotelCatalogService.Infrastructure.Services
     public class BookingService : IBookingService
     {
         private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BookingService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public BookingService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> CheckIsHaveAnyBookInFunitue(Guid RoomTypeId, CancellationToken token = default)

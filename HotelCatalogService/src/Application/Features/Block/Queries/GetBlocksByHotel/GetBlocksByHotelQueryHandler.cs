@@ -1,7 +1,6 @@
 ﻿using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Application.DTOs.Block;
-using HotelCatalogService.Domain.Repositories;
 using MediatR;
 
 namespace HotelCatalogService.Application.Features.Block.Queries.GetBlocksByHotel

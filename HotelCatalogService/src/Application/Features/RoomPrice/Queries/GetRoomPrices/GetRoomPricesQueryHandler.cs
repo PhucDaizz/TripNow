@@ -17,7 +17,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomPric
 
         public async Task<Result<List<RoomPriceDto>>> Handle(GetRoomPricesQuery request, CancellationToken token)
         {
-            var roomTypeData = await _context.RoomType
+            var roomTypeData = await _context.RoomTypes
                 .Where(rt => rt.Id == request.RoomTypeId)
                 .Select(rt => new { rt.BasePrice })
                 .FirstOrDefaultAsync(token);
@@ -27,7 +27,7 @@ namespace HotelCatalogService.Application.Features.RoomPrice.Queries.GetRoomPric
                 return Result.Failure<List<RoomPriceDto>>(new Error("RoomType.NotFound", "This room type does not exist.."));
             }
 
-            var specialPrices = await _context.RoomPrice
+            var specialPrices = await _context.RoomPrices
                 .AsNoTracking()
                 .Where(p => p.RoomTypeId == request.RoomTypeId
                          && p.Date >= request.FromDate.Date

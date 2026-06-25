@@ -2,24 +2,21 @@
 using HotelCatalogService.Application.Common.Interfaces;
 using HotelCatalogService.Domain.Errors;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelCatalogService.Application.Features.Room.Commands.RollbackCheckInRoom
 {
     public class RollbackCheckInRoomCommandHandler : IRequestHandler<RollbackCheckInRoomCommand, Result>
     {
-        private readonly IApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
-        public RollbackCheckInRoomCommandHandler(IApplicationDbContext context, IUnitOfWork unitOfWork)
+        public RollbackCheckInRoomCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
             _unitOfWork = unitOfWork;
         }
 
         public async Task<Result> Handle(RollbackCheckInRoomCommand request, CancellationToken cancellationToken)
         {
-            var room = await _context.Room.FirstOrDefaultAsync(x => x.Id == request.RoomId, cancellationToken);
+            var room = await _unitOfWork.Hotel.GetRoomByIdAsync(request.RoomId, cancellationToken);
 
             if (room == null)
             {

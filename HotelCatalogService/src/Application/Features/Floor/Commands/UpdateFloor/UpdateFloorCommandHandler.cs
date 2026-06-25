@@ -1,5 +1,4 @@
-﻿
-using Domain.Common.Response;
+﻿using Domain.Common.Response;
 using HotelCatalogService.Application.Common.Interfaces;
 using MediatR;
 

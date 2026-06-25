@@ -20,7 +20,7 @@ namespace HotelCatalogService.Application.Features.Promotion.Queries.GetAvailabl
         {
             var now = DateTime.UtcNow;
 
-            var entities = await _context.Promotion.AsNoTracking()
+            var entities = await _context.Promotions.AsNoTracking()
                 .Where(p => p.HotelId == request.HotelId)
                 .Where(p => p.IsActive == true)              
                 .Where(p => p.RemainingQuantity > 0)         

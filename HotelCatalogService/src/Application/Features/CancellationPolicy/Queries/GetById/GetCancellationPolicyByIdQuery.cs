@@ -22,7 +22,7 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Queries.Ge
 
         public async Task<Result<CancellationPolicyDto>> Handle(GetCancellationPolicyByIdQuery request, CancellationToken cancellationToken)
         {
-            var policy = await _context.CancellationPolicy
+            var policy = await _context.CancellationPolicies
                 .Where(p => p.Id == request.Id)
                 .Select(p => new CancellationPolicyDto
                 {
@@ -38,6 +38,7 @@ namespace HotelCatalogService.Application.Features.CancellationPolicy.Queries.Ge
                         RefundPercentage = r.RefundPercentage
                     }).ToList()
                 })
+                .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (policy == null)

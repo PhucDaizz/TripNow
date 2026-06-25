@@ -1,5 +1,4 @@
-﻿using CloudinaryDotNet;
-using HotelCatalogService.Domain.Common.Models;
+﻿using HotelCatalogService.Domain.Common.Models;
 using HotelCatalogService.Domain.Dto.Hotel;
 using HotelCatalogService.Domain.Dto.Room;
 using HotelCatalogService.Domain.Entities;
@@ -388,6 +387,35 @@ namespace HotelCatalogService.Infrastructure.Data.Repositories
                         .ThenInclude(f => f.Rooms)
                 .AsSplitQuery() 
                 .FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
+        }
+
+        public async Task<Room?> GetRoomByIdAsync(Guid roomId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Room
+            .FirstOrDefaultAsync(x => x.Id == roomId, cancellationToken);
+        }
+
+        public async Task<Hotel?> GetHotelAggregateDetailAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Hotel
+                .Include(x => x.Amenities)
+                .Include(x => x.RoomTypes)
+                    .ThenInclude(rt => rt.CancellationPolicy!)
+                        .ThenInclude(cp => cp.Rules)
+                .Include(x => x.Images)
+                .FirstOrDefaultAsync(x => x.Id == hotelId, cancellationToken);
+        }
+
+        public async Task<List<Hotel>> GetHotelsWithAggregateByStatusAsync(HotelStatus status, CancellationToken cancellationToken = default)
+        {
+            return await _context.Hotel
+                .Include(x => x.Amenities)
+                .Include(x => x.RoomTypes)
+                    .ThenInclude(rt => rt.CancellationPolicy!)
+                        .ThenInclude(cp => cp.Rules)
+                .Include(x => x.Images)
+                .Where(x => x.Status == status)
+                .ToListAsync(cancellationToken);
         }
     }
 }
