@@ -1,26 +1,35 @@
 ﻿using HotelCatalogService.Application.Contracts;
-using Microsoft.AspNetCore.Http;
+using HotelCatalogService.Infrastructure.Protos;
+using Microsoft.Extensions.Logging;
 
 namespace HotelCatalogService.Infrastructure.Services
 {
     public class BookingService : IBookingService
     {
-        private readonly HttpClient _httpClient;
+        private readonly BookingGrpc.BookingGrpcClient _grpcClient;
+        private readonly ILogger<BookingService> _logger;
 
-        public BookingService(HttpClient httpClient)
+        public BookingService(BookingGrpc.BookingGrpcClient grpcClient, ILogger<BookingService> logger)
         {
-            _httpClient = httpClient;
+            _grpcClient = grpcClient;
+            _logger = logger;
         }
 
-        public async Task<bool> CheckIsHaveAnyBookInFunitue(Guid RoomTypeId, CancellationToken token = default)
+        public async Task<bool> CheckIsHaveAnyBookInFunitue(Guid roomTypeId, CancellationToken token = default)
         {
-            var response = await _httpClient.GetAsync($"/api/Booking/check-room-usage{RoomTypeId}", token);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return true;
+                var request = new CheckRoomUsageRequest { RoomTypeId = roomTypeId.ToString() };
+                var response = await _grpcClient.CheckIsHaveAnyBookInFurnitureAsync(request, cancellationToken: token);
+
+                return response.IsUsed;
             }
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi gọi gRPC sang Booking Service");
+                return false;
+            }
+
         }
     }
 }

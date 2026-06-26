@@ -2,6 +2,6 @@
 {
     public interface IBookingService
     {
-        Task<bool> CheckIsHaveAnyBookInFunitue(Guid RoomTypeId, CancellationToken token = default);
+        Task<bool> CheckIsHaveAnyBookInFunitue(Guid roomTypeId, CancellationToken token = default);
     }
 }

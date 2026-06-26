@@ -5,10 +5,12 @@ using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Booking;
 using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Room;
 using HotelCatalogService.Infrastructure.BackgroundJobs.Consumer.Social;
 using HotelCatalogService.Infrastructure.Data.Repositories;
+using HotelCatalogService.Infrastructure.Protos;
 using HotelCatalogService.Infrastructure.Services;
 using HotelCatalogService.Infrastructure.Settings;
 using HotelCatalogService.Infrastructure.SignalR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,29 +46,39 @@ namespace HotelCatalogService.Infrastructure
             services.AddScoped<IHousekeepingSignalRService, HousekeepingSignalRService>();
             services.AddSingleton<ICloudinaryService, CloudinaryService>();
             services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<IStaffService, StaffService>();
 
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
-
-
 
             services.AddSharedRabbitMQ(configuration);
             services.AddHostedService<BookingCancelledConsumer>();
             services.AddHostedService<BookingEventsConsumer>();
             services.AddHostedService<SocialEventsConsumer>();
 
-            services.AddHttpClient<IStaffService, StaffService>(
-                (sp, client) =>
+            services.AddGrpcClient<StaffProfileGrpc.StaffProfileGrpcClient>((sp, options) =>
+            {
+                var serviceUrls = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                options.Address = new Uri(serviceUrls.Auth);
+            })
+            .AddCallCredentials((context, metadata, serviceProvider) =>
+            {
+                var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+                var authHeader = httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(authHeader))
                 {
-                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
-                    client.BaseAddress = new Uri(options.Auth);
-                });
-            services.AddHttpClient<IBookingService, BookingService>(
-                (sp, client) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
-                    client.BaseAddress = new Uri(options.Booking);
-                });
+                    metadata.Add("Authorization", authHeader);
+                }
+
+                return Task.CompletedTask;
+            });
+            services.AddGrpcClient<BookingGrpc.BookingGrpcClient>((sp, options) =>
+            {
+                var serviceUrls = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                options.Address = new Uri(serviceUrls.Booking);
+            });
 
             services.AddSignalR();
 

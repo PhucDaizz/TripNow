@@ -6,12 +6,12 @@ using System.Net.Http.Json;
 
 namespace BookingService.Infrastructure.Services
 {
-    public class HotelCatalogService : IHotelCatalogService
+    public class HotelCatalogApiClient : IHotelCatalogService
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public HotelCatalogService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public HotelCatalogApiClient(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;

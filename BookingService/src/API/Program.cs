@@ -1,6 +1,7 @@
 using BookingService.API.Common.ExceptionHandling;
 using BookingService.API.ExceptionHandling;
 using BookingService.API.Extensions;
+using BookingService.API.GrpcServices;
 using BookingService.API.StartUp;
 using BookingService.Application;
 using BookingService.Application.Contracts;
@@ -55,12 +56,14 @@ namespace BookingService.API
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
 
+            builder.Services.AddGrpc();
+
             builder.Services.AddHostedService<InventoryEventsConsumer>();
             builder.Services.AddHostedService<BookingEventsConsumer>();
             builder.Services.AddHostedService<BookingCleanupWorker>();
             builder.Services.AddHostedService<DailyInventoryRolloutJob>();
 
-            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogService>(
+            builder.Services.AddHttpClient<IHotelCatalogService, HotelCatalogApiClient>(
                 (sp, client) =>
                 {
                     var options = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
@@ -86,6 +89,7 @@ namespace BookingService.API
 
             app.UseAuthorization();
 
+            app.MapGrpcService<BookingGrpcEndpoint>();
 
             app.MapControllers();
 

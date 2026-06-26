@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.GrpcServices;
 using API.StartUp;
 using Application;
 using CarbonTC.API.Extensions;
@@ -24,6 +25,8 @@ namespace API
             // 3. Đăng ký Bảo mật & Authentication
             builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
 
+            builder.Services.AddGrpc();
+
             var app = builder.Build();
 
             // 4. Khởi tạo Database (Migration & Seeding)
@@ -34,21 +37,15 @@ namespace API
             app.UseForwardedHeaders();
             app.UseSwaggerConfiguration();
 
-            // app.UseHttpsRedirection();
 
-            app.Use((context, next) =>
-            {
-                context.Request.Scheme = "http";
-                context.Request.Host = new HostString("localhost", 7000); 
-                return next();
-            });
+            // app.UseHttpsRedirection();
 
             app.MapHealthChecks("/health"); 
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-
+            app.MapGrpcService<StaffProfileGrpcEndpoint>();
             app.MapControllers();
 
             app.Run();

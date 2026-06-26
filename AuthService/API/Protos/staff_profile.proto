@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "Api.Protos";
+
+package staff_profile.v1;
+
+service StaffProfileGrpc {
+  rpc GetStaffProfile (GetStaffProfileRequest) returns (GetStaffProfileResponse);
+}
+
+message GetStaffProfileRequest {
+}
+
+message GetStaffProfileResponse {
+	string id = 1; 
+	string user_id = 2; 
+	string hotel_id = 3; 
+	string position = 4; 
+}

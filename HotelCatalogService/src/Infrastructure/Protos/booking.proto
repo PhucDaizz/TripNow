@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "HotelCatalogService.Infrastructure.Protos";
+
+package booking;
+
+service BookingGrpc {
+  rpc CheckIsHaveAnyBookInFurniture (CheckRoomUsageRequest) returns (CheckRoomUsageResponse);
+}
+
+message CheckRoomUsageRequest {
+  string room_type_id = 1; 
+}
+
+message CheckRoomUsageResponse {
+  bool is_used = 1;
+}
