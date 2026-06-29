@@ -1,4 +1,3 @@
-using DotNetEnv;
 using SocialService.API.Extensions;
 using SocialService.API.StartUp;
 using SocialService.Application;
@@ -10,12 +9,6 @@ namespace SocialService.API
     {
         public static async Task Main(string[] args)
         {
-            var envPath = Path.Combine(Directory.GetCurrentDirectory(), "../Config/.env");
-            if (File.Exists(envPath))
-            {
-                Env.Load(envPath);
-            }
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddCustomExceptionHandling();
