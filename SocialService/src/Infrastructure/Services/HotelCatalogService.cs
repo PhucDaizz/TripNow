@@ -1,36 +1,31 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Grpc.Core;
+using Microsoft.AspNetCore.Http;
 using Nexus.BuildingBlocks.Model;
 using SocialService.Application.Contracts;
 using SocialService.Application.DTOs.Hotel;
+using SocialService.Infrastructure.Protos;
 using System.Net.Http.Json;
 
 namespace SocialService.Infrastructure.Services
 {
     public class HotelCatalogService : IHotelCatalogService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CatalogGrpc.CatalogGrpcClient _grpcClient;
 
-        public HotelCatalogService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public HotelCatalogService(CatalogGrpc.CatalogGrpcClient grpcClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _grpcClient = grpcClient;
         }
 
         public async Task<bool> IsHotelExisting(Guid hotelId, CancellationToken cancellationToken = default)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/Hotel/hotel-existing?hotelId={hotelId}", cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>(cancellationToken: cancellationToken);
-                    return apiResponse?.Data ?? false;
-                }
-
-                return false;
+                var request = new IsHotelExistingRequest { HotelId = hotelId.ToString() };
+                var response = await _grpcClient.IsHotelExistingAsync(request, cancellationToken: cancellationToken);
+                return response.IsExisting;
             }
-            catch
+            catch (RpcException)
             {
                 return false;
             }
@@ -40,16 +35,29 @@ namespace SocialService.Infrastructure.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/Hotel/detail?hotelId={hotelId}", cancellation);
-                if (response.IsSuccessStatusCode)
-                {
-                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<HotelDetailDto>>(cancellationToken: cancellation);
-                    return apiResponse?.Data ?? null;
-                }
+                var request = new GetHotelDetailRequest { HotelId = hotelId.ToString() };
+                var response = await _grpcClient.GetHotelDetailAsync(request, cancellationToken: cancellation);
 
-                return null;
+                return new HotelDetailDto
+                {
+                    Id = Guid.Parse(response.Id),
+                    OwnerId = Guid.Parse(response.OwnerId),
+                    Name = response.Name,
+                    Follower = response.Follower,
+                    Slug = response.Slug,
+                    Description = response.Description,
+                    AddressStreet = response.AddressStreet,
+                    AddressCity = response.AddressCity,
+                    Status = response.Status,
+                    Rating = (decimal)response.Rating,
+                    Location = response.Location != null
+                        ? new Domain.ValueObject.Coordinates(response.Location.Latitude, response.Location.Longitude)
+                        : null,
+                    DistanceKm = response.DistanceKm,
+                    Thumbnail = response.Thumbnail
+                };
             }
-            catch
+            catch (RpcException)
             {
                 return null;
             }

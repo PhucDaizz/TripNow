@@ -1,37 +1,32 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
+﻿using Grpc.Core;
 using SocialService.Application.Contracts;
-using System.Net.Http.Json;
+using SocialService.Infrastructure.Protos;
 
-namespace SocialService.Infrastructure.Services
+public class AuthService : IAuthService
 {
-    public class AuthService : IAuthService
+    private readonly AuthGrpc.AuthGrpcClient _grpcClient;
+
+    public AuthService(AuthGrpc.AuthGrpcClient grpcClient)
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public AuthService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        _grpcClient = grpcClient;
+    }
+
+    public async Task<bool> IsUserExisting(Guid userId, CancellationToken cancellationToken = default)
+    {
+        try
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            var request = new IsUserExistingRequest
+            {
+                UserId = userId.ToString() 
+            };
+
+            var response = await _grpcClient.IsUserExistingAsync(request, cancellationToken: cancellationToken);
+
+            return response.IsExisting;
         }
-
-        public async Task<bool> IsUserExisting(Guid userId, CancellationToken cancellationToken = default)
+        catch (RpcException)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"/api/Auth/user-existing?userId={userId}", cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>(cancellationToken: cancellationToken);
-                    return apiResponse?.Data ?? false;
-                }
-
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
     }
 }

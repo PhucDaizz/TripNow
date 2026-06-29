@@ -1,6 +1,8 @@
 ﻿using BookingService.Api.Protos;
 using Grpc.Core;
+using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelDetail;
 using HotelCatalogService.Application.Features.Hotel.Queries.GetHotelSummary;
+using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelExisting;
 using HotelCatalogService.Application.Features.Hotel.Queries.IsHotelOwner;
 using HotelCatalogService.Application.Features.Promotion.Commands.ApplyPromotion;
 using HotelCatalogService.Application.Features.Promotion.Queries.CheckPromotion;
@@ -309,6 +311,73 @@ namespace HotelCatalogService.API.GrpcServices
             {
                 IsOwner = result
             };
+        }
+
+        public override async Task<IsHotelExistingResponse> IsHotelExisting(
+            IsHotelExistingRequest request,
+            ServerCallContext context)
+        {
+            var query = new IsHotelExistingQuery
+            {
+                HotelId = Guid.Parse(request.HotelId)
+            };
+
+            var result = await _mediator.Send(query);
+
+            return new IsHotelExistingResponse
+            {
+                IsExisting = result.Value 
+            };
+        }
+
+        public override async Task<GetHotelDetailResponse> GetHotelDetail(
+            GetHotelDetailRequest request,
+            ServerCallContext context)
+        {
+            var query = new GetHotelDetailQuery
+            {
+                HotelId = Guid.Parse(request.HotelId)
+            };
+
+            var result = await _mediator.Send(query);
+
+            if (result.IsSuccess)
+            {
+                var dto = result.Value;
+
+                var response = new GetHotelDetailResponse
+                {
+                    Id = dto.Id.ToString(),
+                    OwnerId = dto.OwnerId.ToString(),
+                    Name = dto.Name ?? string.Empty,
+                    Follower = dto.Follower,
+                    Slug = dto.Slug ?? string.Empty,
+                    Description = dto.Description ?? string.Empty,
+                    AddressStreet = dto.AddressStreet ?? string.Empty,
+                    AddressCity = dto.AddressCity ?? string.Empty,
+                    Status = dto.Status ?? string.Empty,
+                    Rating = (double)dto.Rating, 
+                    Thumbnail = dto.Thumbnail ?? string.Empty
+                };
+
+                if (dto.DistanceKm.HasValue)
+                {
+                    response.DistanceKm = dto.DistanceKm.Value;
+                }
+
+                if (dto.Location != null)
+                {
+                    response.Location = new CoordinatesMessage
+                    {
+                        Latitude = dto.Location.Latitude,
+                        Longitude = dto.Location.Longitude
+                    };
+                }
+
+                return response;
+            }
+
+            throw new RpcException(new Status(StatusCode.NotFound, result.Error.Message ?? "Hotel not found."));
         }
     }
 }

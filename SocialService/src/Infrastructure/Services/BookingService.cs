@@ -1,34 +1,32 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
+﻿using SocialService.Infrastructure.Protos;
+using Grpc.Core;
 using SocialService.Application.Contracts;
-using System.Net.Http.Json;
 
 namespace SocialService.Infrastructure.Services
 {
     public class BookingService : IBookingService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public BookingService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        private readonly BookingGrpc.BookingGrpcClient _grpcClient;
+
+        public BookingService(BookingGrpc.BookingGrpcClient grpcClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _grpcClient = grpcClient;
         }
 
         public async Task<bool> IsBookingExisting(Guid bookingId, Guid userId, CancellationToken cancellationToken = default)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/Booking/is-existing?bookingId={bookingId}&userId={userId}", cancellationToken);
-                if (response.IsSuccessStatusCode)
+                var request = new IsBookingExistingRequest
                 {
-                    var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>(cancellationToken: cancellationToken);
-                    return apiResponse?.Data ?? false;
-                }
+                    BookingId = bookingId.ToString()
+                };
 
-                return false;
+                var response = await _grpcClient.IsBookingExistingAsync(request, cancellationToken: cancellationToken);
+
+                return response.IsExisting;
             }
-            catch
+            catch (RpcException)
             {
                 return false;
             }

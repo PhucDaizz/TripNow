@@ -1,4 +1,5 @@
 ﻿using BookingService.API.Protos;
+using BookingService.Application.Features.Booking.Queries.IsBookingExisting;
 using BookingService.Application.Features.Inventory.Queries.CheckRoomUsage;
 using Grpc.Core;
 using MediatR;
@@ -23,6 +24,23 @@ namespace BookingService.API.GrpcServices
             var result = await _mediator.Send(new CheckRoomUsageQuery { RoomTypeId = roomId });
 
             return new CheckRoomUsageResponse { IsUsed = result };
+        }
+
+        public override async Task<IsBookingExistingResponse> IsBookingExisting(
+            IsBookingExistingRequest request,
+            ServerCallContext context)
+        {
+            var query = new IsBookingExistingQuery
+            {
+                BookingId = Guid.Parse(request.BookingId)
+            };
+
+            var result = await _mediator.Send(query);
+
+            return new IsBookingExistingResponse
+            {
+                IsExisting = result.Value 
+            };
         }
     }
 }

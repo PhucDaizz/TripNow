@@ -1,8 +1,4 @@
-﻿
-
-using System.IO;
-
-namespace HotelCatalogService.Domain.ValueObject
+﻿namespace HotelCatalogService.Domain.ValueObject
 {
     public class Coordinates: Common.ValueObject
     {

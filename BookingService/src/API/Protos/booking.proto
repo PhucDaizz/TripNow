@@ -2,10 +2,12 @@ syntax = "proto3";
 
 option csharp_namespace = "BookingService.API.Protos";
 
-package booking;
+package booking.v1;
 
 service BookingGrpc {
   rpc CheckIsHaveAnyBookInFurniture (CheckRoomUsageRequest) returns (CheckRoomUsageResponse);
+
+  rpc IsBookingExisting (IsBookingExistingRequest) returns (IsBookingExistingResponse);
 }
 
 message CheckRoomUsageRequest {
@@ -14,4 +16,12 @@ message CheckRoomUsageRequest {
 
 message CheckRoomUsageResponse {
   bool is_used = 1;
+}
+
+message IsBookingExistingRequest {
+  string booking_id = 1;
+}
+
+message IsBookingExistingResponse {
+  bool is_existing = 1;
 }

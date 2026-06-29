@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "SocialService.Infrastructure.Protos"; 
+
+package booking.v1; 
+
+service BookingGrpc {
+  rpc IsBookingExisting (IsBookingExistingRequest) returns (IsBookingExistingResponse);
+}
+
+message IsBookingExistingRequest {
+  string booking_id = 1;
+}
+
+message IsBookingExistingResponse {
+  bool is_existing = 1;
+}

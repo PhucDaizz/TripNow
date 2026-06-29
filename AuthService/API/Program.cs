@@ -46,6 +46,7 @@ namespace API
             app.UseAuthorization();
 
             app.MapGrpcService<StaffProfileGrpcEndpoint>();
+            app.MapGrpcService<AuthGrpcEndpoint>();
             app.MapControllers();
 
             app.Run();

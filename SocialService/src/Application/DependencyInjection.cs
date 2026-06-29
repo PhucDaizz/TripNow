@@ -15,9 +15,6 @@ namespace SocialService.Application
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
             return services;
         }
     }

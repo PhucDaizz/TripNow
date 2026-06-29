@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option csharp_namespace = "SocialService.Infrastructure.Protos";
+
+package catalog.v1; 
+
+service CatalogGrpc {
+  rpc IsHotelExisting (IsHotelExistingRequest) returns (IsHotelExistingResponse);
+  rpc GetHotelDetail (GetHotelDetailRequest) returns (GetHotelDetailResponse);
+}
+
+message IsHotelExistingRequest {
+  string hotel_id = 1;
+}
+
+message IsHotelExistingResponse {
+  bool is_existing = 1;
+}
+
+message GetHotelDetailRequest {
+  string hotel_id = 1;
+}
+
+message CoordinatesMessage {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message GetHotelDetailResponse {
+  string id = 1;
+  string owner_id = 2;
+  string name = 3;
+  int32 follower = 4;
+  string slug = 5;
+  string description = 6;
+  string address_street = 7;
+  string address_city = 8;
+  string status = 9;
+  double rating = 10; 
+  CoordinatesMessage location = 11;
+  optional double distance_km = 12; 
+  string thumbnail = 13;
+}

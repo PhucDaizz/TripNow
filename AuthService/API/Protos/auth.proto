@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Api.Protos";
+
+package auth.v1; 
+
+service AuthGrpc {
+  rpc IsUserExisting (IsUserExistingRequest) returns (IsUserExistingResponse);
+}
+
+message IsUserExistingRequest {
+  string user_id = 1;
+}
+
+message IsUserExistingResponse {
+  bool is_existing = 1;
+}
