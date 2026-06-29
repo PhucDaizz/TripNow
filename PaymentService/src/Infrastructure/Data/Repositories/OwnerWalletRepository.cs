@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PaymentService.Application.Common.Interfaces;
 using PaymentService.Domain.Common.Models;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enum;
@@ -9,9 +8,9 @@ namespace PaymentService.Infrastructure.Data.Repositories
 {
     public class OwnerWalletRepository : IOwnerWalletRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public OwnerWalletRepository(IApplicationDbContext context)
+        public OwnerWalletRepository(ApplicationDbContext context)
         {
             _context = context;
         }

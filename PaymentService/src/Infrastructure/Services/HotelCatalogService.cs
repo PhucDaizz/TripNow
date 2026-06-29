@@ -1,36 +1,44 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
+﻿using Grpc.Core;
 using PaymentService.Application.Contracts;
 using PaymentService.Application.DTOs.HotelCatalog;
-using System.Net.Http.Json;
+using PaymentService.Infrastructure.Protos;
 
 namespace PaymentService.Infrastructure.Services
 {
     public class HotelCatalogService : IHotelCatalogService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CatalogGrpc.CatalogGrpcClient _grpcClient;
 
-        public HotelCatalogService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public HotelCatalogService(CatalogGrpc.CatalogGrpcClient grpcClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _grpcClient = grpcClient;
         }
 
         public async Task<HotelSummaryDto?> GetHotelSummary(Guid hotelId, CancellationToken token = default)
         {
-            var response = await _httpClient.GetAsync($"/api/Hotel/{hotelId}/summary");
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<HotelSummaryDto?>>(cancellationToken: token);
-                if (apiResponse != null && apiResponse.Success && apiResponse.Data != null)
+                var request = new GetHotelSummaryRequest
                 {
-                    return apiResponse.Data;
-                }
-            }
+                    HotelId = hotelId.ToString()
+                };
 
-            return null;
+                var response = await _grpcClient.GetHotelSummaryAsync(request, cancellationToken: token);
+
+                return new HotelSummaryDto
+                {
+                    HotelName = response.HotelName,
+                    OwnerId = Guid.Parse(response.OwnerId), 
+                    Street = response.Street,
+                    City = response.City,
+                    Country = response.Country,
+                    Status = response.Status
+                };
+            }
+            catch (RpcException)
+            {
+                return null;
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ using PaymentService.Infrastructure.BackgroundJobs;
 using PaymentService.Infrastructure.BackgroundJobs.Consumer.OwnerWallet;
 using PaymentService.Infrastructure.BackgroundJobs.Consumer.Payment;
 using PaymentService.Infrastructure.Data.Repositories;
+using PaymentService.Infrastructure.Protos;
 using PaymentService.Infrastructure.Services;
 using PaymentService.Infrastructure.Settings;
 using VNPAY.Extensions;
@@ -79,6 +80,12 @@ namespace PaymentService.Infrastructure
             services.AddHostedService<PaymentEventsConsumer>();
             services.AddHostedService<OwnerWalletEventsConsumer>();
             services.AddHostedService<SettlementWorker>();
+
+            services.AddGrpcClient<CatalogGrpc.CatalogGrpcClient>((sp, options) =>
+            {
+                var serviceUrls = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                options.Address = new Uri(serviceUrls.HotelCatalog);
+            });
 
             services.AddSharedRabbitMQ(configuration);
 

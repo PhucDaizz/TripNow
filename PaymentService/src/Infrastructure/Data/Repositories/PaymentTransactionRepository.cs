@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Nexus.BuildingBlocks.Model;
-using PaymentService.Application.Common.Interfaces;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Enum;
 using PaymentService.Domain.Repositories;
@@ -9,9 +7,9 @@ namespace PaymentService.Infrastructure.Data.Repositories
 {
     public class PaymentTransactionRepository : IPaymentTransactionRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public PaymentTransactionRepository(IApplicationDbContext context)
+        public PaymentTransactionRepository(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PaymentService.Application.Common.Interfaces;
 using PaymentService.Domain.Common.Models;
 using PaymentService.Domain.Entities;
 using PaymentService.Domain.Repositories;
@@ -8,9 +7,9 @@ namespace PaymentService.Infrastructure.Data.Repositories
 {
     public class SettlementPeriodRepository : ISettlementPeriodRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public SettlementPeriodRepository(IApplicationDbContext context)
+        public SettlementPeriodRepository(ApplicationDbContext context)
         {
             _context = context;
         }

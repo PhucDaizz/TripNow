@@ -23,6 +23,16 @@ namespace PaymentService.Infrastructure
         public DbSet<OwnerBankAccount> OwnerBankAccount { get; set; }
         public DbSet<RefundRequest> RefundRequest { get; set; }
 
+        public IQueryable<EscrowAccount> EscrowAccounts => EscrowAccount;
+        public IQueryable<OwnerWallet> OwnerWallets => OwnerWallet;
+        public IQueryable<PaymentTransaction> PaymentTransactions => PaymentTransaction;
+        public IQueryable<Payout> Payouts => Payout;
+        public IQueryable<SettlementItem> SettlementItems => SettlementItem;
+        public IQueryable<SettlementPeriod> SettlementPeriods => SettlementPeriod;
+        public IQueryable<WalletLedger> WalletLedgers => WalletLedger;
+        public IQueryable<OwnerBankAccount> OwnerBankAccounts => OwnerBankAccount;
+        public IQueryable<RefundRequest> RefundRequests => RefundRequest;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // write your customizations here    

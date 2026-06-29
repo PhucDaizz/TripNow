@@ -1,19 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PaymentService.Domain.Entities;
+﻿using PaymentService.Domain.Entities;
 
 namespace PaymentService.Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
-        public DbSet<EscrowAccount> EscrowAccount { get; }
-        public DbSet<OwnerWallet> OwnerWallet { get; }
-        public DbSet<PaymentTransaction> PaymentTransaction { get; }
-        public DbSet<Payout> Payout { get; }
-        public DbSet<SettlementItem> SettlementItem { get; }
-        public DbSet<SettlementPeriod> SettlementPeriod { get; }
-        public DbSet<WalletLedger> WalletLedger { get; }
-        public DbSet<OwnerBankAccount> OwnerBankAccount { get; }
-        public DbSet<RefundRequest> RefundRequest { get; }
+        IQueryable<EscrowAccount> EscrowAccounts { get; }
+        IQueryable<OwnerWallet> OwnerWallets { get; }
+        IQueryable<PaymentTransaction> PaymentTransactions { get; }
+        IQueryable<Payout> Payouts { get; }
+        IQueryable<SettlementItem> SettlementItems { get; }
+        IQueryable<SettlementPeriod> SettlementPeriods { get; }
+        IQueryable<WalletLedger> WalletLedgers { get; }
+        IQueryable<OwnerBankAccount> OwnerBankAccounts { get; }
+        IQueryable<RefundRequest> RefundRequests { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
