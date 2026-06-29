@@ -17,13 +17,13 @@ namespace BookingService.Application.Features.RoomAssignment.Queries.GetAssigned
 
         public async Task<Result<List<AssignedRoomDto>>> Handle(GetAssignedRoomsQuery request, CancellationToken cancellationToken)
         {
-            var bookingExists = await _context.Booking.AnyAsync(b => b.Id == request.BookingId, cancellationToken);
+            var bookingExists = await _context.Bookings.AnyAsync(b => b.Id == request.BookingId, cancellationToken);
             if (!bookingExists)
             {
                 return Result.Failure<List<AssignedRoomDto>>(new Error("Booking.NotFound", "Can not found Booking."));
             }
 
-            var assignedRooms = await _context.BookingItem
+            var assignedRooms = await _context.BookingItems
                 .AsNoTracking()
                 .Where(bi => bi.BookingId == request.BookingId)
                 .SelectMany(

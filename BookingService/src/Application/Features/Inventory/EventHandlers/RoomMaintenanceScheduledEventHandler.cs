@@ -24,11 +24,11 @@ namespace BookingService.Application.Features.Inventory.EventHandlers
             {
                 try
                 {
-                    var inventories = await _context.Inventory
-                        .Where(x => x.RoomTypeId == notification.RoomTypeId
-                                    && x.Date >= notification.FromDate
-                                    && x.Date <= notification.ToDate)
-                        .ToListAsync(cancellationToken);
+                    var inventories = await _unitOfWork.Inventory.GetInventoriesByDateRangeAsync(
+                        notification.RoomTypeId,
+                        notification.FromDate,
+                        notification.ToDate,
+                        cancellationToken);
 
                     foreach (var inv in inventories)
                     {

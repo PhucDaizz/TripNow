@@ -22,6 +22,15 @@ namespace BookingService.Infrastructure
         public DbSet<RoomAssignment> RoomAssignment { get; set; } 
         public DbSet<InventoryConfiguration> InventoryConfiguration { get; set; }
 
+        public IQueryable<Booking> Bookings => Booking;
+        public IQueryable<BookingCancellation> BookingCancellations => BookingCancellation;
+        public IQueryable<BookingItem> BookingItems => BookingItem;
+        public IQueryable<BookingPriceDetail> BookingPriceDetails => BookingPriceDetail;
+        public IQueryable<BookingPriceSnapshot> BookingPriceSnapshots => BookingPriceSnapshot;
+        public IQueryable<Inventory> Inventories => Inventory;
+        public IQueryable<RoomAssignment> RoomAssignments => RoomAssignment;
+        public IQueryable<InventoryConfiguration> InventoryConfigurations => InventoryConfiguration;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // write your customizations here    

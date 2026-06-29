@@ -49,7 +49,7 @@ namespace BookingService.Application.Features.Statistics.Queries.GetHotelDashboa
                 return Result.Failure<HotelDashboardSummaryDto>(new Error("Auth.Forbidden", "You do not have permission to view the statistics of this hotel."));
             }
 
-            var query = _context.Booking.AsNoTracking().Where(b => b.HotelId == targetHotelId);
+            var query = _context.Bookings.AsNoTracking().Where(b => b.HotelId == targetHotelId);
 
             var today = request.Date;
 

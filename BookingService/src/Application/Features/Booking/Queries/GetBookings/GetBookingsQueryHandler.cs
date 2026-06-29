@@ -23,7 +23,7 @@ namespace BookingService.Application.Features.Booking.Queries.GetBookings
 
         public async Task<Result<PagedResult<BookingSummaryDto>>> Handle(GetBookingsQuery request, CancellationToken cancellationToken)
         {
-            var query = _context.Booking
+            var query = _context.Bookings
                 .AsNoTracking()
                 .Include(b => b.Items)
                 .AsQueryable();

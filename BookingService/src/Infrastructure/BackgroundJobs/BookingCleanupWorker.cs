@@ -1,6 +1,5 @@
 ﻿using BookingService.Application.Common.Interfaces;
 using BookingService.Application.Features.Booking.Commands.CancelBooking;
-using BookingService.Domain.Entities;
 using BookingService.Domain.Enum;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,14 +24,11 @@ namespace BookingService.Infrastructure.BackgroundJobs
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                    var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     var timeoutThreshold = DateTime.UtcNow.AddMinutes(-15);
 
-                    var expiredBookings = await context.Booking
-                        .Where(b => b.Status == BookingStatus.Pending && b.CreatedAt < timeoutThreshold)
-                        .Include(b => b.Items) 
-                        .ToListAsync(stoppingToken);
+                    var expiredBookings = await unitOfWork.Booking.GetExpiredPendingBookingsAsync(timeoutThreshold, stoppingToken);
 
                     foreach (var booking in expiredBookings)
                     {
@@ -50,7 +46,7 @@ namespace BookingService.Infrastructure.BackgroundJobs
 
                     if (expiredBookings.Any())
                     {
-                        await context.SaveChangesAsync(stoppingToken);
+                        await unitOfWork.SaveChangesAsync(stoppingToken);
                     }
                 }
 

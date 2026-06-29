@@ -28,7 +28,7 @@ namespace BookingService.Application.Features.Booking.Queries.GetDetailBooking
                 return Result.Failure<BookingDetailResponse>(new Error("NO.LOGIN","UserId cannot be null"));
             }
 
-            var booking = await _context.Booking
+            var booking = await _context.Bookings
             .AsNoTracking()
             .Where(b => b.Id == request.BookingId)
             .Select(b => new BookingDetailResponse

@@ -51,7 +51,7 @@ namespace BookingService.Application.Features.Statistics.Queries.GetRevenueStati
 
             var toDateEndOfDay = request.ToDate.Date.AddDays(1).AddTicks(-1);
 
-            var query = _context.Booking.AsNoTracking()
+            var query = _context.Bookings.AsNoTracking()
                 .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Completed)
                 .Where(b => b.CreatedAt >= request.FromDate && b.CreatedAt <= toDateEndOfDay);
 

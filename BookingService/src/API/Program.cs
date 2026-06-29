@@ -26,8 +26,6 @@ namespace BookingService.API
 
             builder.Services.AddGrpc();
 
-            
-
             var app = builder.Build();
 
             app.UseExceptionHandler();
@@ -39,6 +37,8 @@ namespace BookingService.API
             app.MapControllers();
 
             await app.Services.InitializeDatabaseAsync();
+
+            app.Run();
         }
     }
 }

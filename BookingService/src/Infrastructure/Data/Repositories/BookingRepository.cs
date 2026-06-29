@@ -53,6 +53,14 @@ namespace BookingService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
         }
 
+        public async Task<List<Booking>> GetExpiredPendingBookingsAsync(DateTime timeoutThreshold, CancellationToken cancellationToken = default)
+        {
+            return await _context.Booking
+                .Where(b => b.Status == BookingStatus.Pending && b.CreatedAt < timeoutThreshold)
+                .Include(b => b.Items)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<bool> HaveAnyBookInFuture(Guid roomTypeId, CancellationToken cancellationToken = default)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);

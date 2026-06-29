@@ -13,6 +13,8 @@ namespace BookingService.Domain.Repositories
         Task AddRangeAsync(IEnumerable<Inventory> inventories, CancellationToken cancellationToken);
         Task UpdateTotalStockForDatesAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, int quantityChange, CancellationToken cancellationToken);
         Task UpdateBlockedStockBulkAsync(Guid roomTypeId, IEnumerable<DateOnly> dates, int quantityChange, CancellationToken cancellationToken);
+        Task<Inventory?> GetLastKnownInventoryAsync(Guid roomTypeId, DateOnly date, CancellationToken token = default);
+        Task<List<Inventory>> GetInventoriesByDateRangeAsync(Guid roomTypeId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách các ngày ĐÃ CÓ Inventory trong một khoảng thời gian (để biết ngày nào cần reset).

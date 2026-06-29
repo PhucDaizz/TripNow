@@ -63,7 +63,7 @@ namespace BookingService.Application.Features.Booking.Queries.GetAvailability
             }
 
             // 3. Query Database
-            var inventoryData = await _context.Inventory.AsQueryable()
+            var inventoryData = await _context.Inventories.AsQueryable()
                 .AsNoTracking()
                 .Where(x => x.RoomTypeId == request.RoomTypeId
                             && x.Date >= fromDate

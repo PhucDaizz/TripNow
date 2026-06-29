@@ -20,7 +20,7 @@ namespace BookingService.Application.Features.BookingPriceDetail.Queries.GetPric
 
         public async Task<Result<List<BookingPriceDetailDto>>> Handle(GetBookingPriceDetailsQuery request, CancellationToken token)
         {
-            var bookingAuthInfo = await _context.Booking
+            var bookingAuthInfo = await _context.Bookings
                 .AsNoTracking()
                 .Where(b => b.Id == request.BookingId)
                 .Select(b => new { b.Id, b.HotelId, b.UserId })
@@ -34,7 +34,7 @@ namespace BookingService.Application.Features.BookingPriceDetail.Queries.GetPric
                 return Result.Failure<List<BookingPriceDetailDto>>(new Error("Auth.Forbidden", "Access denied."));
             }
 
-            var details = await _context.BookingPriceDetail 
+            var details = await _context.BookingPriceDetails 
                 .AsNoTracking()
                 .Where(x => x.BookingId == request.BookingId)
                 .Select(x => new BookingPriceDetailDto

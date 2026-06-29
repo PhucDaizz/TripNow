@@ -30,6 +30,13 @@ namespace BookingService.Infrastructure.Data.Repositories
             return Task.CompletedTask;
         }
 
+        public async Task<List<InventoryConfiguration>> GetActiveConfigurationsAsync(CancellationToken token = default)
+        {
+            return await _context.InventoryConfiguration
+                .Where(x => x.IsActive)
+                .ToListAsync(token);
+        }
+
         public async Task<List<InventoryConfiguration>?> GetByHotelIdAsync(Guid hotelId, CancellationToken token = default)
         {
             var inventoryConfiguration = await _context.InventoryConfiguration.Where(x => x.HotelId == hotelId).ToListAsync(token);

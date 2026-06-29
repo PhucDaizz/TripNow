@@ -30,19 +30,7 @@ namespace BookingService.Infrastructure.BackgroundJobs
                     _logger.LogError(ex, "Lỗi khi chạy job tạo inventory hàng ngày.");
                 }
 
-                while (!stoppingToken.IsCancellationRequested)
-                {
-                    await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
-
-                    try
-                    {
-                        await ProcessDailyRollout(stoppingToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Lỗi khi chạy job tạo inventory hàng ngày.");
-                    }
-                }
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
             }
         }
 
@@ -50,17 +38,13 @@ namespace BookingService.Infrastructure.BackgroundJobs
         {
             using var scope = _scopeFactory.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
             var inventorySettings = scope.ServiceProvider.GetRequiredService<IInventorySettings>();
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var maxTargetDate = today.AddDays(inventorySettings.LookAheadDays); // Ngày thứ ... cần tạo
 
             // 1. Lấy danh sách các RoomType ĐANG HOẠT ĐỘNG (IsActive = true)
-            var activeConfigs = await dbContext.InventoryConfiguration
-                .Where(x => x.IsActive)
-                .ToListAsync(token);
+            var activeConfigs = await unitOfWork.InventoryConfiguration.GetActiveConfigurationsAsync(token);
 
             var allNewInventories = new List<Domain.Entities.Inventory>();
 
@@ -82,16 +66,13 @@ namespace BookingService.Infrastructure.BackgroundJobs
                 // Lấy Stock mẫu để kế thừa (Lấy của ngày liền trước ngày bắt đầu)
                 // Nếu server tắt 5 ngày, ta lấy stock của ngày thứ 6 trước đó làm chuẩn
                 var previousDate = startDate.AddDays(-1);
-                var lastKnownInventory = await dbContext.Inventory
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(x => x.RoomTypeId == config.RoomTypeId && x.Date == previousDate, token);
+                var lastKnownInventory = await unitOfWork.Inventory.GetLastKnownInventoryAsync(config.RoomTypeId, previousDate, token);
 
                 int currentStockToUse = lastKnownInventory != null
                     ? lastKnownInventory.TotalStock
                     : config.DefaultStock;
 
                 var currentDateIterator = startDate;
-
 
                 while (currentDateIterator <= maxTargetDate)
                 {

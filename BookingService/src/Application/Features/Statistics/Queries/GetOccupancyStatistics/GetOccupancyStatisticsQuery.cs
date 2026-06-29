@@ -47,7 +47,7 @@ namespace BookingService.Application.Features.Statistics.Queries.GetOccupancySta
                 return Result.Failure<List<OccupancyDataPointDto>>(
                     new Error("Auth.Forbidden", "You do not have permission to view the occupancy statistics of this hotel."));
 
-            var roomTypeIds = await _context.Booking
+            var roomTypeIds = await _context.Bookings
                 .Where(b => b.HotelId == targetHotelId.Value) 
                 .SelectMany(b => b.Items)
                 .Select(i => i.RoomTypeId)
@@ -59,7 +59,7 @@ namespace BookingService.Application.Features.Statistics.Queries.GetOccupancySta
                 return Result.Success(new List<OccupancyDataPointDto>());
             }
 
-            var inventoryRaw = await _context.Inventory
+            var inventoryRaw = await _context.Inventories
                 .AsNoTracking()
                 .Where(i => roomTypeIds.Contains(i.RoomTypeId))
                 .Where(i => i.Date >= request.FromDate && i.Date <= request.ToDate)

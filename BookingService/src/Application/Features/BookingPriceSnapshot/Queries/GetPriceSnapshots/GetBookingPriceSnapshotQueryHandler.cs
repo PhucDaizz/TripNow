@@ -20,7 +20,7 @@ namespace BookingService.Application.Features.BookingPriceSnapshot.Queries.GetPr
 
         public async Task<Result<BookingPriceSnapshotDto>> Handle(GetBookingPriceSnapshotQuery request, CancellationToken token)
         {
-            var bookingAuthInfo = await _context.Booking
+            var bookingAuthInfo = await _context.Bookings
                 .AsNoTracking()
                 .Where(b => b.Id == request.BookingId)
                 .Select(b => new { b.Id, b.HotelId, b.UserId })
@@ -32,7 +32,7 @@ namespace BookingService.Application.Features.BookingPriceSnapshot.Queries.GetPr
             if (!CanViewBooking(bookingAuthInfo.HotelId, bookingAuthInfo.UserId))
                 return Result.Failure<BookingPriceSnapshotDto>(new Error("Auth.Forbidden", "Access denied."));
 
-            var snapshot = await _context.BookingPriceSnapshot 
+            var snapshot = await _context.BookingPriceSnapshots
                 .AsNoTracking()
                 .Where(x => x.BookingId == request.BookingId)
                 .Select(x => new BookingPriceSnapshotDto

@@ -1,4 +1,5 @@
 ﻿using BookingService.Application.Common.Interfaces;
+using BookingService.Application.Contracts;
 using BookingService.Domain.Repositories;
 using BookingService.Infrastructure.BackgroundJobs;
 using BookingService.Infrastructure.BackgroundJobs.Consumer.Booking;
@@ -52,6 +53,8 @@ namespace BookingService.Infrastructure
             services.AddScoped<IDomainEventService, DomainEventService>();
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
             services.AddScoped<IHotelAuthorizationService, HotelAuthorizationService>();
+            services.AddScoped<IHotelCatalogService, HotelCatalogApiClient>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
             services.AddSharedRabbitMQ(configuration);
             services.AddHostedService<InventoryEventsConsumer>();
@@ -59,6 +62,7 @@ namespace BookingService.Infrastructure
             services.AddHostedService<BookingCleanupWorker>();
             services.AddHostedService<DailyInventoryRolloutJob>();
 
+            #region Grpc Clients
             services.AddGrpcClient<CatalogGrpc.CatalogGrpcClient>((sp, options) =>
             {
                 var serviceUrlOptions = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
@@ -82,6 +86,8 @@ namespace BookingService.Infrastructure
                 var serviceUrlOptions = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
                 options.Address = new Uri(serviceUrlOptions.Payment);
             });
+
+            #endregion
 
             return services;
         }

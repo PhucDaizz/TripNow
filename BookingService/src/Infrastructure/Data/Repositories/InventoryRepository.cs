@@ -121,5 +121,21 @@ namespace BookingService.Infrastructure.Data.Repositories
             _context.Inventory.RemoveRange(inventories);
             await Task.CompletedTask;
         }
+
+        public async Task<Inventory?> GetLastKnownInventoryAsync(Guid roomTypeId, DateOnly date, CancellationToken token = default)
+        {
+            return await _context.Inventory
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.RoomTypeId == roomTypeId && x.Date == date, token);
+        }
+
+        public async Task<List<Inventory>> GetInventoriesByDateRangeAsync(Guid roomTypeId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
+        {
+            return await _context.Inventory
+                .Where(x => x.RoomTypeId == roomTypeId
+                            && x.Date >= fromDate
+                            && x.Date <= toDate)
+                .ToListAsync(cancellationToken);
+        }
     }
 }
