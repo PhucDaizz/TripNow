@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+option csharp_namespace = "BookingService.Api.Protos";
+
+package catalog.v1; 
+
+service CatalogGrpc {
+  rpc ValidatePromotion (ValidatePromotionRequest) returns (ValidatePromotionResponse);
+  rpc ApplyPromotion (ApplyPromotionRequest) returns (ApplyPromotionResponse);
+  rpc GetBatchRoomPrices (GetBatchRoomPricesRequest) returns (GetBatchRoomPricesResponse);
+  rpc GetHotelSummary (GetHotelSummaryRequest) returns (GetHotelSummaryResponse);
+  rpc CheckInRoom (CheckInRoomRequest) returns (CheckInRoomResponse);
+  rpc RollbackCheckInRoom (RollbackCheckInRoomRequest) returns (RollbackCheckInRoomResponse);
+  rpc VerifyHotelOwnership (VerifyHotelOwnershipRequest) returns (VerifyHotelOwnershipResponse);
+}
+
+// 1. Validate Promotion
+message ValidatePromotionRequest {
+  string hotel_id = 1;          
+  string code = 2;
+  double total_base_amount = 3; 
+  string user_id = 4;
+}
+
+message ValidatePromotionResponse {
+  bool is_valid = 1;
+  double discount_amount = 2;
+  string promotion_id = 3;
+  string message = 4;
+}
+
+// 2. Apply Promotion
+message ApplyPromotionRequest {
+  string hotel_id = 1;
+  string code = 2;
+  double order_amount = 3;
+  string user_id = 4;
+  string booking_id = 5;
+}
+
+message ApplyPromotionResponse {
+  bool is_success = 1;
+  double discount_amount = 2;
+  string message = 3;
+}
+
+// 3. Get Batch Room Prices
+message GetBatchRoomPricesRequest {
+  string hotel_id = 1;
+  string from_date = 2; 
+  string to_date = 3;
+}
+
+message CancellationRuleMessage {
+  string id = 1;
+  int32 hours_before_check_in = 2; 
+  double refund_percentage = 3;    
+}
+
+message CancellationPolicyMessage {
+  string id = 1;
+  string hotel_id = 2;
+  string name = 3;
+  string type = 4;
+  string description = 5;
+  repeated CancellationRuleMessage rules = 6; 
+}
+
+message CatalogDailyPriceMessage {
+  string date = 1;
+  double price = 2;
+  bool is_special_price = 3;
+}
+
+message CatalogBatchPriceMessage {
+  string room_type_id = 1;
+  string room_type_name = 2;
+  double base_price = 3;
+  repeated CatalogDailyPriceMessage calendar = 4; 
+  CancellationPolicyMessage cancellation_policy = 5; 
+}
+
+message GetBatchRoomPricesResponse {
+  repeated CatalogBatchPriceMessage prices = 1; 
+}
+
+// 4. Get Hotel Summary
+message GetHotelSummaryRequest {
+  string hotel_id = 1;
+}
+
+message GetHotelSummaryResponse {
+  string hotel_name = 1;
+  string owner_id = 2;
+  string street = 3;
+  string city = 4;
+  string country = 5;
+  string status = 6;
+}
+
+// 5. Check In Room
+message CheckInRoomRequest {
+  string hotel_id = 1;
+  string room_id = 2;
+  string check_in_by = 3;
+}
+
+message CheckInRoomResponse {
+  string room_id = 1;
+  string room_type_id = 2;
+  string room_name = 3;
+  string status = 4;
+}
+
+// 6. Rollback Check In Room
+message RollbackCheckInRoomRequest {
+  string hotel_id = 1;
+  string room_id = 2;
+}
+
+message RollbackCheckInRoomResponse {
+  bool is_success = 1; 
+}
+
+// 7. Verify Hotel Ownership
+message VerifyHotelOwnershipRequest {
+  string hotel_id = 1;
+}
+
+message VerifyHotelOwnershipResponse {
+  bool is_owner = 1;
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "BookingService.Infrastructure.Protos";
+
+package payment.v1;
+
+service PaymentGrpc {
+  rpc CreatePaymentLink (CreatePaymentLinkRequest) returns (CreatePaymentLinkResponse);
+}
+
+message CreatePaymentLinkRequest {
+  string booking_id = 1;
+  double amount = 2;
+  PaymentProvider payment_provider = 3;
+}
+
+message CreatePaymentLinkResponse {
+  string payment_link = 1;
+}
+
+enum PaymentProvider {
+  VNPay = 0;
+  Momo = 1;
+  Stripe = 2;
+  Cash = 3;
+}

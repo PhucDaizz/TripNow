@@ -1,42 +1,36 @@
 ﻿using BookingService.Application.Contracts;
-using BookingService.Application.DTOs.HotelCatalog;
-using BookingService.Application.DTOs.Payment;
-using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
-using System.Net.Http.Json;
+using BookingService.Infrastructure.Protos;
+using Grpc.Core;
 
 namespace BookingService.Infrastructure.Services
 {
     public class PaymentService : IPaymentService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly PaymentGrpc.PaymentGrpcClient _grpcClient;
 
-        public PaymentService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public PaymentService(PaymentGrpc.PaymentGrpcClient  grpcClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _grpcClient = grpcClient;
         }
 
-        public async Task<string> CreatePaymentLinkAsync(Guid bookingId, decimal amount, PaymentProvider paymentProvider, CancellationToken token)
+        public async Task<string> CreatePaymentLinkAsync(Guid bookingId, decimal amount, Application.DTOs.Payment.PaymentProvider paymentProvider, CancellationToken token)
         {
-            var requestBody = new CreatePaymentLinkRequest
+            try
             {
-                BookingId = bookingId.ToString(),
-                MoneyToPay = (double)amount,
-                providerBank = paymentProvider
-            };
+                var request = new CreatePaymentLinkRequest
+                {
+                    BookingId = bookingId.ToString(),
+                    Amount = (double)amount,
+                    PaymentProvider = (PaymentProvider)paymentProvider
+                };
 
-            var response = await _httpClient.PostAsJsonAsync("api/Payment/payment-link", requestBody, token);
+                var response = await _grpcClient.CreatePaymentLinkAsync(request, cancellationToken: token);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var paymentLink = await response.Content.ReadFromJsonAsync<ApiResponse<string>>(cancellationToken: token);
-                return paymentLink.Data;
+                return response.PaymentLink;
             }
-            else
+            catch (RpcException ex)
             {
-                throw new Exception($"Failed to create payment link. Status code: {response.StatusCode}");
+                throw new Exception($"Failed to create payment link. gRPC Status: {ex.StatusCode}, Detail: {ex.Status.Detail}");
             }
         }
     }

@@ -5,8 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
+  
+	<ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.35.1" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.80.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.82.0-pre1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>
@@ -23,6 +29,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\BookingService.Application.csproj" />
     <ProjectReference Include="..\Domain\BookingService.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\catalog.proto" GrpcServices="Client" />
+  </ItemGroup>
+  <ItemGroup>
+	<Protobuf Include="Protos\payment.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>
