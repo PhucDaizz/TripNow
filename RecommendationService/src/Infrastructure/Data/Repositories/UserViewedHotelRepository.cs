@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using RecommendationService.Application.Common.Interfaces;
 using RecommendationService.Domain.Entities;
 using RecommendationService.Domain.Repositories;
 
@@ -7,9 +6,9 @@ namespace RecommendationService.Infrastructure.Data.Repositories
 {
     public class UserViewedHotelRepository : IUserViewedHotelRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public UserViewedHotelRepository(IApplicationDbContext context)
+        public UserViewedHotelRepository(ApplicationDbContext context)
         {
             _context = context;
         }

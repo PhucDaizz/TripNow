@@ -1,5 +1,4 @@
-﻿using ChatService.Application.Common.Interfaces;
-using ChatService.Domain.Entities;
+﻿using ChatService.Domain.Entities;
 using ChatService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +6,9 @@ namespace ChatService.Infrastructure.Data.Repositories
 {
     public class ChatProfileRepository : IChatProfileRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public ChatProfileRepository(IApplicationDbContext context)
+        public ChatProfileRepository(ApplicationDbContext context)
         {
             _context = context;
         }

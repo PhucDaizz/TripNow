@@ -1,16 +1,14 @@
-﻿using ChatService.Application.Common.Interfaces;
-using ChatService.Domain.Entities;
+﻿using ChatService.Domain.Entities;
 using ChatService.Domain.Repositories;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatService.Infrastructure.Data.Repositories
 {
     public class ConversationRepository : IConversationRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public ConversationRepository(IApplicationDbContext context)
+        public ConversationRepository(ApplicationDbContext context)
         {
             _context = context;
         }

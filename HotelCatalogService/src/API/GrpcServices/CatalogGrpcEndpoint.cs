@@ -10,7 +10,6 @@ using HotelCatalogService.Application.Features.Room.Commands.CheckInHotelRoom;
 using HotelCatalogService.Application.Features.Room.Commands.RollbackCheckInRoom;
 using HotelCatalogService.Application.Features.RoomPrice.Queries.GetHotelBatchRoomPrices;
 using HotelCatalogService.Domain.Common;
-using HotelCatalogService.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;

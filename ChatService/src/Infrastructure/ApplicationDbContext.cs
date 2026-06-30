@@ -17,6 +17,10 @@ namespace ChatService.Infrastructure
         public DbSet<Messages> Messages { get; set; }
         public DbSet<ChatProfile> ChatProfiles { get; set; }
 
+        public IQueryable<Conversations> ConversationsQuery => Conversations;
+        public IQueryable<Messages> MessagesQuery => Messages;
+        public IQueryable<ChatProfile> ChatProfilesQuery => ChatProfiles;
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

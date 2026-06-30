@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NotificationService.Domain.Entities;
+﻿using NotificationService.Domain.Entities;
 
 namespace NotificationService.Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<SocialNotification> SocialNotifications { get; set; }
+        IQueryable<Notification> NotificationsQuery { get; }
+        IQueryable<SocialNotification> SocialNotificationsQuery { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

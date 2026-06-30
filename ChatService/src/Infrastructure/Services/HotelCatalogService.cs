@@ -1,47 +1,54 @@
 ﻿using ChatService.Application.Common.Interfaces;
+using ChatService.Infrastructure.Protos;
+using Grpc.Core;
 using Microsoft.AspNetCore.Http;
-using Nexus.BuildingBlocks.Model;
-using System.Net.Http.Json;
 
 namespace ChatService.Infrastructure.Services
 {
     public class HotelCatalogService : IHotelCatalogService
     {
-        private readonly HttpClient _httpClient;
+        private readonly CatalogGrpc.CatalogGrpcClient _grpcClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public HotelCatalogService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public HotelCatalogService(CatalogGrpc.CatalogGrpcClient grpcClient, IHttpContextAccessor httpContextAccessor)
         {
-            _httpClient = httpClient;
+            _grpcClient = grpcClient;
             _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> VerifyHotelOwnershipAsync(Guid hotelId, CancellationToken cancellationToken)
         {
-            var context = _httpContextAccessor.HttpContext;
-            var bearerToken = context?.Request.Headers["Authorization"].ToString();
+            try
+            {
+                var context = _httpContextAccessor.HttpContext;
+                var bearerToken = context?.Request.Headers["Authorization"].ToString();
 
-            if (string.IsNullOrEmpty(bearerToken))
+                if (string.IsNullOrEmpty(bearerToken))
+                {
+                    return false;
+                }
+
+                var headers = new Metadata
+                {
+                    { "Authorization", bearerToken }
+                };
+
+                var request = new VerifyHotelOwnershipRequest
+                {
+                    HotelId = hotelId.ToString()
+                };
+
+                var response = await _grpcClient.VerifyHotelOwnershipAsync(
+                    request,
+                    headers: headers, 
+                    cancellationToken: cancellationToken);
+
+                return response.IsOwner;
+            }
+            catch (RpcException)
             {
                 return false;
             }
-
-            _httpClient.DefaultRequestHeaders.Authorization = null;
-            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", bearerToken);
-
-            var response = await _httpClient.GetAsync($"/api/Hotel/is-hotel-owner?hotelId={hotelId}", cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>(cancellationToken);
-                if (apiResponse != null && apiResponse.Success && apiResponse.Data != null)
-                {
-                    return apiResponse.Data;
-                }
-            }
-
-            return false;
-
         }
     }
 }

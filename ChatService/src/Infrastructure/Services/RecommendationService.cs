@@ -1,4 +1,6 @@
 ﻿using ChatService.Application.Common.Interfaces;
+using ChatService.Infrastructure.Protos;
+using Grpc.Core;
 using Microsoft.AspNetCore.Http;
 using Nexus.BuildingBlocks.Model;
 using System.Net.Http.Json;
@@ -7,45 +9,46 @@ namespace ChatService.Infrastructure.Services
 {
     public class RecommendationService : IRecommendationService
     {
-        private readonly HttpClient _httpClient;
+        private readonly RagGrpc.RagGrpcClient _grpcClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RecommendationService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public RecommendationService(RagGrpc.RagGrpcClient grpcClient, IHttpContextAccessor httpContextAccessor)
         {
-            _httpClient = httpClient;
+            _grpcClient = grpcClient;
             _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<List<string>> GetHotelChatContextAsync(Guid hotelId, string userMessage, int limit = 3, CancellationToken cancellationToken = default)
         {
-            var context = _httpContextAccessor.HttpContext;
-            var bearerToken = context?.Request.Headers["Authorization"].ToString();
-
-            if (!string.IsNullOrEmpty(bearerToken))
+            try
             {
-                _httpClient.DefaultRequestHeaders.Authorization = null;
-                _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", bearerToken);
-            }
+                var context = _httpContextAccessor.HttpContext;
+                var bearerToken = context?.Request.Headers["Authorization"].ToString();
 
-            var requestBody = new
-            {
-                Message = userMessage,
-                Limit = limit
-            };
-
-            var response = await _httpClient.PostAsJsonAsync($"/api/Rag/hotel/{hotelId}/context", requestBody, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<string>>>(cancellationToken);
-
-                if (apiResponse != null && apiResponse.Success && apiResponse.Data != null)
+                var headers = new Metadata();
+                if (!string.IsNullOrEmpty(bearerToken))
                 {
-                    return apiResponse.Data;
+                    headers.Add("Authorization", bearerToken);
                 }
-            }
 
-            return new List<string>();
+                var request = new GetHotelChatContextRequest
+                {
+                    HotelId = hotelId.ToString(),
+                    Message = userMessage,
+                    Limit = limit
+                };
+
+                var response = await _grpcClient.GetHotelChatContextAsync(
+                    request,
+                    headers: headers,
+                    cancellationToken: cancellationToken);
+
+                return response.Contexts.ToList();
+            }
+            catch (RpcException)
+            {
+                return new List<string>();
+            }
         }
     }
 }

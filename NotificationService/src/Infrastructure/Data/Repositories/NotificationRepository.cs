@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NotificationService.Application.Common.Interfaces;
 using NotificationService.Domain.Entities;
 using NotificationService.Domain.Repositories;
 
@@ -7,9 +6,9 @@ namespace NotificationService.Infrastructure.Data.Repositories
 {
     public class NotificationRepository : INotificationRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public NotificationRepository(IApplicationDbContext context)
+        public NotificationRepository(ApplicationDbContext context)
         {
             _context = context;
         }

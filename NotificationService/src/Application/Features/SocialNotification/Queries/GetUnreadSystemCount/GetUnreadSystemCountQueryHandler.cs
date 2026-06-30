@@ -16,7 +16,8 @@ namespace NotificationService.Application.Features.SocialNotification.Queries.Ge
 
         public async Task<Result<int>> Handle(GetUnreadSystemCountQuery request, CancellationToken cancellationToken)
         {
-            var count = await _context.Notifications
+            var count = await _context.NotificationsQuery
+                .AsNoTracking()
                 .Where(x => x.OwnerId == request.UserId && x.IsRead == false) 
                 .CountAsync(cancellationToken);
 

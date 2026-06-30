@@ -1,6 +1,4 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using NotificationService.Application.Common.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
 using NotificationService.Domain.Entities;
 using NotificationService.Domain.Enum;
 using NotificationService.Domain.Repositories;
@@ -9,9 +7,9 @@ namespace NotificationService.Infrastructure.Data.Repositories
 {
     public class SocialNotificationRepository : ISocialNotificationRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public SocialNotificationRepository(IApplicationDbContext context)
+        public SocialNotificationRepository(ApplicationDbContext context)
         {
             _context = context;
         }

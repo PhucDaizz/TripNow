@@ -17,7 +17,7 @@ namespace ChatService.Application.Features.Conversation.Queries.GetChatHistory
 
         public async Task<Result<List<MessageDto>>> Handle(GetChatHistoryQuery request, CancellationToken cancellationToken)
         {
-            var conversation = await _context.Conversations
+            var conversation = await _context.ConversationsQuery
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == request.ConversationId, cancellationToken);
 
@@ -28,7 +28,7 @@ namespace ChatService.Application.Features.Conversation.Queries.GetChatHistory
 
             var targetIds = new List<Guid> { conversation.UserId, conversation.HotelId };
 
-            var profiles = await _context.ChatProfiles
+            var profiles = await _context.ChatProfilesQuery
                 .AsNoTracking()
                 .Where(p => targetIds.Contains(p.Id))
                 .ToDictionaryAsync(p => p.Id, cancellationToken);
@@ -36,8 +36,8 @@ namespace ChatService.Application.Features.Conversation.Queries.GetChatHistory
             profiles.TryGetValue(conversation.UserId, out var customerProfile);
             profiles.TryGetValue(conversation.HotelId, out var hotelProfile);
 
-            var query = _context.Messages.AsQueryable()
-                .AsNoTracking() 
+            var query = _context.MessagesQuery
+                .AsNoTracking()
                 .Where(m => m.ConversationId == request.ConversationId);
 
             if (request.Before.HasValue)

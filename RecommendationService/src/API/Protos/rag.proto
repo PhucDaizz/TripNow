@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "RecommendationService.Api.Protos"; 
+
+package rag.v1;
+
+service RagGrpc {
+  rpc GetHotelChatContext (GetHotelChatContextRequest) returns (GetHotelChatContextResponse);
+}
+
+message GetHotelChatContextRequest {
+  string hotel_id = 1;
+  string message = 2;
+  int32 limit = 3;
+}
+
+message GetHotelChatContextResponse {
+  repeated string contexts = 1; 
+}

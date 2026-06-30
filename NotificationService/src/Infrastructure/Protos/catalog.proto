@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "NotificationService.Infrastructure.Protos";
+
+package catalog.v1;
+
+service CatalogGrpc {
+  rpc VerifyHotelOwnership (VerifyHotelOwnershipRequest) returns (VerifyHotelOwnershipResponse);
+}
+
+message VerifyHotelOwnershipRequest {
+  string hotel_id = 1;
+}
+
+message VerifyHotelOwnershipResponse {
+  bool is_owner = 1;
+}

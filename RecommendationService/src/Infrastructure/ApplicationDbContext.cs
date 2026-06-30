@@ -16,6 +16,9 @@ namespace RecommendationService.Infrastructure
         public DbSet<UserViewedHotel> UserViewedHotels { get; set; }
         public DbSet<UserSearchHistory> UserSearchHistories { get; set; }
 
+        public IQueryable<UserViewedHotel> UserViewedHotelsQuery => UserViewedHotels;
+        public IQueryable<UserSearchHistory> UserSearchHistoriesQuery => UserSearchHistories;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // write your customizations here    

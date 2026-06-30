@@ -12,6 +12,9 @@ namespace NotificationService.Infrastructure
         public DbSet<Notification> Notifications { get ; set; }
         public DbSet<SocialNotification> SocialNotifications { get ; set; }
 
+        public IQueryable<Notification> NotificationsQuery => Notifications;
+        public IQueryable<SocialNotification> SocialNotificationsQuery => SocialNotifications;
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDomainEventService domainEventService) : base(options)
         {
             _domainEventService = domainEventService;

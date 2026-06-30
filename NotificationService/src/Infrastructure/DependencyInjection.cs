@@ -1,11 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Nexus.BuildingBlocks.Extensions;
 using NotificationService.Application.Common.Interfaces;
 using NotificationService.Application.Services;
 using NotificationService.Domain.Repositories;
+using NotificationService.Infrastructure.BackgroundJobs.Consumer;
 using NotificationService.Infrastructure.Data.Repositories;
+using NotificationService.Infrastructure.Protos;
 using NotificationService.Infrastructure.Services;
+using NotificationService.Infrastructure.Settings;
 
 namespace NotificationService.Infrastructure
 {
@@ -13,6 +18,9 @@ namespace NotificationService.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<ServiceUrlOptions>(
+                configuration.GetSection(ServiceUrlOptions.SectionName));
+
             services.AddDbContext<ApplicationDbContext>(options =>
                options.UseMySql(
                    configuration.GetConnectionString("DefaultConnection"),
@@ -32,6 +40,17 @@ namespace NotificationService.Infrastructure
             services.AddScoped<IIntegrationEventService, IntegrationEventService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IHotelAuthorizationService, HotelAuthorizationService>();
+
+            services.AddHostedService<SocialNotificationConsumer>();
+            services.AddHostedService<SystemNotificationConsumer>();
+
+            services.AddGrpcClient<CatalogGrpc.CatalogGrpcClient>((sp, options) =>
+            {
+                var serviceUrls = sp.GetRequiredService<IOptions<ServiceUrlOptions>>().Value;
+                options.Address = new Uri(serviceUrls.HotelCatalog);
+            });
+
+            services.AddSharedRabbitMQ(configuration);
             return services;
         }
     }

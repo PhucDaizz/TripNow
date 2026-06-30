@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RecommendationService.Domain.Entities;
+﻿using RecommendationService.Domain.Entities;
+
 namespace RecommendationService.Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
-        public DbSet<UserViewedHotel> UserViewedHotels { get; }
-        public DbSet<UserSearchHistory> UserSearchHistories { get; }
+        IQueryable<UserViewedHotel> UserViewedHotelsQuery { get; }
+        IQueryable<UserSearchHistory> UserSearchHistoriesQuery { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
